@@ -1,6 +1,199 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天天发蛋糕的工具库</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background: var(--secondary-color);
+            border-radius: 2px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .tool-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--secondary-color);
+        }
+
+        .tool-card:nth-child(2)::before {
+            background: #2ecc71;
+        }
+
+        .tool-card:nth-child(3)::before {
+            background: #9b59b6;
+        }
+
+        .tool-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .tool-title {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .tool-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .tool-link:hover {
+            background: #2980b9;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
 <body>
-<h1>天天发蛋糕的工具库</h1>
+    <div class="container">
+        <header>
+            <h1>天天发蛋糕的工具库</h1>
+        </header>
+
+        <div class="tools-grid">
+            <!-- 游戏王概率计算器 -->
+            <div class="tool-card" onclick="window.location.href='https://ttfdg.cn/yu-gi-oh-probability-calculator/'">
+                <div class="tool-content">
+                    <h2 class="tool-title">游戏王概率计算器</h2>
+                    <p class="tool-description">
+                        精准计算卡牌抽取概率，支持自定义卡组配置和复杂条件判断。可视化卡组构成分析，帮助优化卡组配置。
+                    </p>
+                    <a href="https://ttfdg.cn/yu-gi-oh-probability-calculator/" class="tool-link">立即使用</a>
+                </div>
+            </div>
+
+            <!-- 图片格式转换工具 -->
+            <div class="tool-card" onclick="window.location.href='https://ttfdg.cn/webp-avif-2-jpg-png/'">
+                <div class="tool-content">
+                    <h2 class="tool-title">图片格式转换工具</h2>
+                    <p class="tool-description">
+                        支持AVIF/WebP转JPG/PNG格式，批量处理高效转换。实时预览转换效果，一键打包下载所有图片。
+                    </p>
+                    <a href="https://ttfdg.cn/webp-avif-2-jpg-png/" class="tool-link">开始转换</a>
+                </div>
+            </div>
+
+            <!-- 标签页恢复插件 -->
+            <div class="tool-card" onclick="window.open('https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed')">
+                <div class="tool-content">
+                    <h2 class="tool-title">标签页恢复助手</h2>
+                    <p class="tool-description">
+                        一键恢复关闭的浏览器标签页，支持历史记录查看和个性化设置。Chrome商店评分4.8星优质扩展。
+                    </p>
+                    <a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" 
+                       class="tool-link"
+                       target="_blank">
+                        Chrome商店获取
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
