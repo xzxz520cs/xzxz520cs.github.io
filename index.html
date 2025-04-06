@@ -124,6 +124,50 @@
             background: #2980b9;
         }
 
+        /* 关于我部分 */
+        .about-me {
+            margin-top: 4rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            text-align: center;
+        }
+
+        .about-me h2 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .about-me p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .bilibili-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .bilibili-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            background: #00a1d6; /* Bilibili主题色 */
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .bilibili-link:hover {
+            background: #0087b3;
+        }
+
         @keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -162,7 +206,7 @@
                 <div class="tool-content">
                     <h2 class="tool-title">游戏王概率计算器</h2>
                     <p class="tool-description">
-                        精准计算卡牌抽取概率，支持自定义卡组配置和复杂条件判断。可视化卡组构成分析，帮助优化卡组配置。
+                        精准计算卡组启动概率上手率等概率，支持自定义卡组配置和复杂条件判断。可视化卡组构成分析，帮助优化卡组配置。
                     </p>
                     <a href="https://ttfdg.cn/yu-gi-oh-probability-calculator/" class="tool-link">立即使用</a>
                 </div>
@@ -192,6 +236,20 @@
                         Chrome商店获取
                     </a>
                 </div>
+            </div>
+        </div>
+
+        <!-- 关于我部分 -->
+        <div class="about-me">
+            <h2>关于我</h2>
+            <p>
+                欢迎关注我的B站账号！<br>
+                晚上会直播游戏王日常，每次1-2小时。<br>
+                除了直播录像，也会分享一些低质量教学视频。
+            </p>
+            <div class="bilibili-links">
+                <a href="https://space.bilibili.com/1446349" class="bilibili-link" target="_blank">Bilibili主页</a>
+                <a href="https://live.bilibili.com/15205" class="bilibili-link" target="_blank">Bilibili直播间</a>
             </div>
         </div>
     </div>
