@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS 样式展示</title>
+    <link rel="stylesheet" href="assets\css\styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 标题展示 -->
+        <h1>CSS 样式展示</h1>
+        <p class="text-muted text-center">这是一个展示全站通用CSS样式的页面</p>
+        
+        <!-- 颜色展示 -->
+        <section class="card">
+            <h2>颜色系统</h2>
+            <div class="flex-row">
+                <div style="background: var(--primary-color); color: white; padding: 10px; border-radius: 4px;">--primary-color</div>
+                <div style="background: var(--secondary-color); color: white; padding: 10px; border-radius: 4px;">--secondary-color</div>
+                <div style="background: var(--accent-color); color: white; padding: 10px; border-radius: 4px;">--accent-color</div>
+                <div style="background: var(--success-color); color: white; padding: 10px; border-radius: 4px;">--success-color</div>
+                <div style="background: var(--warning-color); padding: 10px; border-radius: 4px;">--warning-color</div>
+                <div style="background: var(--danger-color); color: white; padding: 10px; border-radius: 4px;">--danger-color</div>
+            </div>
+        </section>
+        
+        <!-- 排版展示 -->
+        <section class="card">
+            <h2>排版</h2>
+            <h1>标题1 (h1)</h1>
+            <h2>标题2 (h2)</h2>
+            <h3>标题3 (h3)</h3>
+            <h4>标题4 (h4)</h4>
+            <p>普通段落文本 - 游戏王概率计算器是一个强大的工具，可以帮助玩家精确计算卡组启动概率。</p>
+            <p class="text-muted">次要文本 (text-muted)</p>
+            <p class="text-center">居中文本 (text-center)</p>
+        </section>
+        
+        <!-- 卡片和容器 -->
+        <section class="card">
+            <h2>卡片和容器</h2>
+            <div class="flex-row">
+                <div class="card" style="flex: 1;">
+                    <h3>普通卡片</h3>
+                    <p>这是一个.card样式的示例，带有阴影和圆角。</p>
+                </div>
+                <div class="card" style="flex: 1;">
+                    <h3>悬停效果</h3>
+                    <p>将鼠标悬停在卡片上查看效果。</p>
+                </div>
+            </div>
+            
+            <div class="section" style="margin-top: 20px;">
+                <h3>分区样式 (.section)</h3>
+                <p>用于内容分组，带有浅色背景和边框。</p>
+            </div>
+        </section>
+        
+        <!-- 表单元素 -->
+        <section class="card">
+            <h2>表单元素</h2>
+            <div class="flex-row">
+                <div style="flex: 1;">
+                    <label for="exampleText">文本输入</label>
+                    <input type="text" id="exampleText" placeholder="请输入文本">
+                </div>
+                <div style="flex: 1;">
+                    <label for="exampleNumber">数字输入</label>
+                    <input type="number" id="exampleNumber" placeholder="请输入数字">
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <label for="exampleSelect">下拉选择</label>
+                <select id="exampleSelect">
+                    <option value="">请选择</option>
+                    <option value="1">选项1</option>
+                    <option value="2">选项2</option>
+                    <option value="3">选项3</option>
+                </select>
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <label for="exampleTextarea">文本区域</label>
+                <textarea id="exampleTextarea" placeholder="请输入多行文本"></textarea>
+            </div>
+        </section>
+        
+        <!-- 按钮 -->
+        <section class="card">
+            <h2>按钮</h2>
+            <div class="flex-row">
+                <button>普通按钮</button>
+                <button class="btn-success">成功按钮</button>
+                <button class="btn-warning">警告按钮</button>
+                <button class="btn-danger">危险按钮</button>
+            </div>
+            <div class="flex-row" style="margin-top: 10px;">
+                <button style="width: 100%;">全宽按钮 (响应式)</button>
+            </div>
+        </section>
+        
+        <!-- 工具卡片 -->
+        <section class="card">
+            <h2>工具卡片 (用于工具库)</h2>
+            <div class="tools-grid">
+                <div class="tool-card">
+                    <div class="tool-content">
+                        <h3 class="tool-title">游戏王概率计算器</h3>
+                        <p class="tool-description">精准计算卡组启动概率上手率等概率，支持自定义卡组配置和复杂条件判断。</p>
+                        <a href="#" class="tool-link">立即使用</a>
+                    </div>
+                </div>
+                <div class="tool-card">
+                    <div class="tool-content">
+                        <h3 class="tool-title">图片格式转换工具</h3>
+                        <p class="tool-description">支持AVIF/WebP转JPG/PNG格式，批量处理高效转换。</p>
+                        <a href="#" class="tool-link">开始转换</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 游戏王计算器特定组件 -->
+        <section class="card">
+            <h2>游戏王计算器组件</h2>
+            
+            <h3>卡牌输入行</h3>
+            <div class="card-input">
+                <label>A类卡:</label>
+                <input type="number" value="3">
+                <input type="text" placeholder="卡名">
+            </div>
+            
+            <h3 style="margin-top: 20px;">结果行</h3>
+            <div class="results-container">
+                <div class="result-row"><label>概率：</label></div>
+                <div class="result-row"><input type="text" value="42.35%" readonly></div>
+            </div>
+        </section>
+        
+        <!-- 图片转换工具组件 -->
+        <section class="card">
+            <h2>图片转换工具组件</h2>
+            
+            <div class="preview-container">
+                <div class="preview-card">
+                    <img class="preview-img" src="https://via.placeholder.com/150" alt="示例图片">
+                    <div class="file-name">example.webp → example.jpg</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar" style="margin-top: 20px;">
+                <div class="progress" style="width: 65%;"></div>
+            </div>
+        </section>
+        
+        <!-- 响应式测试 -->
+        <section class="card">
+            <h2>响应式测试</h2>
+            <p>调整浏览器窗口大小查看响应式效果。</p>
+            <div class="flex-row">
+                <div class="card" style="flex: 1; background: var(--light-gray); padding: 10px;">小屏幕时会堆叠</div>
+                <div class="card" style="flex: 1; background: var(--light-gray); padding: 10px;">小屏幕时会堆叠</div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
