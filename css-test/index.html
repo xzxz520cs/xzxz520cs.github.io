@@ -3,168 +3,501 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSS 样式展示</title>
+    <title>CSS 设计系统展示</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <style>
+        /* 为展示页面添加一些额外样式 */
+        .color-swatch {
+            width: 100%;
+            height: 60px;
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-xs);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .shadow-demo {
+            width: 100px;
+            height: 100px;
+            background-color: var(--color-bg-alt);
+            margin: 0 auto;
+            border-radius: var(--radius-sm);
+        }
+        
+        .radius-demo {
+            width: 100px;
+            height: 100px;
+            background-color: var(--color-secondary);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .transition-demo {
+            width: 100px;
+            height: 100px;
+            background-color: var(--color-accent);
+            margin: 0 auto;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
+        
+        .transition-demo:hover {
+            transform: scale(1.1);
+        }
+        
+        .section {
+            margin-bottom: var(--space-xl);
+        }
+        
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .dark-mode-toggle {
+            position: fixed;
+            top: var(--space-md);
+            right: var(--space-md);
+            z-index: 100;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <!-- 标题展示 -->
-        <h1>CSS 样式展示</h1>
-        <p class="text-muted text-center">这是一个展示全站通用CSS样式的页面</p>
+        <h1 class="animate-fade-down">CSS 设计系统展示</h1>
+        <p class="text-center text-muted">这是一个展示所有 CSS 设计系统样式的示例页面</p>
         
-        <!-- 颜色展示 -->
-        <section class="card">
+        <button class="btn dark-mode-toggle" id="darkModeToggle">切换暗色模式</button>
+        
+        <!-- 颜色系统 -->
+        <section class="section">
             <h2>颜色系统</h2>
-            <div class="flex-row">
-                <div style="background: var(--primary-color); color: white; padding: 10px; border-radius: 4px;">--primary-color</div>
-                <div style="background: var(--secondary-color); color: white; padding: 10px; border-radius: 4px;">--secondary-color</div>
-                <div style="background: var(--accent-color); color: white; padding: 10px; border-radius: 4px;">--accent-color</div>
-                <div style="background: var(--success-color); color: white; padding: 10px; border-radius: 4px;">--success-color</div>
-                <div style="background: var(--warning-color); padding: 10px; border-radius: 4px;">--warning-color</div>
-                <div style="background: var(--danger-color); color: white; padding: 10px; border-radius: 4px;">--danger-color</div>
+            <div class="grid">
+                <div class="card">
+                    <h3>主色</h3>
+                    <div class="color-swatch" style="background-color: var(--color-primary)">--color-primary</div>
+                    <div class="color-swatch" style="background-color: var(--color-primary-hover)">--color-primary-hover</div>
+                    <div class="color-swatch" style="background-color: var(--color-primary-active)">--color-primary-active</div>
+                </div>
+                
+                <div class="card">
+                    <h3>次要色</h3>
+                    <div class="color-swatch" style="background-color: var(--color-secondary)">--color-secondary</div>
+                    <div class="color-swatch" style="background-color: var(--color-secondary-hover)">--color-secondary-hover</div>
+                    <div class="color-swatch" style="background-color: var(--color-secondary-active)">--color-secondary-active</div>
+                </div>
+                
+                <div class="card">
+                    <h3>强调色</h3>
+                    <div class="color-swatch" style="background-color: var(--color-accent)">--color-accent</div>
+                    <div class="color-swatch" style="background-color: var(--color-accent-hover)">--color-accent-hover</div>
+                </div>
+                
+                <div class="card">
+                    <h3>状态色</h3>
+                    <div class="color-swatch" style="background-color: var(--color-success)">--color-success</div>
+                    <div class="color-swatch" style="background-color: var(--color-warning); color: var(--color-text)">--color-warning</div>
+                    <div class="color-swatch" style="background-color: var(--color-danger)">--color-danger</div>
+                    <div class="color-swatch" style="background-color: var(--color-info)">--color-info</div>
+                </div>
+                
+                <div class="card">
+                    <h3>中性色</h3>
+                    <div class="color-swatch" style="background-color: var(--color-white); color: var(--color-text)">--color-white</div>
+                    <div class="color-swatch" style="background-color: var(--color-light); color: var(--color-text)">--color-light</div>
+                    <div class="color-swatch" style="background-color: var(--color-medium); color: var(--color-text-light)">--color-medium</div>
+                    <div class="color-swatch" style="background-color: var(--color-dark); color: var(--color-text-light)">--color-dark</div>
+                    <div class="color-swatch" style="background-color: var(--color-black); color: var(--color-text-light)">--color-black</div>
+                </div>
+                
+                <div class="card">
+                    <h3>文本色</h3>
+                    <div class="color-swatch" style="background-color: var(--color-text); color: var(--color-text-light)">--color-text</div>
+                    <div class="color-swatch" style="background-color: var(--color-text-light); color: var(--color-text)">--color-text-light</div>
+                    <div class="color-swatch" style="background-color: var(--color-text-muted); color: var(--color-text-light)">--color-text-muted</div>
+                </div>
+                
+                <div class="card">
+                    <h3>背景色</h3>
+                    <div class="color-swatch" style="background-color: var(--color-bg); color: var(--color-text)">--color-bg</div>
+                    <div class="color-swatch" style="background-color: var(--color-bg-alt); color: var(--color-text)">--color-bg-alt</div>
+                </div>
+                
+                <div class="card">
+                    <h3>边框色</h3>
+                    <div class="color-swatch" style="background-color: var(--color-border); color: var(--color-text)">--color-border</div>
+                </div>
             </div>
         </section>
         
-        <!-- 排版展示 -->
-        <section class="card">
+        <!-- 阴影系统 -->
+        <section class="section">
+            <h2>阴影系统</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>小阴影</h3>
+                    <p>--shadow-sm</p>
+                    <div class="shadow-demo" style="box-shadow: var(--shadow-sm)"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>中阴影</h3>
+                    <p>--shadow-md</p>
+                    <div class="shadow-demo" style="box-shadow: var(--shadow-md)"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>大阴影</h3>
+                    <p>--shadow-lg</p>
+                    <div class="shadow-demo" style="box-shadow: var(--shadow-lg)"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 圆角系统 -->
+        <section class="section">
+            <h2>圆角系统</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>小圆角</h3>
+                    <p>--radius-sm</p>
+                    <div class="radius-demo" style="border-radius: var(--radius-sm)">4px</div>
+                </div>
+                
+                <div class="card">
+                    <h3>中圆角</h3>
+                    <p>--radius-md</p>
+                    <div class="radius-demo" style="border-radius: var(--radius-md)">8px</div>
+                </div>
+                
+                <div class="card">
+                    <h3>大圆角</h3>
+                    <p>--radius-lg</p>
+                    <div class="radius-demo" style="border-radius: var(--radius-lg)">12px</div>
+                </div>
+                
+                <div class="card">
+                    <h3>全圆角</h3>
+                    <p>--radius-full</p>
+                    <div class="radius-demo" style="border-radius: var(--radius-full)">9999px</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 间距系统 -->
+        <section class="section">
+            <h2>间距系统</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>超小间距</h3>
+                    <p>--space-xxs: 0.25rem</p>
+                    <div style="background-color: var(--color-secondary); height: var(--space-xxs); width: 100%;"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>小间距</h3>
+                    <p>--space-xs: 0.5rem</p>
+                    <div style="background-color: var(--color-secondary); height: var(--space-xs); width: 100%;"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>中小间距</h3>
+                    <p>--space-sm: 0.75rem</p>
+                    <div style="background-color: var(--color-secondary); height: var(--space-sm); width: 100%;"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>中间距</h3>
+                    <p>--space-md: 1rem</p>
+                    <div style="background-color: var(--color-secondary); height: var(--space-md); width: 100%;"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>大间距</h3>
+                    <p>--space-lg: 1.5rem</p>
+                    <div style="background-color: var(--color-secondary); height: var(--space-lg); width: 100%;"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>超大间距</h3>
+                    <p>--space-xl: 2rem</p>
+                    <div style="background-color: var(--color-secondary); height: var(--space-xl); width: 100%;"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>特大间距</h3>
+                    <p>--space-xxl: 3rem</p>
+                    <div style="background-color: var(--color-secondary); height: var(--space-xxl); width: 100%;"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 过渡效果 -->
+        <section class="section">
+            <h2>过渡效果</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>快速过渡</h3>
+                    <p>--transition-fast: 0.15s ease</p>
+                    <div class="transition-demo" style="transition: all var(--transition-fast)"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>正常过渡</h3>
+                    <p>--transition-normal: 0.3s ease</p>
+                    <div class="transition-demo" style="transition: all var(--transition-normal)"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>慢速过渡</h3>
+                    <p>--transition-slow: 0.5s ease</p>
+                    <div class="transition-demo" style="transition: all var(--transition-slow)"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 排版 -->
+        <section class="section">
             <h2>排版</h2>
-            <h1>标题1 (h1)</h1>
-            <h2>标题2 (h2)</h2>
-            <h3>标题3 (h3)</h3>
-            <h4>标题4 (h4)</h4>
-            <p>普通段落文本 - 游戏王概率计算器是一个强大的工具，可以帮助玩家精确计算卡组启动概率。</p>
-            <p class="text-muted">次要文本 (text-muted)</p>
-            <p class="text-center">居中文本 (text-center)</p>
-        </section>
-        
-        <!-- 卡片和容器 -->
-        <section class="card">
-            <h2>卡片和容器</h2>
-            <div class="flex-row">
-                <div class="card" style="flex: 1;">
-                    <h3>普通卡片</h3>
-                    <p>这是一个.card样式的示例，带有阴影和圆角。</p>
-                </div>
-                <div class="card" style="flex: 1;">
-                    <h3>悬停效果</h3>
-                    <p>将鼠标悬停在卡片上查看效果。</p>
-                </div>
-            </div>
-            
-            <div class="section" style="margin-top: 20px;">
-                <h3>分区样式 (.section)</h3>
-                <p>用于内容分组，带有浅色背景和边框。</p>
+            <div class="card">
+                <h1>标题1 (h1)</h1>
+                <h2>标题2 (h2)</h2>
+                <h3>标题3 (h3)</h3>
+                <h4>标题4 (h4)</h4>
+                <h5>标题5 (h5)</h5>
+                <h6>标题6 (h6)</h6>
+                
+                <p>这是一个段落文本。Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula.</p>
+                
+                <p class="text-muted">这是一个淡化的文本段落。</p>
+                
+                <p><a href="#">这是一个链接</a>，鼠标悬停时会变色。</p>
             </div>
         </section>
         
-        <!-- 表单元素 -->
-        <section class="card">
-            <h2>表单元素</h2>
-            <div class="flex-row">
-                <div style="flex: 1;">
-                    <label for="exampleText">文本输入</label>
-                    <input type="text" id="exampleText" placeholder="请输入文本">
-                </div>
-                <div style="flex: 1;">
-                    <label for="exampleNumber">数字输入</label>
-                    <input type="number" id="exampleNumber" placeholder="请输入数字">
-                </div>
-            </div>
-            
-            <div style="margin-top: 15px;">
-                <label for="exampleSelect">下拉选择</label>
-                <select id="exampleSelect">
-                    <option value="">请选择</option>
-                    <option value="1">选项1</option>
-                    <option value="2">选项2</option>
-                    <option value="3">选项3</option>
-                </select>
-            </div>
-            
-            <div style="margin-top: 15px;">
-                <label for="exampleTextarea">文本区域</label>
-                <textarea id="exampleTextarea" placeholder="请输入多行文本"></textarea>
-            </div>
-        </section>
-        
-        <!-- 按钮 -->
-        <section class="card">
-            <h2>按钮</h2>
-            <div class="flex-row">
-                <button>普通按钮</button>
-                <button class="btn-success">成功按钮</button>
-                <button class="btn-warning">警告按钮</button>
-                <button class="btn-danger">危险按钮</button>
-            </div>
-            <div class="flex-row" style="margin-top: 10px;">
-                <button style="width: 100%;">全宽按钮 (响应式)</button>
-            </div>
-        </section>
-        
-        <!-- 工具卡片 -->
-        <section class="card">
-            <h2>工具卡片 (用于工具库)</h2>
-            <div class="tools-grid">
-                <div class="tool-card">
-                    <div class="tool-content">
-                        <h3 class="tool-title">游戏王概率计算器</h3>
-                        <p class="tool-description">精准计算卡组启动概率上手率等概率，支持自定义卡组配置和复杂条件判断。</p>
-                        <a href="#" class="tool-link">立即使用</a>
+        <!-- 按钮组件 -->
+        <section class="section">
+            <h2>按钮组件</h2>
+            <div class="card">
+                <div class="component-grid">
+                    <div>
+                        <h3>默认按钮</h3>
+                        <button class="btn">默认按钮</button>
+                        <button class="btn" disabled>禁用按钮</button>
                     </div>
-                </div>
-                <div class="tool-card">
-                    <div class="tool-content">
-                        <h3 class="tool-title">图片格式转换工具</h3>
-                        <p class="tool-description">支持AVIF/WebP转JPG/PNG格式，批量处理高效转换。</p>
-                        <a href="#" class="tool-link">开始转换</a>
+                    
+                    <div>
+                        <h3>主色按钮</h3>
+                        <button class="btn btn--primary">主色按钮</button>
+                        <button class="btn btn--primary" disabled>禁用主色</button>
+                    </div>
+                    
+                    <div>
+                        <h3>状态按钮</h3>
+                        <button class="btn btn--success">成功按钮</button>
+                        <button class="btn btn--danger">危险按钮</button>
+                        <button class="btn btn--warning">警告按钮</button>
+                    </div>
+                    
+                    <div>
+                        <h3>轮廓按钮</h3>
+                        <button class="btn btn--outline">轮廓按钮</button>
+                        <button class="btn btn--outline" disabled>禁用轮廓</button>
+                    </div>
+                    
+                    <div>
+                        <h3>块级按钮</h3>
+                        <button class="btn btn--block">块级按钮</button>
                     </div>
                 </div>
             </div>
         </section>
         
-        <!-- 游戏王计算器特定组件 -->
-        <section class="card">
-            <h2>游戏王计算器组件</h2>
-            
-            <h3>卡牌输入行</h3>
-            <div class="card-input">
-                <label>A类卡:</label>
-                <input type="number" value="3">
-                <input type="text" placeholder="卡名">
-            </div>
-            
-            <h3 style="margin-top: 20px;">结果行</h3>
-            <div class="results-container">
-                <div class="result-row"><label>概率：</label></div>
-                <div class="result-row"><input type="text" value="42.35%" readonly></div>
-            </div>
-        </section>
-        
-        <!-- 图片转换工具组件 -->
-        <section class="card">
-            <h2>图片转换工具组件</h2>
-            
-            <div class="preview-container">
-                <div class="preview-card">
-                    <img class="preview-img" src="https://via.placeholder.com/150" alt="示例图片">
-                    <div class="file-name">example.webp → example.jpg</div>
+        <!-- 卡片组件 -->
+        <section class="section">
+            <h2>卡片组件</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>默认卡片</h3>
+                    <p>这是一个普通的卡片组件，悬停时有阴影效果。</p>
+                </div>
+                
+                <div class="card card--elevated">
+                    <h3>高架卡片</h3>
+                    <p>这是一个有更大阴影的卡片，悬停时阴影会更大。</p>
                 </div>
             </div>
-            
-            <div class="progress-bar" style="margin-top: 20px;">
-                <div class="progress" style="width: 65%;"></div>
+        </section>
+        
+        <!-- 表单组件 -->
+        <section class="section">
+            <h2>表单组件</h2>
+            <div class="card">
+                <form>
+                    <div class="form-group">
+                        <label for="textInput">文本输入</label>
+                        <input type="text" id="textInput" placeholder="输入一些文本">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="emailInput">邮箱输入</label>
+                        <input type="email" id="emailInput" placeholder="输入邮箱地址">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="passwordInput">密码输入</label>
+                        <input type="password" id="passwordInput" placeholder="输入密码">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dateInput">日期选择</label>
+                        <input type="date" id="dateInput">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="selectInput">下拉选择</label>
+                        <select id="selectInput">
+                            <option value="">选择一个选项</option>
+                            <option value="1">选项1</option>
+                            <option value="2">选项2</option>
+                            <option value="3">选项3</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="textareaInput">多行文本</label>
+                        <textarea id="textareaInput" placeholder="输入多行文本"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fileInput">文件上传</label>
+                        <input type="file" id="fileInput">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox"> 复选框
+                        </label>
+                        <label>
+                            <input type="radio" name="radioGroup"> 单选按钮1
+                        </label>
+                        <label>
+                            <input type="radio" name="radioGroup"> 单选按钮2
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn--primary">提交表单</button>
+                    <button type="reset" class="btn btn--outline">重置</button>
+                </form>
             </div>
         </section>
         
-        <!-- 响应式测试 -->
-        <section class="card">
-            <h2>响应式测试</h2>
-            <p>调整浏览器窗口大小查看响应式效果。</p>
-            <div class="flex-row">
-                <div class="card" style="flex: 1; background: var(--light-gray); padding: 10px;">小屏幕时会堆叠</div>
-                <div class="card" style="flex: 1; background: var(--light-gray); padding: 10px;">小屏幕时会堆叠</div>
+        <!-- 布局工具 -->
+        <section class="section">
+            <h2>布局工具</h2>
+            <div class="card">
+                <h3>Flex 布局</h3>
+                <div class="flex flex--row">
+                    <div class="card" style="flex: 1;">Flex 项1</div>
+                    <div class="card" style="flex: 1;">Flex 项2</div>
+                    <div class="card" style="flex: 1;">Flex 项3</div>
+                </div>
+                
+                <h3 class="mt-4">Grid 布局</h3>
+                <div class="grid">
+                    <div class="card">Grid 项1</div>
+                    <div class="card">Grid 项2</div>
+                    <div class="card">Grid 项3</div>
+                    <div class="card">Grid 项4</div>
+                </div>
+                
+                <h3 class="mt-4">间距工具</h3>
+                <div>
+                    <button class="btn mt-1">上边距1 (mt-1)</button>
+                    <button class="btn mt-2">上边距2 (mt-2)</button>
+                    <button class="btn mt-3">上边距3 (mt-3)</button>
+                    <button class="btn mt-4">上边距4 (mt-4)</button>
+                    <button class="btn mt-5">上边距5 (mt-5)</button>
+                    <button class="btn mt-6">上边距6 (mt-6)</button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 动画 -->
+        <section class="section">
+            <h2>动画效果</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>淡入动画</h3>
+                    <p>--animate-fade</p>
+                    <button class="btn" id="fadeBtn">触发淡入</button>
+                    <div id="fadeBox" class="color-swatch hidden" style="background-color: var(--color-accent);">淡入元素</div>
+                </div>
+                
+                <div class="card">
+                    <h3>下滑淡入</h3>
+                    <p>--animate-fade-down</p>
+                    <button class="btn" id="fadeDownBtn">触发下滑淡入</button>
+                    <div id="fadeDownBox" class="color-swatch hidden" style="background-color: var(--color-secondary);">下滑淡入元素</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 响应式设计 -->
+        <section class="section">
+            <h2>响应式设计</h2>
+            <div class="card">
+                <p>调整浏览器窗口大小查看响应式效果：</p>
+                <ul>
+                    <li>在大于 768px 时，flex 布局是行方向</li>
+                    <li>在小于 768px 时，flex 布局变为列方向</li>
+                    <li>在小于 480px 时，容器和卡片的内边距会变小</li>
+                </ul>
+                
+                <div class="flex flex--row mt-4">
+                    <div class="card" style="flex: 1;">Flex 项1</div>
+                    <div class="card" style="flex: 1;">Flex 项2</div>
+                    <div class="card" style="flex: 1;">Flex 项3</div>
+                </div>
+                
+                <button class="btn btn--mobile-block mt-4">移动端块级按钮</button>
             </div>
         </section>
     </div>
+    
+    <script>
+        // 简单的交互逻辑
+        document.getElementById('fadeBtn').addEventListener('click', function() {
+            const box = document.getElementById('fadeBox');
+            box.classList.add('animate-fade');
+            box.classList.remove('hidden');
+        });
+        
+        document.getElementById('fadeDownBtn').addEventListener('click', function() {
+            const box = document.getElementById('fadeDownBox');
+            box.classList.add('animate-fade-down');
+            box.classList.remove('hidden');
+        });
+        
+        // 暗色模式切换
+        document.getElementById('darkModeToggle').addEventListener('click', function() {
+            const html = document.documentElement;
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                this.textContent = '切换暗色模式';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                this.textContent = '切换亮色模式';
+            }
+        });
+    </script>
 </body>
 </html>
