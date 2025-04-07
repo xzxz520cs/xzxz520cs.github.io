@@ -5,241 +5,7 @@
     <meta charset="UTF-8">
     <title>游戏王概率计算器</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        /* 全局样式 */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-
-        h1, h2 {
-            text-align: center;
-            color: #444;
-            margin: 0.5em 0;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 10px auto;
-            padding: 15px;
-            background-color: #fff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-
-        .flex-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .flex-column {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        label {
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-
-        input[type="number"],
-        input[type="text"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 6px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 0.9em;
-        }
-
-        #condition {
-            resize: none;
-            height: 120px;
-            font-family: monospace;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.3s;
-            white-space: nowrap;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        .deck-management,
-        .card-inputs,
-        .draw-settings,
-        .condition-section,
-        .results-section,
-        .progress-section {
-            padding: 10px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: #fafafa;
-        }
-
-        .deck-management {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .deck-management select,
-        .deck-management input {
-            flex: 1 1;
-            min-width: 120px;
-            font-size: 0.9em;
-        }
-
-        .deck-management button {
-            flex: 0 1 auto;
-            padding: 6px 8px;
-        }
-
-        #cardInputs {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .card-input {
-            display: grid;
-            grid-template-columns: 1fr 1fr 2fr;
-            align-items: center;
-            gap: 8px;
-            padding: 4px 0;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .card-input:last-child {
-            border-bottom: none;
-        }
-
-        .card-input label {
-            margin: 0;
-            white-space: nowrap;
-            font-size: 0.85em;
-        }
-
-        #deckPieChart {
-            width: 100%;
-            max-width: 400px;
-            height: auto;
-            margin: 0 auto;
-        }
-
-        .draw-settings,
-        .condition-section,
-        .results-section {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .results-container {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .result-row {
-            padding: 6px;
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .progress-section {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            align-items: center;
-            padding: 8px;
-        }
-
-        progress {
-            width: 100%;
-            height: 20px;
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .flex-row {
-                flex-direction: column;
-            }
-
-            .deck-management {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .card-input {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .card-input input[type="text"] {
-                grid-column: span 2;
-            }
-
-            .results-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 10px;
-            }
-
-            button {
-                width: 100%;
-            }
-
-            .deck-management button {
-                width: 100%;
-            }
-            
-            .card-input label {
-                font-size: 0.8em;
-            }
-            
-            .deck-management select,
-            .deck-management input {
-                min-width: 100%;
-                font-size: 0.8em;
-            }
-            
-            .deck-management {
-                gap: 6px;
-            }
-
-            #condition {
-                height: 100px;
-                font-size: 0.9em;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/styles.css">
     <script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 
@@ -248,50 +14,64 @@
         <h1>游戏王概率计算器</h1>
 
         <!-- 卡组管理 -->
-        <div class="deck-management">
-            <select id="deckList">
-                <option value="">选择卡组</option>
-            </select>
-            <input type="text" id="deckName" placeholder="卡组名称">
-            <button onclick="saveDeck()">保存卡组</button>
-            <button onclick="loadDeck()">加载卡组</button>
-            <button onclick="deleteDeck()">删除卡组</button>
+        <div class="card mb-4">
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="form-group">
+                    <label for="deckList">选择卡组</label>
+                    <select id="deckList" class="form-control">
+                        <option value="">-- 选择卡组 --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="deckName">卡组名称</label>
+                    <input type="text" id="deckName" class="form-control" placeholder="输入卡组名称">
+                </div>
+                <div class="form-group flex flex--column" style="justify-content: flex-end;">
+                    <div class="flex flex--row" style="gap: var(--space-xs);">
+                        <button onclick="saveDeck()" class="btn btn--success btn--block">保存</button>
+                        <button onclick="loadDeck()" class="btn btn--secondary btn--block">加载</button>
+                        <button onclick="deleteDeck()" class="btn btn--danger btn--block">删除</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="flex-row">
+        <div class="grid mb-4" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-lg);">
             <!-- 卡牌输入 -->
-            <div class="card-inputs flex-column" style="flex: 1 1;">
+            <div class="card">
                 <h2>卡牌输入</h2>
-                <div id="cardInputs"></div>
+                <div id="cardInputs" class="grid" style="grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: var(--space-sm);"></div>
             </div>
 
             <!-- 饼图容器 -->
-            <div class="card-inputs flex-column" style="flex: 1 1;">
+            <div class="card">
                 <h2>卡组构成</h2>
                 <canvas id="deckPieChart"></canvas>
             </div>
         </div>
 
         <!-- 抽卡设置 -->
-        <div class="draw-settings">
+        <div class="card mb-4">
             <h2>抽卡设置</h2>
-            <div class="flex-row" style="gap: 15px;">
-                <div style="flex: 1;">
-                    <label for="total">卡组总数：</label>
-                    <input type="number" id="total" readonly>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+                <div class="form-group">
+                    <label for="total">卡组总数</label>
+                    <input type="number" id="total" class="form-control" readonly>
                 </div>
-                <div style="flex: 1;">
-                    <label for="draws">抽卡数：</label>
-                    <input type="number" id="draws" value="5" min="1" max="60">
+                <div class="form-group">
+                    <label for="draws">抽卡数</label>
+                    <input type="number" id="draws" class="form-control" value="5" min="1" max="60">
                 </div>
             </div>
         </div>
 
         <!-- 逻辑判断条件 -->
-        <div class="condition-section">
+        <div class="card mb-4">
             <h2>逻辑判断条件</h2>
-            <textarea id="condition" placeholder="输入逻辑判断条件，例如：a > 0 && b == 1"></textarea>
-            <div style="font-size: 0.8em; color: #666;">
+            <div class="form-group">
+                <textarea id="condition" class="form-control" rows="3" placeholder="输入逻辑判断条件，例如：a > 0 && b == 1"></textarea>
+            </div>
+            <div class="text-muted" style="font-size: 0.8em;">
                 <strong>运算符优先级说明：</strong><br>
                 1. 括号 () 最高优先级<br>
                 2. 逻辑非 !<br>
@@ -306,30 +86,36 @@
         </div>
 
         <!-- 计算按钮 -->
-        <div class="flex-row" style="justify-content: center; gap: 15px; margin-top: 10px;">
-            <button onclick="calculate()" style="flex: 1 1;">开始计算</button>
-            <button onclick="cancelCalculation()" id="cancelBtn" class="hidden"
-                style="background-color: #f44336;">取消计算</button>
+        <div class="grid mb-4" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+            <button onclick="calculate()" class="btn btn--primary">开始计算</button>
+            <button onclick="cancelCalculation()" id="cancelBtn" class="btn btn--danger hidden">取消计算</button>
         </div>
 
         <!-- 进度条 -->
-        <div id="progressContainer" class="progress-section hidden">
-            <progress id="calculationProgress" value="0" max="100"></progress>
-            <div id="progressText">等待计算...</div>
+        <div id="progressContainer" class="card hidden mb-4">
+            <div class="form-group">
+                <label>计算进度</label>
+                <progress id="calculationProgress" value="0" max="100" style="width: 100%;"></progress>
+                <div id="progressText" class="text-center">等待计算...</div>
+            </div>
         </div>
 
         <!-- 结果输出 -->
-        <div class="results-section">
+        <div class="card">
             <h2>计算结果</h2>
-            <div class="results-container">
-                <div class="result-row"><label for="probability">概率：</label></div>
-                <div class="result-row"><input type="text" id="probability" readonly></div>
-
-                <div class="result-row"><label for="validCombinations">满足条件的组合数：</label></div>
-                <div class="result-row"><input type="text" id="validCombinations" readonly></div>
-
-                <div class="result-row"><label for="totalCombinations">总组合数：</label></div>
-                <div class="result-row"><input type="text" id="totalCombinations" readonly></div>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-md);">
+                <div class="form-group">
+                    <label for="probability">概率</label>
+                    <input type="text" id="probability" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="validCombinations">满足条件的组合数</label>
+                    <input type="text" id="validCombinations" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="totalCombinations">总组合数</label>
+                    <input type="text" id="totalCombinations" class="form-control" readonly>
+                </div>
             </div>
         </div>
     </div>
@@ -346,11 +132,11 @@
             const container = document.getElementById('cardInputs');
             for (let i = 0; i < 30; i++) {
                 const div = document.createElement('div');
-                div.className = 'card-input';
+                div.className = 'form-group';
                 div.innerHTML = `
-                    <label>${getCardLabel(i)}类卡:</label>
-                    <input type="number" id="card${i}" value="0" min="0" class="card-count" onchange="updateTotalDeck()">
-                    <input type="text" id="cardName${i}" placeholder="卡名">
+                    <label>${getCardLabel(i)}类卡</label>
+                    <input type="number" id="card${i}" value="0" min="0" class="form-control card-count" onchange="updateTotalDeck()">
+                    <input type="text" id="cardName${i}" class="form-control mt-1" placeholder="卡名">
                 `;
                 container.appendChild(div);
             }
@@ -429,7 +215,7 @@
         // 更新卡组列表
         function updateDeckList() {
             const select = document.getElementById('deckList');
-            select.innerHTML = '<option value="">选择卡组</option>';
+            select.innerHTML = '<option value="">-- 选择卡组 --</option>';
             const decks = JSON.parse(localStorage.getItem('decks') || '[]');
 
             decks.forEach(deck => {
@@ -668,102 +454,62 @@
                 isCalculating = true;
                 document.getElementById('cancelBtn').classList.remove('hidden');
             } catch (error) {
-                alert(`错误：${error.message}`);
-                document.getElementById('progressContainer').classList.add('hidden');
+                showError(error.message);
             }
         }
 
         // 更新进度
-        function updateProgress(percent) {
-            document.getElementById('calculationProgress').value = percent;
-            document.getElementById('progressText').textContent = `计算中: ${percent}%`;
+        function updateProgress(progress) {
+            document.getElementById('calculationProgress').value = progress;
+            document.getElementById('progressText').textContent = `计算中: ${progress}%`;
         }
 
         // 完成计算
         function finalizeCalculation(result) {
-            isCalculating = false;
-            cleanupWorker();
-
-            const draws = parseInt(document.getElementById('draws').value);
-            const deckSize = parseInt(document.getElementById('total').value);
-            const totalCombination = combination(deckSize, draws);
-            const probability = (Number(result.valid) / Number(totalCombination)) * 100;
-
-            // 保留完整精度
+            const probability = (Number(result.valid) / Number(result.total)) * 100;
+            
             document.getElementById('probability').value = `${probability.toFixed(20)}%`;
             document.getElementById('validCombinations').value = result.valid.toString();
-            document.getElementById('totalCombinations').value = totalCombination.toString();
-
-            document.getElementById('cancelBtn').classList.add('hidden');
-            document.getElementById('progressContainer').classList.add('hidden');
-            document.getElementById('progressText').textContent = '计算完成';
+            document.getElementById('totalCombinations').value = result.total.toString();
+            
+            cleanupCalculation();
         }
 
         // 显示错误
         function showError(message) {
-            isCalculating = false;
-            cleanupWorker();
-
-            document.getElementById('probability').value = '错误';
-            document.getElementById('validCombinations').value = '错误';
-            document.getElementById('totalCombinations').value = '错误';
-            alert(`错误：${message}`);
-
-            document.getElementById('cancelBtn').classList.add('hidden');
-            document.getElementById('progressContainer').classList.add('hidden');
-            document.getElementById('progressText').textContent = '计算错误';
+            alert(`计算错误: ${message}`);
+            cleanupCalculation();
         }
 
         // 取消计算
         function cancelCalculation() {
-            if (isCalculating && calculationWorker) {
-                calculationWorker.terminate();
-                isCalculating = false;
-                cleanupWorker();
-
-                document.getElementById('probability').value = '已取消';
-                document.getElementById('validCombinations').value = '已取消';
-                document.getElementById('totalCombinations').value = '已取消';
-
-                alert('计算已取消');
-                document.getElementById('cancelBtn').classList.add('hidden');
-                document.getElementById('progressContainer').classList.add('hidden');
-                document.getElementById('progressText').textContent = '计算已取消';
-            }
-        }
-
-        // 清理Worker
-        function cleanupWorker() {
             if (calculationWorker) {
                 calculationWorker.terminate();
                 calculationWorker = null;
             }
-            // 重置进度条
-            document.getElementById('calculationProgress').value = 0;
+            cleanupCalculation();
+            alert("计算已取消");
         }
 
-        // 组合数计算（用于主线程的最终结果计算）
-        const combinationCache = new Map();
-        function combination(n, k) {
-            if (k < 0 || k > n) return 0n;
-            if (k === 0n || k === n) return 1n;
-
-            const key = `${n},${k}`;
-            if (combinationCache.has(key)) return combinationCache.get(key);
-
-            let result = 1n;
-            for (let i = 1n; i <= BigInt(k); i++) {
-                result = result * (BigInt(n) - BigInt(k) + i) / i;
-            }
-
-            combinationCache.set(key, result);
-            return result;
+        // 清理计算状态
+        function cleanupCalculation() {
+            isCalculating = false;
+            document.getElementById('progressContainer').classList.add('hidden');
+            document.getElementById('cancelBtn').classList.add('hidden');
+            calculationWorker = null;
         }
 
-        // 初始化
-        createCardInputs();
-        updateTotalDeck();
-        updateDeckList();
+        // 初始化页面
+        window.onload = function() {
+            createCardInputs();
+            updateDeckList();
+            updateTotalDeck();
+            
+            // 为所有输入框添加事件监听
+            document.querySelectorAll('.card-count').forEach(input => {
+                input.addEventListener('change', updateTotalDeck);
+            });
+        };
     </script>
 </body>
 </html>
