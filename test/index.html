@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>示例页面 | 天天发蛋糕的工具库</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <style>
+        /* 示例页面特有样式 */
+        .hero {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-light);
+            padding: var(--space-xxl) 0;
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        
+        .hero h1 {
+            color: inherit;
+            font-size: clamp(2rem, 5vw, 3rem);
+        }
+        
+        .hero p {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-xl);
+            margin: var(--space-xxl) 0;
+        }
+        
+        .feature-card {
+            background: var(--color-bg-alt);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            text-align: center;
+            transition: transform var(--transition-normal);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-md);
+            color: var(--color-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- 全站Header -->
+    <header class="site-header">
+        <nav class="container">
+            <a href="index.html" class="site-title">🎂 天天发蛋糕的工具库</a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">首页</a></li>
+                <li><a href="yu-gi-oh-probability-calculator/index.html" class="nav-link">游戏王计算器</a></li>
+                <li><a href="webp-avif-2-jpg-png/index.html" class="nav-link">图片转换</a></li>
+                <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" 
+                       class="nav-link nav-external" 
+                       target="_blank"
+                       title="Chrome扩展商店打开">
+                      标签页恢复插件 ↗
+                    </a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- 示例页面内容 -->
+    <main class="container">
+        <section class="hero">
+            <h1>欢迎使用示例页面</h1>
+            <p>这是一个展示全站通用Header和Footer组件的示例页面，您可以基于此模板快速创建新页面</p>
+        </section>
+        
+        <section>
+            <h2>页面特色功能</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>响应式设计</h3>
+                    <p>自动适配各种设备屏幕尺寸，从手机到桌面电脑都能完美显示</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>主题系统</h3>
+                    <p>内置明暗主题切换，跟随系统偏好自动调整界面风格</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>性能优化</h3>
+                    <p>精简的代码结构和高效的渲染性能，确保流畅的用户体验</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="card">
+            <h2>如何使用</h2>
+            <ol>
+                <li>复制Header和Footer代码到新页面</li>
+                <li>确保CSS路径正确（子目录页面使用../assets/css/styles.css）</li>
+                <li>在两者之间添加您的页面内容</li>
+                <li>为当前页面导航项添加active类（可选）</li>
+            </ol>
+            
+            <div class="flex--row mt-4">
+                <a href="index.html" class="btn btn--primary">查看首页</a>
+                <a href="yu-gi-oh-probability-calculator/index.html" class="btn btn--outline">游戏王计算器</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- 全站Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3 class="footer-title">🎂 天天发蛋糕</h3>
+                    <p class="text-muted">为决斗者提供优质工具</p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>工具集合</h4>
+                        <ul>
+                            <li><a href="yu-gi-oh-probability-calculator/index.html">概率计算器</a></li>
+                            <li><a href="webp-avif-2-jpg-png/index.html">图片转换工具</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="link-group">
+                        <h4>相关链接</h4>
+                        <ul>
+                            <li><a href="https://space.bilibili.com/1446349" target="_blank">B站主页</a></li>
+                            <li><a href="https://live.bilibili.com/15205" target="_blank">直播间</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="copyright">&copy; 2024 天天发蛋糕的工具库 | 沪ICP备20240530号</p>
+                <a href="#" class="back-to-top">↑ 返回顶部</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 交互脚本 -->
+    <script>
+        // 为当前页面导航项添加active类
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.href === window.location.href) {
+                link.classList.add('active');
+            }
+        });
+        
+        // 动态active类样式（添加到styles.css中）
+        const style = document.createElement('style');
+        style.textContent = `
+            .nav-link.active {
+                background: var(--color-primary-active);
+            }
+            .nav-link.active::after {
+                width: 100% !important;
+                left: 0 !important;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
