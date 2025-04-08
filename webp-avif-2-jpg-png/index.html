@@ -4,106 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>图片格式转换工具 (AVIF/WebP → JPG/PNG)</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        h1 {
-            color: #4CAF50;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 10px;
-        }
-        .upload-section {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        #fileInput {
-            margin: 15px 0;
-            display: block;
-        }
-        #previewContainer {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .preview-card {
-            background: white;
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .preview-img {
-            max-width: 100%;
-            height: 120px;
-            object-fit: contain;
-            border-radius: 4px;
-        }
-        .file-name {
-            font-size: 0.9em;
-            color: #666;
-            word-break: break-all;
-            margin: 8px 0;
-        }
-        #downloadBtn {
-            background: #4CAF50;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.1s, background 0.3s;
-            display: none;
-        }
-        #downloadBtn:hover {
-            background: #45a049;
-            transform: scale(1.05);
-        }
-        #status {
-            margin-top: 15px;
-            color: #666;
-        }
-        .progress-bar {
-            height: 4px;
-            background: #eee;
-            border-radius: 2px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-        .progress {
-            width: 0%;
-            height: 100%;
-            background: #4CAF50;
-            transition: width 0.3s ease;
-        }
-    </style>
 </head>
 <body>
-    <h1>图片格式转换工具</h1>
-    <div class="upload-section">
-        <p>支持格式：AVIF 和 WebP → JPG/PNG</p>
-        <select id="formatSelect">
-            <option value="jpg">JPG</option>
-            <option value="png">PNG</option>
-        </select>
-        <input type="file" id="fileInput" accept=".avif,.webp" multiple>
-        <div id="status">就绪</div>
-        <div class="progress-bar">
-            <div class="progress"></div>
+    <div class="container">
+        <h1>图片格式转换工具</h1>
+        <p class="text-center text-muted">轻松将AVIF和WebP格式图片转换为JPG或PNG格式</p>
+        
+        <div class="card">
+            <div class="upload-section flex flex--column">
+                <div class="form-group">
+                    <label for="formatSelect">输出格式</label>
+                    <select id="formatSelect" class="btn btn--outline">
+                        <option value="jpg">JPG</option>
+                        <option value="png">PNG</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fileInput">选择图片文件</label>
+                    <input type="file" id="fileInput" accept=".avif,.webp" multiple>
+                    <p class="text-muted mt-2">支持格式：AVIF 和 WebP</p>
+                </div>
+                
+                <div id="status" class="text-center">就绪</div>
+                
+                <div class="progress-bar mt-3 mb-3">
+                    <div class="progress"></div>
+                </div>
+            </div>
         </div>
+        
+        <button id="downloadBtn" class="btn btn--primary btn--block hidden mt-4">下载全部图片</button>
+        
+        <div id="previewContainer" class="grid mt-5"></div>
     </div>
-    
-    <button id="downloadBtn">下载全部图片</button>
-    <div id="previewContainer"></div>
 
     <script>
         let convertedFiles = [];
@@ -178,10 +114,14 @@
 
         function addPreview(data, originalName) {
             const preview = document.createElement('div');
-            preview.className = 'preview-card';
+            preview.className = 'card preview-card animate-fade';
             preview.innerHTML = `
                 <img class="preview-img" src="${URL.createObjectURL(data.blob)}">
-                <div class="file-name">${originalName} → ${data.name}</div>
+                <div class="file-name text-center mt-2">
+                    <span class="text-muted">${originalName}</span> 
+                    <span>→</span> 
+                    <strong>${data.name}</strong>
+                </div>
             `;
             document.getElementById('previewContainer').appendChild(preview);
         }
@@ -194,7 +134,7 @@
 
             if (processedCount === totalFiles) {
                 updateStatus('转换完成！');
-                document.getElementById('downloadBtn').style.display = 'inline-block';
+                document.getElementById('downloadBtn').classList.remove('hidden');
             }
         }
 
@@ -207,7 +147,7 @@
             processedCount = 0;
             totalFiles = 0;
             document.getElementById('previewContainer').innerHTML = '';
-            document.getElementById('downloadBtn').style.display = 'none';
+            document.getElementById('downloadBtn').classList.add('hidden');
             document.querySelector('.progress').style.width = '0%';
         }
 
@@ -229,5 +169,67 @@
             document.body.removeChild(link);
         }
     </script>
+    
+    <style>
+        /* 补充样式 */
+        .upload-section {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: var(--color-light);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            width: 0;
+            background-color: var(--color-success);
+            transition: width var(--transition-slow);
+        }
+        
+        .preview-card {
+            padding: var(--space-md);
+            text-align: center;
+            transition: transform var(--transition-fast);
+        }
+        
+        .preview-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .preview-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-sm);
+            background: 
+                linear-gradient(45deg, var(--color-medium) 25%, transparent 25%) -10px 0/ 20px 20px, 
+                linear-gradient(-45deg, var(--color-medium) 25%, transparent 25%) -10px 0/ 20px 20px, 
+                linear-gradient(45deg, transparent 75%, var(--color-medium) 75%), 
+                linear-gradient(-45deg, transparent 75%, var(--color-medium) 75%);
+            background-color: var(--color-light);
+        }
+        
+        .file-name {
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+        
+        #status {
+            min-height: 1.5em;
+            color: var(--color-secondary);
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .preview-card {
+                padding: var(--space-sm);
+            }
+        }
+    </style>
 </body>
 </html>
