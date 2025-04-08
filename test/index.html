@@ -3,156 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>示例页面 | 天天发蛋糕的工具库</title>
+    <title>示例页面 - 科技风工具库</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
-    <style>
-        /* 示例页面特有样式 */
-        .hero {
-            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-            color: var(--color-text-light);
-            padding: var(--space-xxl) 0;
-            text-align: center;
-            margin-bottom: var(--space-xl);
-        }
-        
-        .hero h1 {
-            color: inherit;
-            font-size: clamp(2rem, 5vw, 3rem);
-        }
-        
-        .hero p {
-            max-width: 800px;
-            margin: 0 auto;
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--space-xl);
-            margin: var(--space-xxl) 0;
-        }
-        
-        .feature-card {
-            background: var(--color-bg-alt);
-            border-radius: var(--radius-lg);
-            padding: var(--space-xl);
-            text-align: center;
-            transition: transform var(--transition-normal);
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: var(--space-md);
-            color: var(--color-secondary);
-        }
-        
-        /* 手动设置当前活动导航项 */
-        .nav-current {
-            background: var(--color-primary-active);
-        }
-    </style>
 </head>
 <body>
-    <!-- 全站Header -->
+    <!-- 页头 -->
     <header class="site-header">
-        <nav class="container">
-            <a href="index.html" class="site-title">🎂 天天发蛋糕的工具库</a>
-            <ul class="nav-menu">
-                <li><a href="index.html" class="nav-link">首页</a></li>
-                <li><a href="yu-gi-oh-probability-calculator/index.html" class="nav-link">游戏王计算器</a></li>
-                <li><a href="webp-avif-2-jpg-png/index.html" class="nav-link nav-current">图片转换</a></li>
-                <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" 
-                       class="nav-link nav-external" 
-                       target="_blank"
-                       title="Chrome扩展商店打开">
-                      标签页恢复插件 ↗
-                    </a></li>
-            </ul>
-        </nav>
+        <div class="container">
+            <div class="site-title">
+                <span>科技风工具库</span>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="#home" class="nav-link active">首页</a></li>
+                    <li><a href="#tools" class="nav-link">工具</a></li>
+                    <li><a href="#about" class="nav-link">关于</a></li>
+                    <li><a href="#contact" class="nav-link">联系</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <!-- 示例页面内容 -->
+    <!-- 页内容 -->
     <main class="container">
-        <section class="hero">
-            <h1>欢迎使用图片转换工具</h1>
-            <p>这是一个纯静态的示例页面，展示了如何使用CSS样式构建美观的界面</p>
+        <!-- 首页部分 -->
+        <section id="home" class="mt-6">
+            <h1>欢迎来到科技风工具库</h1>
+            <p class="text-muted">我们提供一系列高效的在线工具，帮助您简化工作流程并提高生产力。</p>
         </section>
-        
-        <section>
-            <h2>工具特色</h2>
-            <div class="features">
-                <div class="feature-card">
-                    <div class="feature-icon">🖼️</div>
-                    <h3>格式转换</h3>
-                    <p>支持AVIF/WebP转JPG/PNG格式，满足各种使用场景</p>
+
+        <!-- 工具展示部分 -->
+        <section id="tools" class="mt-6">
+            <h2>我们的工具</h2>
+            <div class="grid">
+                <div class="card card--elevated">
+                    <h3>格式转换器</h3>
+                    <p>轻松将 WebP 和 AVIF 格式的图片转换为 JPG 或 PNG 格式。支持批量处理和实时预览。</p>
+                    <a href="#tools" class="btn btn--primary">了解更多</a>
                 </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>快速处理</h3>
-                    <p>无需上传到服务器，直接在浏览器中完成转换</p>
+                <div class="card card--elevated">
+                    <h3>概率计算器</h3>
+                    <p>用于游戏王卡组的概率计算，帮助您优化卡组配置，提高游戏胜率。</p>
+                    <a href="#tools" class="btn btn--primary">了解更多</a>
                 </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>隐私保护</h3>
-                    <p>所有处理都在本地完成，保障您的数据安全</p>
+                <div class="card card--elevated">
+                    <h3>标签页恢复</h3>
+                    <p>一键恢复关闭的浏览器标签页，支持历史记录查看和个性化设置。</p>
+                    <a href="#tools" class="btn btn--primary">了解更多</a>
                 </div>
             </div>
         </section>
-        
-        <section class="card">
-            <h2>使用说明</h2>
-            <ol>
-                <li>点击"选择文件"按钮上传图片</li>
-                <li>选择输出格式（JPG或PNG）</li>
-                <li>等待转换完成</li>
-                <li>下载转换后的图片</li>
-            </ol>
-            
-            <div class="flex--row mt-4">
-                <a href="webp-avif-2-jpg-png/index.html" class="btn btn--primary">开始使用</a>
-                <a href="index.html" class="btn btn--outline">返回首页</a>
-            </div>
+
+        <!-- 关于部分 -->
+        <section id="about" class="mt-6">
+            <h2>关于我们</h2>
+            <p class="text-muted">我们是一支致力于开发实用在线工具的团队，专注于提供高效、简洁、易用的解决方案。</p>
+        </section>
+
+        <!-- 联系部分 -->
+        <section id="contact" class="mt-6 mb-6">
+            <h2>联系我们</h2>
+            <form class="card">
+                <div class="form-group">
+                    <label for="name">姓名</label>
+                    <input type="text" id="name" class="form-control" placeholder="请输入您的姓名">
+                </div>
+                <div class="form-group">
+                    <label for="email">邮箱</label>
+                    <input type="email" id="email" class="form-control" placeholder="请输入您的邮箱">
+                </div>
+                <div class="form-group">
+                    <label for="message">留言</label>
+                    <textarea id="message" class="form-control" rows="5" placeholder="请输入您的留言"></textarea>
+                </div>
+                <button type="submit" class="btn btn--primary btn--block">提交</button>
+            </form>
         </section>
     </main>
 
-    <!-- 全站Footer -->
+    <!-- 页脚 -->
     <footer class="site-footer">
         <div class="container">
             <div class="footer-grid">
-                <div class="footer-brand">
-                    <h3 class="footer-title">🎂 天天发蛋糕</h3>
-                    <p class="text-muted">为决斗者提供优质工具</p>
+                <div>
+                    <h3 class="footer-title">联系我们</h3>
+                    <ul class="footer-links">
+                        <li><a href="mailto:info@example.com">info@example.com</a></li>
+                        <li><a href="tel:+1234567890">+1 234 567 890</a></li>
+                    </ul>
                 </div>
-                
-                <div class="footer-links">
-                    <div class="link-group">
-                        <h4>工具集合</h4>
-                        <ul>
-                            <li><a href="yu-gi-oh-probability-calculator/index.html">概率计算器</a></li>
-                            <li><a href="webp-avif-2-jpg-png/index.html">图片转换工具</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div class="link-group">
-                        <h4>相关链接</h4>
-                        <ul>
-                            <li><a href="https://space.bilibili.com/1446349" target="_blank">B站主页</a></li>
-                            <li><a href="https://live.bilibili.com/15205" target="_blank">直播间</a></li>
-                        </ul>
-                    </div>
+                <div>
+                    <h3 class="footer-title">快速链接</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home">首页</a></li>
+                        <li><a href="#tools">工具</a></li>
+                        <li><a href="#about">关于</a></li>
+                        <li><a href="#contact">联系</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="footer-title">社交媒体</h3>
+                    <ul class="footer-links">
+                        <li><a href="https://www.facebook.com" target="_blank">Facebook</a></li>
+                        <li><a href="https://www.twitter.com" target="_blank">Twitter</a></li>
+                        <li><a href="https://www.github.com" target="_blank">GitHub</a></li>
+                    </ul>
                 </div>
             </div>
-            
             <div class="footer-bottom">
-                <p class="copyright">&copy; 2025 天天发蛋糕的工具库</p>
+                <p class="text-muted">© 2023 科技风工具库. 保留所有权利.</p>
+                <a href="#home" class="back-to-top">返回顶部</a>
             </div>
         </div>
     </footer>
