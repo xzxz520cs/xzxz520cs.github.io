@@ -2,39 +2,39 @@
    设计系统变量
    ====================== */
 
-/* 颜色系统 */
+/* 颜色系统 - 冷色调科技风 */
 :root {
-  /* 主色 */
-  --color-primary: #2c3e50;
-  --color-primary-hover: color-mix(in srgb, var(--color-primary), black 10%);
-  --color-primary-active: color-mix(in srgb, var(--color-primary), black 20%);
+  /* 主色 - 深蓝灰色 */
+  --color-primary: #1a2b3c;
+  --color-primary-hover: #0f1a26;
+  --color-primary-active: #050a10;
 
-  /* 次要色 */
-  --color-secondary: #3498db;
-  --color-secondary-hover: color-mix(in srgb, var(--color-secondary), black 10%);
-  --color-secondary-active: color-mix(in srgb, var(--color-secondary), black 20%);
+  /* 次要色 - 科技蓝 */
+  --color-secondary: #3a86ff;
+  --color-secondary-hover: #2667cc;
+  --color-secondary-active: #1a4d99;
 
-  /* 强调色 */
-  --color-accent: #e74c3c;
-  --color-accent-hover: color-mix(in srgb, var(--color-accent), black 10%);
+  /* 强调色 - 青色 */
+  --color-accent: #00d4ff;
+  --color-accent-hover: #00b4d8;
 
-  /* 状态色 */
-  --color-success: #4CAF50;
-  --color-warning: #FFCE56;
-  --color-danger: #f44336;
-  --color-info: #17a2b8;
+  /* 状态色 - 科技感调整 */
+  --color-success: #2ecc71;
+  --color-warning: #f39c12;
+  --color-danger: #e74c3c;
+  --color-info: #3498db;
 
-  /* 中性色 */
+  /* 中性色 - 冷灰色调 */
   --color-white: #ffffff;
-  --color-light: #f4f4f4;
-  --color-medium: #e0e0e0;
-  --color-dark: #666;
-  --color-black: #222;
+  --color-light: #f0f4f8;
+  --color-medium: #d1d8e0;
+  --color-dark: #5c6b7a;
+  --color-black: #1e293b;
 
   /* 文本色 */
-  --color-text: #333;
+  --color-text: #2d3748;
   --color-text-light: var(--color-white);
-  --color-text-muted: #6c757d;
+  --color-text-muted: #718096;
 
   /* 背景色 */
   --color-bg: var(--color-light);
@@ -43,10 +43,10 @@
   /* 边框 */
   --color-border: var(--color-medium);
 
-  /* 阴影 */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  /* 阴影 - 添加蓝色色调 */
+  --shadow-sm: 0 1px 3px rgba(58, 134, 255, 0.1);
+  --shadow-md: 0 4px 6px rgba(58, 134, 255, 0.1);
+  --shadow-lg: 0 10px 15px rgba(58, 134, 255, 0.1);
 
   /* 圆角 */
   --radius-sm: 4px;
@@ -66,7 +66,6 @@
   /* 过渡效果 */
   --transition-fast: 0.15s ease;
   --transition-normal: 0.3s ease;
-  --transition-slow: 0.5s ease;
 
   /* 断点 */
   --breakpoint-sm: 576px;
@@ -75,24 +74,27 @@
   --breakpoint-xl: 1200px;
 }
 
-/* 暗色模式 */
+/* 暗色模式 - 调整为科技感深色主题 */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-primary: #3498db;
-    --color-secondary: #2980b9;
-    --color-light: #1a1a1a;
-    --color-medium: #333;
-    --color-text: #f8f9fa;
-    --color-bg: #121212;
-    --color-bg-alt: #1e1e1e;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --color-primary: #3a86ff;
+    --color-secondary: #00d4ff;
+    --color-accent: #00f5d4;
+    --color-light: #0f172a;
+    --color-medium: #1e293b;
+    --color-text: #e2e8f0;
+    --color-bg: #0b1120;
+    --color-bg-alt: #1e293b;
+    --color-border: #334155;
+    --shadow-sm: 0 1px 3px rgba(0, 212, 255, 0.2);
+    --shadow-md: 0 4px 6px rgba(0, 212, 255, 0.2);
+    --shadow-lg: 0 10px 15px rgba(0, 212, 255, 0.2);
   }
 }
 
 /* ======================
-     基础重置
-     ====================== */
+  基础重置
+  ====================== */
 *,
 *::before,
 *::after {
@@ -112,13 +114,24 @@ body {
   color: var(--color-text);
   line-height: 1.6;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
 /* ======================
-     排版
-     ====================== */
+  布局容器
+  ====================== */
+.container {
+  width: min(calc(100% - 2rem), var(--breakpoint-xl));
+  margin-inline: auto;
+  padding: var(--space-xl);
+}
+
+/* ======================
+  排版
+  ====================== */
 h1,
 h2,
 h3,
@@ -177,14 +190,117 @@ a:focus-visible {
 }
 
 /* ======================
-     布局
-     ====================== */
-.container {
-  width: min(100% - 2rem, var(--breakpoint-xl));
-  margin-inline: auto;
-  padding: var(--space-xl);
+  Header 样式
+  ====================== */
+.site-header {
+  background: var(--color-primary);
+  color: var(--color-text-light);
+  box-shadow: var(--shadow-lg);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
+.site-header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+}
+
+.site-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-text-light);
+}
+
+.nav-menu {
+  display: flex;
+  gap: var(--space-lg);
+  list-style: none;
+}
+
+.nav-link {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+  position: relative;
+  color: var(--color-text-light);
+}
+
+.nav-link:hover {
+  background: var(--color-primary-hover);
+  text-decoration: none;
+}
+
+.nav-link.active {
+  color: var(--color-secondary);
+  font-weight: 600;
+}
+
+/* ======================
+  Footer 样式
+  ====================== */
+.site-footer {
+  background: var(--color-primary);
+  color: var(--color-text-light);
+  margin-top: auto;
+  border-top: 3px solid var(--color-secondary);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-xl);
+  padding: var(--space-xl) 0;
+}
+
+.footer-title {
+  color: var(--color-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.footer-links a {
+  color: var(--color-text-light);
+  opacity: 0.9;
+  padding: var(--space-xxs) 0;
+  display: block;
+  transition: color var(--transition-fast);
+}
+
+.footer-links a:hover {
+  color: var(--color-secondary);
+  opacity: 1;
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--color-primary-hover);
+  padding-top: var(--space-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.back-to-top {
+  background: var(--color-secondary);
+  color: var(--color-text-light);
+  padding: var(--space-xxs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.back-to-top:hover {
+  background: var(--color-secondary-hover);
+}
+
+/* ======================
+  网格布局
+  ====================== */
 .grid {
   display: grid;
   gap: var(--space-md);
@@ -192,8 +308,8 @@ a:focus-visible {
 }
 
 /* ======================
-     卡片组件
-     ====================== */
+  卡片组件
+  ====================== */
 .card {
   background-color: var(--color-bg-alt);
   border-radius: var(--radius-md);
@@ -211,13 +327,9 @@ a:focus-visible {
   box-shadow: var(--shadow-md);
 }
 
-.card--elevated:hover {
-  box-shadow: var(--shadow-lg);
-}
-
 /* ======================
-     按钮组件
-     ====================== */
+  按钮组件
+  ====================== */
 .btn {
   --btn-bg: var(--color-secondary);
   --btn-color: var(--color-text-light);
@@ -229,16 +341,12 @@ a:focus-visible {
   padding: var(--space-sm) var(--space-md);
   cursor: pointer;
   font-size: 1em;
-  transition:
-    background-color var(--transition-fast),
-    transform var(--transition-fast);
+  transition: background-color var(--transition-fast);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
-  position: relative;
-  overflow: hidden;
   min-width: 100px;
 }
 
@@ -248,7 +356,6 @@ a:focus-visible {
 
 .btn:active:not(:disabled) {
   background-color: var(--color-secondary-active);
-  transform: translateY(1px);
 }
 
 .btn:focus-visible {
@@ -264,7 +371,6 @@ a:focus-visible {
 /* 按钮变体 */
 .btn--primary {
   --btn-bg: var(--color-primary);
-  --btn-color: var(--color-text-light);
 }
 
 .btn--primary:hover:not(:disabled) {
@@ -304,8 +410,8 @@ a:focus-visible {
 }
 
 /* ======================
-     表单组件
-     ====================== */
+  表单组件
+  ====================== */
 .form-group {
   margin-bottom: var(--space-md);
 }
@@ -330,9 +436,7 @@ textarea {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 0.9em;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+  transition: border-color var(--transition-fast);
   background-color: var(--color-bg-alt);
   color: var(--color-text);
 }
@@ -345,32 +449,16 @@ textarea:focus {
   box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
-input:invalid {
-  border-color: var(--color-danger);
-}
-
-input:disabled,
-select:disabled,
-textarea:disabled {
-  background-color: var(--color-light);
-  cursor: not-allowed;
-}
-
 textarea {
   resize: vertical;
   min-height: 100px;
 }
 
 /* ======================
-     工具类
-     ====================== */
+  工具类
+  ====================== */
 .flex {
   display: flex;
-}
-
-.flex--row {
-  flex-direction: row;
-  flex-wrap: wrap;
   gap: var(--space-md);
 }
 
@@ -385,10 +473,6 @@ textarea {
 
 .text-muted {
   color: var(--color-text-muted);
-}
-
-.hidden {
-  display: none;
 }
 
 /* 间距工具 */
@@ -441,52 +525,32 @@ textarea {
 }
 
 /* ======================
-     动画
-     ====================== */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade {
-  animation: fadeIn 0.5s ease forwards;
-}
-
-.animate-fade-down {
-  animation: fadeInDown 0.8s ease forwards;
-}
-
-/* ======================
-     响应式设计
-     ====================== */
+  响应式设计
+  ====================== */
 @media (max-width: 768px) {
   .container {
     padding: var(--space-md);
   }
 
-  .flex--row {
+  .flex {
     flex-direction: column;
   }
 
-  .btn--mobile-block {
-    width: 100%;
+  /* Header 响应式 */
+  .site-header .container {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .nav-menu {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
   }
 }
 
@@ -498,4 +562,10 @@ textarea {
   .card {
     padding: var(--space-md);
   }
+}
+
+/* 外部链接指示器 */
+.external-indicator {
+  font-size: 0.8em;
+  margin-left: 2px;
 }
