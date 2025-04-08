@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>示例页面 - 科技风工具库</title>
+    <title>设计系统演示 - 科技风工具库</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body>
@@ -11,73 +11,112 @@
     <header class="site-header">
         <div class="container">
             <div class="site-title">
-                <span>科技风工具库</span>
+                <span>设计系统演示</span>
             </div>
             <nav>
                 <ul class="nav-menu">
-                    <li><a href="#home" class="nav-link active">首页</a></li>
-                    <li><a href="#tools" class="nav-link">工具</a></li>
-                    <li><a href="#about" class="nav-link">关于</a></li>
-                    <li><a href="#contact" class="nav-link">联系</a></li>
+                    <li><a href="#colors" class="nav-link active">色彩系统</a></li>
+                    <li><a href="#components" class="nav-link">组件库</a></li>
+                    <li><a href="#forms" class="nav-link">表单元素</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- 页内容 -->
+    <!-- 主内容 -->
     <main class="container">
-        <!-- 首页部分 -->
-        <section id="home" class="mt-6">
-            <h1>欢迎来到科技风工具库</h1>
-            <p class="text-muted">我们提供一系列高效的在线工具，帮助您简化工作流程并提高生产力。</p>
-        </section>
-
-        <!-- 工具展示部分 -->
-        <section id="tools" class="mt-6">
-            <h2>我们的工具</h2>
-            <div class="grid">
-                <div class="card card--elevated">
-                    <h3>格式转换器</h3>
-                    <p>轻松将 WebP 和 AVIF 格式的图片转换为 JPG 或 PNG 格式。支持批量处理和实时预览。</p>
-                    <a href="#tools" class="btn btn--primary">了解更多</a>
+        <!-- 色彩系统展示 -->
+        <section id="colors" class="mt-6">
+            <h2>色彩系统</h2>
+            <div class="grid mt-4">
+                <div class="card">
+                    <h3>主色系</h3>
+                    <div class="color-grid">
+                        <div class="color-swatch bg-primary"></div>
+                        <div class="color-swatch bg-primary-hover"></div>
+                        <div class="color-swatch bg-primary-active"></div>
+                    </div>
                 </div>
-                <div class="card card--elevated">
-                    <h3>概率计算器</h3>
-                    <p>用于游戏王卡组的概率计算，帮助您优化卡组配置，提高游戏胜率。</p>
-                    <a href="#tools" class="btn btn--primary">了解更多</a>
-                </div>
-                <div class="card card--elevated">
-                    <h3>标签页恢复</h3>
-                    <p>一键恢复关闭的浏览器标签页，支持历史记录查看和个性化设置。</p>
-                    <a href="#tools" class="btn btn--primary">了解更多</a>
+                
+                <div class="card">
+                    <h3>功能色</h3>
+                    <div class="color-grid">
+                        <div class="color-swatch bg-success"></div>
+                        <div class="color-swatch bg-warning"></div>
+                        <div class="color-swatch bg-danger"></div>
+                        <div class="color-swatch bg-info"></div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- 关于部分 -->
-        <section id="about" class="mt-6">
-            <h2>关于我们</h2>
-            <p class="text-muted">我们是一支致力于开发实用在线工具的团队，专注于提供高效、简洁、易用的解决方案。</p>
+        <!-- 组件展示 -->
+        <section id="components" class="mt-6">
+            <h2>核心组件</h2>
+            
+            <div class="grid mt-4">
+                <!-- 按钮组件 -->
+                <div class="card">
+                    <h3>按钮变体</h3>
+                    <div class="flex flex--column">
+                        <button class="btn">默认按钮</button>
+                        <button class="btn btn--primary">主要按钮</button>
+                        <button class="btn btn--success">成功按钮</button>
+                        <button class="btn btn--danger">危险按钮</button>
+                        <button class="btn btn--outline">轮廓按钮</button>
+                        <button class="btn" disabled>禁用状态</button>
+                    </div>
+                </div>
+
+                <!-- 卡片组件 -->
+                <div class="card card--elevated">
+                    <h3>交互卡片</h3>
+                    <p>悬停查看阴影效果，点击体验交互</p>
+                    <div class="mt-4">
+                        <div class="card nested-card">
+                            <h4>嵌套卡片</h4>
+                            <p>次级内容展示</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <!-- 联系部分 -->
-        <section id="contact" class="mt-6 mb-6">
-            <h2>联系我们</h2>
-            <form class="card">
-                <div class="form-group">
-                    <label for="name">姓名</label>
-                    <input type="text" id="name" class="form-control" placeholder="请输入您的姓名">
-                </div>
-                <div class="form-group">
-                    <label for="email">邮箱</label>
-                    <input type="email" id="email" class="form-control" placeholder="请输入您的邮箱">
-                </div>
-                <div class="form-group">
-                    <label for="message">留言</label>
-                    <textarea id="message" class="form-control" rows="5" placeholder="请输入您的留言"></textarea>
-                </div>
-                <button type="submit" class="btn btn--primary btn--block">提交</button>
-            </form>
+        <!-- 表单元素 -->
+        <section id="forms" class="mt-6 mb-6">
+            <h2>表单元素</h2>
+            
+            <div class="card mt-4">
+                <form class="flex flex--column">
+                    <div class="form-group">
+                        <label>文本输入</label>
+                        <input type="text" placeholder="请输入内容">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>下拉选择</label>
+                        <select>
+                            <option>选项一</option>
+                            <option>选项二</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>多行文本</label>
+                        <textarea rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>文件上传</label>
+                        <input type="file">
+                    </div>
+                    
+                    <div class="flex">
+                        <button type="submit" class="btn btn--primary">提交表单</button>
+                        <button type="reset" class="btn btn--outline">重置</button>
+                    </div>
+                </form>
+            </div>
         </section>
     </main>
 
@@ -86,35 +125,62 @@
         <div class="container">
             <div class="footer-grid">
                 <div>
-                    <h3 class="footer-title">联系我们</h3>
+                    <h3 class="footer-title">设计资源</h3>
                     <ul class="footer-links">
-                        <li><a href="mailto:info@example.com">info@example.com</a></li>
-                        <li><a href="tel:+1234567890">+1 234 567 890</a></li>
+                        <li><a href="#">色彩规范</a></li>
+                        <li><a href="#">组件文档</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="footer-title">快速链接</h3>
+                    <h3 class="footer-title">技术支持</h3>
                     <ul class="footer-links">
-                        <li><a href="#home">首页</a></li>
-                        <li><a href="#tools">工具</a></li>
-                        <li><a href="#about">关于</a></li>
-                        <li><a href="#contact">联系</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="footer-title">社交媒体</h3>
-                    <ul class="footer-links">
-                        <li><a href="https://www.facebook.com" target="_blank">Facebook</a></li>
-                        <li><a href="https://www.twitter.com" target="_blank">Twitter</a></li>
-                        <li><a href="https://www.github.com" target="_blank">GitHub</a></li>
+                        <li><a href="#">更新日志</a></li>
+                        <li><a href="#">问题反馈</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p class="text-muted">© 2023 科技风工具库. 保留所有权利.</p>
-                <a href="#home" class="back-to-top">返回顶部</a>
+                <p class="text-muted">© 2024 设计系统演示 保留所有权利</p>
             </div>
         </div>
     </footer>
+
+    <style>
+        /* 补充样式 */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
+        }
+
+        .color-swatch {
+            height: 80px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--color-border);
+        }
+
+        .bg-primary { background: var(--color-primary) }
+        .bg-primary-hover { background: var(--color-primary-hover) }
+        .bg-primary-active { background: var(--color-primary-active) }
+        .bg-success { background: var(--color-success) }
+        .bg-warning { background: var(--color-warning) }
+        .bg-danger { background: var(--color-danger) }
+        .bg-info { background: var(--color-info) }
+
+        .nested-card {
+            background: var(--color-bg);
+            transition: transform var(--transition-fast);
+        }
+        .nested-card:hover {
+            transform: translateX(10px);
+        }
+
+        @media (max-width: 768px) {
+            .color-swatch {
+                height: 60px;
+            }
+        }
+    </style>
 </body>
 </html>
