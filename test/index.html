@@ -51,6 +51,11 @@
             margin-bottom: var(--space-md);
             color: var(--color-secondary);
         }
+        
+        /* 手动设置当前活动导航项 */
+        .nav-current {
+            background: var(--color-primary-active);
+        }
     </style>
 </head>
 <body>
@@ -61,7 +66,7 @@
             <ul class="nav-menu">
                 <li><a href="index.html" class="nav-link">首页</a></li>
                 <li><a href="yu-gi-oh-probability-calculator/index.html" class="nav-link">游戏王计算器</a></li>
-                <li><a href="webp-avif-2-jpg-png/index.html" class="nav-link">图片转换</a></li>
+                <li><a href="webp-avif-2-jpg-png/index.html" class="nav-link nav-current">图片转换</a></li>
                 <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" 
                        class="nav-link nav-external" 
                        target="_blank"
@@ -75,45 +80,45 @@
     <!-- 示例页面内容 -->
     <main class="container">
         <section class="hero">
-            <h1>欢迎使用示例页面</h1>
-            <p>这是一个展示全站通用Header和Footer组件的示例页面，您可以基于此模板快速创建新页面</p>
+            <h1>欢迎使用图片转换工具</h1>
+            <p>这是一个纯静态的示例页面，展示了如何使用CSS样式构建美观的界面</p>
         </section>
         
         <section>
-            <h2>页面特色功能</h2>
+            <h2>工具特色</h2>
             <div class="features">
                 <div class="feature-card">
-                    <div class="feature-icon">🚀</div>
-                    <h3>响应式设计</h3>
-                    <p>自动适配各种设备屏幕尺寸，从手机到桌面电脑都能完美显示</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">🎨</div>
-                    <h3>主题系统</h3>
-                    <p>内置明暗主题切换，跟随系统偏好自动调整界面风格</p>
+                    <div class="feature-icon">🖼️</div>
+                    <h3>格式转换</h3>
+                    <p>支持AVIF/WebP转JPG/PNG格式，满足各种使用场景</p>
                 </div>
                 
                 <div class="feature-card">
                     <div class="feature-icon">⚡</div>
-                    <h3>性能优化</h3>
-                    <p>精简的代码结构和高效的渲染性能，确保流畅的用户体验</p>
+                    <h3>快速处理</h3>
+                    <p>无需上传到服务器，直接在浏览器中完成转换</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>隐私保护</h3>
+                    <p>所有处理都在本地完成，保障您的数据安全</p>
                 </div>
             </div>
         </section>
         
         <section class="card">
-            <h2>如何使用</h2>
+            <h2>使用说明</h2>
             <ol>
-                <li>复制Header和Footer代码到新页面</li>
-                <li>确保CSS路径正确（子目录页面使用../assets/css/styles.css）</li>
-                <li>在两者之间添加您的页面内容</li>
-                <li>为当前页面导航项添加active类（可选）</li>
+                <li>点击"选择文件"按钮上传图片</li>
+                <li>选择输出格式（JPG或PNG）</li>
+                <li>等待转换完成</li>
+                <li>下载转换后的图片</li>
             </ol>
             
             <div class="flex--row mt-4">
-                <a href="index.html" class="btn btn--primary">查看首页</a>
-                <a href="yu-gi-oh-probability-calculator/index.html" class="btn btn--outline">游戏王计算器</a>
+                <a href="webp-avif-2-jpg-png/index.html" class="btn btn--primary">开始使用</a>
+                <a href="index.html" class="btn btn--outline">返回首页</a>
             </div>
         </section>
     </main>
@@ -147,33 +152,9 @@
             </div>
             
             <div class="footer-bottom">
-                <p class="copyright">&copy; 2024 天天发蛋糕的工具库 | 沪ICP备20240530号</p>
-                <a href="#" class="back-to-top">↑ 返回顶部</a>
+                <p class="copyright">&copy; 2025 天天发蛋糕的工具库</p>
             </div>
         </div>
     </footer>
-
-    <!-- 交互脚本 -->
-    <script>
-        // 为当前页面导航项添加active类
-        document.querySelectorAll('.nav-link').forEach(link => {
-            if (link.href === window.location.href) {
-                link.classList.add('active');
-            }
-        });
-        
-        // 动态active类样式（添加到styles.css中）
-        const style = document.createElement('style');
-        style.textContent = `
-            .nav-link.active {
-                background: var(--color-primary-active);
-            }
-            .nav-link.active::after {
-                width: 100% !important;
-                left: 0 !important;
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
 </body>
 </html>
