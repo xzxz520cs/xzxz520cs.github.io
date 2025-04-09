@@ -646,6 +646,7 @@ textarea {
   font-size: 1.5rem;
   color: var(--color-text-light);
   cursor: pointer;
+  margin-bottom: 0;
 }
 
 /* ======================
