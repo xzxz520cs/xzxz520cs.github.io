@@ -36,11 +36,13 @@
             </div>
         </div>
 
-        <div class="grid mb-4" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-lg);">
+        <div class="grid mb-4"
+            style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-lg);">
             <!-- 卡牌输入 -->
             <div class="card">
                 <h2>卡牌输入</h2>
-                <div id="cardInputs" class="grid" style="grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: var(--space-sm);"></div>
+                <div id="cardInputs" class="grid"
+                    style="grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: var(--space-sm);"></div>
             </div>
 
             <!-- 饼图容器 -->
@@ -53,7 +55,8 @@
         <!-- 抽卡设置 -->
         <div class="card mb-4">
             <h2>抽卡设置</h2>
-            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+            <div class="grid"
+                style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
                 <div class="form-group">
                     <label for="total">卡组总数</label>
                     <input type="number" id="total" class="form-control" readonly>
@@ -69,7 +72,8 @@
         <div class="card mb-4">
             <h2>逻辑判断条件</h2>
             <div class="form-group">
-                <textarea id="condition" class="form-control" rows="3" placeholder="输入逻辑判断条件，例如：a > 0 && b == 1"></textarea>
+                <textarea id="condition" class="form-control" rows="3"
+                    placeholder="输入逻辑判断条件，例如：a > 0 && b == 1"></textarea>
             </div>
             <div class="text-muted" style="font-size: 0.8em;">
                 <strong>运算符优先级说明：</strong><br>
@@ -77,16 +81,17 @@
                 2. 逻辑非 !<br>
                 3. 乘除 * / %<br>
                 4. 加减 + -<br>
-                5. 比较 > >= < <= == != === !==<br>
-                6. 逻辑与 &&<br>
-                7. 逻辑或 ||<br>
-                <br>
-                在条件表达式中，'=' 是赋值运算符。如果您要判断相等，请使用 '==' 或 '==='。
+                5. 比较 > >= < <===!====!==<br>
+                    6. 逻辑与 &&<br>
+                    7. 逻辑或 ||<br>
+                    <br>
+                    在条件表达式中，'=' 是赋值运算符。如果您要判断相等，请使用 '==' 或 '==='。
             </div>
         </div>
 
         <!-- 计算按钮 -->
-        <div class="grid mb-4" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+        <div class="grid mb-4"
+            style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
             <button onclick="calculate()" class="btn btn--primary">开始计算</button>
             <button onclick="cancelCalculation()" id="cancelBtn" class="btn btn--danger hidden">取消计算</button>
         </div>
@@ -103,7 +108,8 @@
         <!-- 结果输出 -->
         <div class="card">
             <h2>计算结果</h2>
-            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-md);">
+            <div class="grid"
+                style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-md);">
                 <div class="form-group">
                     <label for="probability">概率</label>
                     <input type="text" id="probability" class="form-control" readonly>
@@ -310,7 +316,7 @@
                 document.getElementById('calculationProgress').value = 0;
                 document.getElementById('progressText').textContent = '计算中: 0%';
                 document.getElementById('progressContainer').classList.remove('hidden');
-                
+
                 // 重置结果
                 document.getElementById('probability').value = '计算中...';
                 document.getElementById('validCombinations').value = '计算中...';
@@ -467,11 +473,11 @@
         // 完成计算
         function finalizeCalculation(result) {
             const probability = (Number(result.valid) / Number(result.total)) * 100;
-            
+
             document.getElementById('probability').value = `${probability.toFixed(20)}%`;
             document.getElementById('validCombinations').value = result.valid.toString();
             document.getElementById('totalCombinations').value = result.total.toString();
-            
+
             cleanupCalculation();
         }
 
@@ -500,11 +506,11 @@
         }
 
         // 初始化页面
-        window.onload = function() {
+        window.onload = function () {
             createCardInputs();
             updateDeckList();
             updateTotalDeck();
-            
+
             // 为所有输入框添加事件监听
             document.querySelectorAll('.card-count').forEach(input => {
                 input.addEventListener('change', updateTotalDeck);
@@ -512,4 +518,5 @@
         };
     </script>
 </body>
+
 </html>
