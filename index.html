@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>天天发蛋糕的工具箱</title>
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
+
 <body>
     <!-- 页头 -->
     <header class="site-header">
@@ -15,21 +17,54 @@
                     <span class="site-title">天天发蛋糕的工具箱</span>
                 </a>
             </div>
-            <nav>
-                <ul class="nav-menu">
-                    <li><a href="/tools/yu-gi-oh-probability-calculator/" class="nav-link">游戏王概率计算器</a></li>
-                    <li><a href="/tools/webp-avif-2-jpg-png/" class="nav-link">AVIF/WebP转JPG/PNG</a></li>
-                    <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" class="nav-link">恢复关闭的标签页</a></li>
+            <!-- 用 label 替换原 button -->
+            <label for="menu-toggle-checkbox" class="menu-toggle" aria-label="打开菜单">☰</label>
+            <nav class="nav-menu">
+                <ul class="nav-list">
+                    <!-- 父菜单 -->
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a>
+                            </li>
+                            <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                                    class="dropdown-item">恢复关闭的标签页</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </nav>
         </div>
+        <!-- 增加隐藏的复选框用于切换 -->
+        <input type="checkbox" id="menu-toggle-checkbox" hidden>
+        <!-- 移动端侧边抽屉 -->
+        <div class="drawer">
+            <!-- 新增：关闭菜单按钮 -->
+            <label for="menu-toggle-checkbox" class="menu-toggle close-menu" aria-label="关闭菜单">×</label>
+            <nav class="drawer-menu">
+                <ul class="drawer-list">
+                    <li class="drawer-item">
+                        <a href="#" class="drawer-link">工具</a>
+                        <ul class="drawer-submenu">
+                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a>
+                            </li>
+                            <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                                    class="drawer-subitem">恢复关闭的标签页</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <!-- 新增：点击遮罩关闭侧边菜单 -->
+        <label for="menu-toggle-checkbox" class="drawer-overlay"></label>
     </header>
 
     <!-- 主内容 -->
     <main class="container">
         <section class="mt-6">
             <h1>实用工具</h1>
-            
+
             <div class="grid mt-4">
                 <!-- 游戏王概率计算器 -->
                 <div class="card card--elevated">
@@ -60,9 +95,8 @@
                         <p class="tool-description">
                             一键恢复关闭的浏览器标签页，支持历史记录查看和个性化设置。Chrome商店8,000用户优质扩展。
                         </p>
-                        <a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" 
-                           class="btn btn--primary"
-                           target="_blank">
+                        <a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                            class="btn btn--primary" target="_blank">
                             Chrome商店获取
                         </a>
                     </div>
@@ -106,4 +140,5 @@
         </div>
     </footer>
 </body>
+
 </html>
