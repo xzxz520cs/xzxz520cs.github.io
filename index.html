@@ -3,67 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天天发蛋糕的工具库</title>
+    <title>天天发蛋糕的工具箱</title>
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <header class="mb-6">
-            <h1 class="animate-fade-down">天天发蛋糕的工具库</h1>
-        </header>
-
-        <div class="grid">
-            <!-- 游戏王概率计算器 -->
-            <div class="card card--elevated" onclick="window.location.href='https://ttfdg.cn/yu-gi-oh-probability-calculator/'">
-                <div class="flex--column">
-                    <h2 class="tool-title">游戏王概率计算器</h2>
-                    <p class="tool-description">
-                        精准计算卡组启动概率上手率等概率，支持自定义卡组配置和复杂条件判断。可视化卡组构成分析，帮助优化卡组配置。
-                    </p>
-                    <a href="https://ttfdg.cn/yu-gi-oh-probability-calculator/" class="btn btn--primary">立即使用</a>
-                </div>
+    <!-- 页头 -->
+    <header class="site-header">
+        <div class="container">
+            <div class="site-title">
+                <a href="/" style="color: inherit; text-decoration: none;">
+                    <span>天天发蛋糕的工具箱</span>
+                </a>
             </div>
-
-            <!-- 图片格式转换工具 -->
-            <div class="card card--elevated" onclick="window.location.href='https://ttfdg.cn/webp-avif-2-jpg-png/'">
-                <div class="flex--column">
-                    <h2 class="tool-title">图片格式转换工具</h2>
-                    <p class="tool-description">
-                        支持AVIF/WebP转JPG/PNG格式，批量处理高效转换。实时预览转换效果，一键打包下载所有图片。
-                    </p>
-                    <a href="https://ttfdg.cn/webp-avif-2-jpg-png/" class="btn btn--primary">开始转换</a>
-                </div>
-            </div>
-
-            <!-- 标签页恢复插件 -->
-            <div class="card card--elevated" onclick="window.open('https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed')">
-                <div class="flex--column">
-                    <h2 class="tool-title">恢复关闭的标签页</h2>
-                    <p class="tool-description">
-                        一键恢复关闭的浏览器标签页，支持历史记录查看和个性化设置。Chrome商店8,000用户优质扩展。
-                    </p>
-                    <a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" 
-                       class="btn btn--primary"
-                       target="_blank">
-                        Chrome商店获取
-                    </a>
-                </div>
-            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="https://ttfdg.cn/yu-gi-oh-probability-calculator/" class="nav-link">游戏王概率计算器</a></li>
+                    <li><a href="https://ttfdg.cn/webp-avif-2-jpg-png/" class="nav-link">AVIF/WebP转JPG/PNG</a></li>
+                </ul>
+            </nav>
         </div>
+    </header>
+
+    <!-- 主内容 -->
+    <main class="container">
+        <section class="mt-6">
+            <h1>实用工具</h1>
+            
+            <div class="grid mt-4">
+                <!-- 游戏王概率计算器 -->
+                <div class="card card--elevated">
+                    <div class="flex--column">
+                        <h2 class="tool-title">游戏王概率计算器</h2>
+                        <p class="tool-description">
+                            精准计算卡组启动概率上手率等概率，支持自定义卡组配置和复杂条件判断。可视化卡组构成分析，帮助优化卡组配置。
+                        </p>
+                        <a href="https://ttfdg.cn/yu-gi-oh-probability-calculator/" class="btn btn--primary">立即使用</a>
+                    </div>
+                </div>
+
+                <!-- AVIF/WebP转JPG/PNG -->
+                <div class="card card--elevated">
+                    <div class="flex--column">
+                        <h2 class="tool-title">AVIF/WebP转JPG/PNG</h2>
+                        <p class="tool-description">
+                            支持AVIF/WebP转JPG/PNG格式，批量处理高效转换。实时预览转换效果，一键打包下载所有图片。
+                        </p>
+                        <a href="https://ttfdg.cn/webp-avif-2-jpg-png/" class="btn btn--primary">开始转换</a>
+                    </div>
+                </div>
+
+                <!-- 标签页恢复插件 -->
+                <div class="card card--elevated">
+                    <div class="flex--column">
+                        <h2 class="tool-title">恢复关闭的标签页</h2>
+                        <p class="tool-description">
+                            一键恢复关闭的浏览器标签页，支持历史记录查看和个性化设置。Chrome商店8,000用户优质扩展。
+                        </p>
+                        <a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" 
+                           class="btn btn--primary"
+                           target="_blank">
+                            Chrome商店获取
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- 关于我部分 -->
-        <div class="card about-me mt-6">
-            <h2>关于我</h2>
-            <p>
-                欢迎关注我的B站账号！<br>
-                晚上会直播游戏王日常。<br>
-                除了直播录像，也会分享一些低质量教学视频。
-            </p>
-            <div class="flex--row">
-                <a href="https://space.bilibili.com/1446349" class="btn btn--outline" target="_blank">Bilibili主页</a>
-                <a href="https://live.bilibili.com/15205" class="btn btn--outline" target="_blank">Bilibili直播间</a>
+        <section class="mt-6">
+            <div class="card about-me">
+                <h2>关于我</h2>
+                <p>
+                    欢迎关注我的B站账号！<br>
+                    晚上会直播游戏王日常。<br>
+                    除了直播录像，也会分享一些低质量教学视频。
+                </p>
+                <div class="flex">
+                    <a href="https://space.bilibili.com/1446349" class="btn btn--outline" target="_blank">Bilibili主页</a>
+                    <a href="https://live.bilibili.com/15205" class="btn btn--outline" target="_blank">Bilibili直播间</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h3 class="footer-title">关于作者</h3>
+                    <ul class="footer-links">
+                        <li><a href="mailto:ttfdg520cs@gmail.com">ttfdg520cs@gmail.com</a></li>
+                        <li><a href="https://space.bilibili.com/1446349" target="_blank">Bilibili主页</a></li>
+                        <li><a href="https://github.com/xzxz520cs" target="_blank">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="text-muted">© 2025 天天发蛋糕的工具箱</p>
             </div>
         </div>
-    </div>
+    </footer>
 </body>
 </html>
