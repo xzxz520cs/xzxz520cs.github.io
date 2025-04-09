@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,11 +8,12 @@
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 </head>
+
 <body>
     <div class="container">
         <h1>图片格式转换工具</h1>
         <p class="text-center text-muted">轻松将AVIF和WebP格式图片转换为JPG或PNG格式</p>
-        
+
         <div class="card">
             <div class="upload-section flex flex--column">
                 <div class="form-group">
@@ -21,23 +23,23 @@
                         <option value="png">PNG</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="fileInput">选择图片文件</label>
                     <input type="file" id="fileInput" accept=".avif,.webp" multiple>
                     <p class="text-muted mt-2">支持格式：AVIF 和 WebP</p>
                 </div>
-                
+
                 <div id="status" class="text-center">就绪</div>
-                
+
                 <div class="progress-bar mt-3 mb-3">
                     <div class="progress"></div>
                 </div>
             </div>
         </div>
-        
+
         <button id="downloadBtn" class="btn btn--primary btn--block hidden mt-4">下载全部图片</button>
-        
+
         <div id="previewContainer" class="grid mt-5"></div>
     </div>
 
@@ -56,7 +58,7 @@
             resetState();
             totalFiles = files.length;
             updateStatus(`正在处理 0/${totalFiles} 个文件...`);
-            
+
             const format = document.getElementById('formatSelect').value;
 
             for (let file of files) {
@@ -155,7 +157,7 @@
             const zip = new JSZip();
             const format = document.getElementById('formatSelect').value;
             const folder = zip.folder(`converted_${format}`);
-            
+
             convertedFiles.forEach(file => {
                 folder.file(file.name, file.blob);
             });
@@ -169,62 +171,62 @@
             document.body.removeChild(link);
         }
     </script>
-    
+
     <style>
         /* 补充样式 */
         .upload-section {
             max-width: 500px;
             margin: 0 auto;
         }
-        
+
         .progress-bar {
             height: 8px;
             background-color: var(--color-light);
             border-radius: var(--radius-full);
             overflow: hidden;
         }
-        
+
         .progress {
             height: 100%;
             width: 0;
             background-color: var(--color-success);
             transition: width var(--transition-slow);
         }
-        
+
         .preview-card {
             padding: var(--space-md);
             text-align: center;
             transition: transform var(--transition-fast);
         }
-        
+
         .preview-card:hover {
             transform: translateY(-5px);
         }
-        
+
         .preview-img {
             max-width: 100%;
             height: auto;
             border-radius: var(--radius-sm);
             box-shadow: var(--shadow-sm);
-            background: 
-                linear-gradient(45deg, var(--color-medium) 25%, transparent 25%) -10px 0/ 20px 20px, 
-                linear-gradient(-45deg, var(--color-medium) 25%, transparent 25%) -10px 0/ 20px 20px, 
-                linear-gradient(45deg, transparent 75%, var(--color-medium) 75%), 
+            background:
+                linear-gradient(45deg, var(--color-medium) 25%, transparent 25%) -10px 0/ 20px 20px,
+                linear-gradient(-45deg, var(--color-medium) 25%, transparent 25%) -10px 0/ 20px 20px,
+                linear-gradient(45deg, transparent 75%, var(--color-medium) 75%),
                 linear-gradient(-45deg, transparent 75%, var(--color-medium) 75%);
             background-color: var(--color-light);
         }
-        
+
         .file-name {
             font-size: 0.9em;
             word-break: break-all;
         }
-        
+
         #status {
             min-height: 1.5em;
             color: var(--color-secondary);
             font-weight: 500;
         }
-        
+
         @media (max-width: 768px) {
             .preview-card {
                 padding: var(--space-sm);
@@ -232,4 +234,5 @@
         }
     </style>
 </body>
+
 </html>
