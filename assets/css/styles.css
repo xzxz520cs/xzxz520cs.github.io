@@ -568,9 +568,12 @@ textarea {
   transform: translateX(0);
 }
 
+/* 修改：调整侧边抽屉内导航布局 */
 .drawer-menu {
-  padding: var(--space-lg);
-  text-align: right; /* 向右对齐侧边菜单内容 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md); /* 类似 .container 的内边距 */
 }
 
 .drawer-list {
@@ -625,17 +628,6 @@ textarea {
   display: block;
 }
 
-/* 新增：侧边抽屉内的关闭按钮 */
-.drawer .close-menu {
-  position: absolute;
-  top: var(--space-sm);
-  right: var(--space-sm);
-  font-size: 1.5rem; /* 保持与菜单按钮尺寸一致 */
-  color: var(--color-text-light); /* 与菜单按钮统一颜色 */
-  cursor: pointer;
-  z-index: 2100;
-}
-
 /* ======================
    菜单按钮样式
    ====================== */
@@ -644,9 +636,9 @@ textarea {
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: var(--color-text-light);
   cursor: pointer;
   margin-bottom: 0;
+  font-weight: 900;
 }
 
 /* ======================
@@ -759,6 +751,7 @@ textarea {
   .drawer {
     display: block;
   }
+
 }
 
 @media (max-width: 480px) {
