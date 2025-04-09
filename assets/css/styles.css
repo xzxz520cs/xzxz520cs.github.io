@@ -752,6 +752,11 @@ textarea {
     display: block;
   }
 
+  /* 新增：调整 drawer 内 container 的排列方向 */
+  .drawer > .container {
+    display: flex;
+    flex-direction: row-reverse;
+  }
 }
 
 @media (max-width: 480px) {
