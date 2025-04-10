@@ -647,6 +647,11 @@ textarea {
   cursor: pointer;
   margin-bottom: 0;
   font-weight: 900;
+  color: var(--color-text-light); /* 新增：设置打开菜单按钮颜色 */
+}
+
+.menu-toggle.close-menu {
+  color: var(--color-text); /* 新增：设置关闭菜单按钮颜色 */
 }
 
 /* ======================
