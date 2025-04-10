@@ -594,8 +594,11 @@ textarea {
 
 .drawer-submenu {
   list-style: none;
-  padding-left: var(--space-md);
   margin-top: var(--space-sm);
+}
+
+.drawer-submenu li {
+  margin-top: var(--space-xxs);
 }
 
 .drawer-subitem {
