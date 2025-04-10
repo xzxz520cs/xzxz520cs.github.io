@@ -550,19 +550,13 @@ textarea {
   position: fixed;
   top: 0;
   right: 0;
-  width: 80%;
+  width: 70%;
   max-width: 300px;
   height: 100%;
   background: linear-gradient(135deg, var(--color-bg), var(--color-bg-alt));
   /* 渐变背景 */
   border-left: 4px solid var(--color-secondary);
   /* 增加左侧边框 */
-  border-top-left-radius: var(--radius-md);
-  /* 左上圆角 */
-  border-bottom-left-radius: var(--radius-md);
-  /* 左下圆角 */
-  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.2);
-  /* 强化阴影效果 */
   z-index: 2000;
   transform: translateX(100%);
   transition: transform var(--transition-normal);
@@ -579,7 +573,7 @@ textarea {
   justify-content: space-between;
   align-items: center;
   padding: var(--space-md);
-  /* 类似 .container 的内边距 */
+  flex-direction: row-reverse;
 }
 
 .drawer-list {
@@ -647,11 +641,13 @@ textarea {
   cursor: pointer;
   margin-bottom: 0;
   font-weight: 900;
-  color: var(--color-text-light); /* 新增：设置打开菜单按钮颜色 */
+  color: var(--color-text-light);
+  /* 新增：设置打开菜单按钮颜色 */
 }
 
 .menu-toggle.close-menu {
-  color: var(--color-text); /* 新增：设置关闭菜单按钮颜色 */
+  color: var(--color-text);
+  /* 新增：设置关闭菜单按钮颜色 */
 }
 
 /* ======================
@@ -763,6 +759,18 @@ textarea {
   /* 在移动端，确保侧边抽屉显示 */
   .drawer {
     display: block;
+  }
+
+  /* 新增：使侧边抽屉菜单右对齐 */
+  .drawer-menu {
+    text-align: right;
+    margin-right: var(--space-md);
+    margin-left: var(--space-md);
+  }
+
+  .drawer-menu .drawer-link,
+  .drawer-menu .drawer-subitem {
+    text-align: right;
   }
 
   /* 新增：调整 drawer 内 container 的排列方向 */
