@@ -500,13 +500,12 @@ a:focus-visible {
   表单组件
   ====================== */
 .form-group {
-  margin-bottom: var(--space-md);
+  margin-bottom: 0;
 }
 
 label {
   font-weight: 600;
   font-size: 0.9em;
-  margin-bottom: var(--space-xs);
   display: block;
   color: var(--color-text);
 }
@@ -539,7 +538,7 @@ textarea:focus {
 
 textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 200px;
 }
 
 /* ======================
