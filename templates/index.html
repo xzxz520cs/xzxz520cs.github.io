@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>天天发蛋糕的工具箱 - 模板页面</title>
+    <title>天天发蛋糕的工具箱 - {{页面标题}}</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <!-- 可选的额外CSS -->
 </head>
 
 <body>
@@ -17,19 +18,62 @@
                     <span class="site-title">天天发蛋糕的工具箱</span>
                 </a>
             </div>
-            <nav>
-                <ul class="nav-menu">
-                    <li><a href="/tools/yu-gi-oh-probability-calculator/" class="nav-link">游戏王概率计算器</a></li>
-                    <li><a href="/tools/webp-avif-2-jpg-png/" class="nav-link">AVIF/WebP转JPG/PNG</a></li>
-                    <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
-                            class="nav-link">恢复关闭的标签页</a></li>
+            <!-- 用 label 替换原 button -->
+            <label for="menu-toggle-checkbox" class="menu-toggle" aria-label="打开菜单">☰</label>
+            <nav class="nav-menu">
+                <ul class="nav-list">
+                    <!-- 父菜单 -->
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a>
+                            </li>
+                            <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                                    class="dropdown-item">恢复关闭的标签页</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </nav>
         </div>
+        <!-- 增加隐藏的复选框用于切换 -->
+        <input type="checkbox" id="menu-toggle-checkbox" hidden>
+        <!-- 移动端侧边抽屉 -->
+        <div class="drawer">
+            <div class="container">
+                <label for="menu-toggle-checkbox" class="menu-toggle close-menu" aria-label="关闭菜单">×</label>
+            </div>
+            <nav class="drawer-menu">
+                <!-- 将关闭按钮放入导航容器中 -->
+                <ul class="drawer-list">
+                    <li class="drawer-item">
+                        <a href="#" class="drawer-link">工具</a>
+                        <ul class="drawer-submenu">
+                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a>
+                            </li>
+                            <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                                    class="drawer-subitem">恢复关闭的标签页</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <!-- 新增：点击遮罩关闭侧边菜单 -->
+        <label for="menu-toggle-checkbox" class="drawer-overlay"></label>
     </header>
 
     <!-- 主内容 -->
     <main class="container">
+        <section class="mt-6">
+            <h1>{{工具标题}}</h1>
+            <p class="text-center text-muted">{{工具描述}}</p>
+
+            <!-- 工具内容区域 -->
+            <div class="card mt-4">
+                {{工具主要内容}}
+            </div>
+        </section>
     </main>
 
     <!-- 页脚 -->
@@ -50,6 +94,8 @@
             </div>
         </div>
     </footer>
+
+    <!-- 可选的额外JavaScript -->
 </body>
 
 </html>
