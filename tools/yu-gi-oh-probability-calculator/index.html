@@ -64,7 +64,7 @@
 
         <div class="card">
             <!-- 卡组管理 -->
-            <div class="card-management grid">
+            <div class="deck-management">
                 <div class="form-group">
                     <label for="deckList">选择卡组</label>
                     <select id="deckList" class="form-control">
@@ -76,11 +76,9 @@
                     <input type="text" id="deckName" class="form-control" placeholder="输入卡组名称">
                 </div>
                 <div class="form-group deck-actions">
-                    <div class="btn-group">
-                        <button onclick="saveDeck()" class="btn btn--success">保存</button>
-                        <button onclick="loadDeck()" class="btn btn--secondary">加载</button>
-                        <button onclick="deleteDeck()" class="btn btn--danger">删除</button>
-                    </div>
+                    <button onclick="saveDeck()" class="btn btn--success">保存</button>
+                    <button onclick="loadDeck()" class="btn btn--secondary">加载</button>
+                    <button onclick="deleteDeck()" class="btn btn--danger">删除</button>
                 </div>
             </div>
 
