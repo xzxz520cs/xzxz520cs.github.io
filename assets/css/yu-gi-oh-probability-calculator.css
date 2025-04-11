@@ -1,0 +1,80 @@
+/* ======================
+   游戏王概率计算器特定样式
+   ====================== */
+
+/* 卡组管理区域 */
+.card-management {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+  
+  /* 主内容区域 */
+  .main-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-xl);
+  }
+  
+  /* 卡牌输入网格 */
+  .card-input-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--space-sm);
+  }
+  
+  /* 抽卡设置 */
+  .draw-settings {
+    margin-bottom: var(--space-lg);
+  }
+  
+  /* 条件区域 */
+  .condition-section {
+    margin: var(--space-xl) 0;
+  }
+  
+  /* 计算按钮区域 */
+  .calculation-actions {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+  
+  /* 结果区域 */
+  .result-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* 移动端样式 */
+  @media (max-width: 768px) {
+    .card-management {
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    .deck-actions {
+      grid-column: span 2;
+    }
+    
+    .main-content {
+      grid-template-columns: 1fr;
+    }
+    
+    .card-input-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    
+    .result-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .calculation-actions {
+      flex-direction: column;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: var(--space-sm);
+    }
+  }
+  

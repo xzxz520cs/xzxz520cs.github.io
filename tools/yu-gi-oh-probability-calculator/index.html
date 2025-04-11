@@ -8,6 +8,7 @@
     <meta name="description" content="游戏王概率计算器 - 专业的卡组概率分析工具，支持自定义条件判断，精确计算启动率和上手率等概率。帮您优化卡组构筑。">
     <meta name="keywords" content="游戏王, 概率计算, 卡组工具">
     <link rel="stylesheet" href="../../assets/css/styles.css">
+    <link rel="stylesheet" href="../../assets/css/yu-gi-oh-probability-calculator.css">
 </head>
 
 <body>
@@ -25,9 +26,11 @@
                     <li class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
                         <ul class="dropdown-menu">
-                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a></li>
+                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a>
+                            </li>
                             <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
-                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" class="dropdown-item">恢复关闭的标签页</a></li>
+                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                                    class="dropdown-item">恢复关闭的标签页</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -43,9 +46,11 @@
                     <li class="drawer-item">
                         <a href="#" class="drawer-link">工具</a>
                         <ul class="drawer-submenu">
-                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a></li>
+                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a>
+                            </li>
                             <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
-                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" class="drawer-subitem">恢复关闭的标签页</a></li>
+                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                                    class="drawer-subitem">恢复关闭的标签页</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -54,13 +59,12 @@
         <label for="menu-toggle-checkbox" class="drawer-overlay"></label>
     </header>
 
-    <!-- 将原有内容包装到 <main> 中 -->
     <main class="container">
         <h1>游戏王概率计算器</h1>
 
         <div class="card">
             <!-- 卡组管理 -->
-            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: var(--space-md);">
+            <div class="card-management grid">
                 <div class="form-group">
                     <label for="deckList">选择卡组</label>
                     <select id="deckList" class="form-control">
@@ -71,34 +75,34 @@
                     <label for="deckName">卡组名称</label>
                     <input type="text" id="deckName" class="form-control" placeholder="输入卡组名称">
                 </div>
-                <div class="form-group flex flex--column" style="justify-content: flex-end;">
-                    <div class="flex flex--row" style="gap: var(--space-xs);">
-                        <button onclick="saveDeck()" class="btn btn--success btn--block">保存</button>
-                        <button onclick="loadDeck()" class="btn btn--secondary btn--block">加载</button>
-                        <button onclick="deleteDeck()" class="btn btn--danger btn--block">删除</button>
+                <div class="form-group deck-actions">
+                    <div class="btn-group">
+                        <button onclick="saveDeck()" class="btn btn--success">保存</button>
+                        <button onclick="loadDeck()" class="btn btn--secondary">加载</button>
+                        <button onclick="deleteDeck()" class="btn btn--danger">删除</button>
                     </div>
                 </div>
             </div>
 
-            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-md);">
+            <div class="main-content">
                 <!-- 卡牌输入 -->
-                <div>
-                    <h2 style="margin-bottom: var(--space-sm);">卡牌输入</h2>
-                    <div id="cardInputs" class="grid" style="grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: var(--space-xxs);"></div>
+                <div class="card-input-section">
+                    <h2>卡牌输入</h2>
+                    <div id="cardInputs" class="card-input-grid"></div>
                 </div>
 
                 <!-- 右侧区域 -->
-                <div class="flex flex--column" style="gap: var(--space-md);">
+                <div class="right-section">
                     <!-- 饼图容器 -->
-                    <div>
-                        <h2 style="margin-bottom: var(--space-sm);">卡组构成</h2>
-                        <canvas id="deckPieChart" style="max-height: 250px;"></canvas>
+                    <div class="chart-section">
+                        <h2>卡组构成</h2>
+                        <canvas id="deckPieChart"></canvas>
                     </div>
 
                     <!-- 抽卡设置 -->
-                    <div>
-                        <h2 style="margin-bottom: var(--space-sm);">抽卡设置</h2>
-                        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                    <div class="draw-settings">
+                        <h2>抽卡设置</h2>
+                        <div class="draw-inputs grid">
                             <div class="form-group">
                                 <label for="total">卡组总数</label>
                                 <input type="number" id="total" class="form-control" readonly>
@@ -113,18 +117,19 @@
             </div>
 
             <!-- 逻辑判断条件 -->
-            <div style="margin-bottom: var(--space-md);">
-                <h2 style="margin-bottom: var(--space-sm);">逻辑判断条件</h2>
+            <div class="condition-section">
+                <h2>逻辑判断条件</h2>
                 <div class="form-group">
-                    <textarea id="condition" class="form-control" rows="3" placeholder="输入逻辑判断条件，例如：a > 0 && b == 1"></textarea>
+                    <textarea id="condition" class="form-control" rows="3"
+                        placeholder="输入逻辑判断条件，例如：a > 0 && b == 1"></textarea>
                 </div>
-                <div class="text-muted" style="font-size: 0.8em;">
+                <div class="operator-help">
                     <strong>运算符优先级说明：</strong><br>
                     1. 括号 () 最高优先级<br>
                     2. 逻辑非 !<br>
                     3. 乘除 * / %<br>
                     4. 加减 + -<br>
-                    5. 比较 > >= < <= == !=<br>
+                    5. 比较 &gt; &gt;= &lt; &lt;= == !=<br>
                     6. 逻辑与 &&<br>
                     7. 逻辑或 ||<br>
                     <br>
@@ -133,24 +138,24 @@
             </div>
 
             <!-- 计算按钮 -->
-            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-md);">
+            <div class="calculation-actions">
                 <button onclick="calculate()" class="btn btn--primary">开始计算</button>
                 <button onclick="cancelCalculation()" id="cancelBtn" class="btn btn--danger hidden">取消计算</button>
             </div>
 
             <!-- 进度条 -->
-            <div id="progressContainer" class="hidden" style="margin-bottom: var(--space-md);">
+            <div id="progressContainer" class="progress-container hidden">
                 <div class="form-group">
                     <label>计算进度</label>
-                    <progress id="calculationProgress" value="0" max="100" style="width: 100%;"></progress>
+                    <progress id="calculationProgress" value="0" max="100"></progress>
                     <div id="progressText" class="text-center">等待计算...</div>
                 </div>
             </div>
 
             <!-- 结果输出 -->
-            <div>
-                <h2 style="margin-bottom: var(--space-sm);">计算结果</h2>
-                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-md);">
+            <div class="result-section">
+                <h2>计算结果</h2>
+                <div class="result-grid grid">
                     <div class="form-group">
                         <label for="probability">概率</label>
                         <input type="text" id="probability" class="form-control" readonly>
