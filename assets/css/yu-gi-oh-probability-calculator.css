@@ -15,6 +15,13 @@
     gap: var(--space-md);
 }
 
+/* 统一按钮和输入框高度 */
+.deck-management select,
+.deck-management input[type="text"],
+.deck-management .btn {
+    height: calc(var(--space-md) * 2 + 1rem);
+}
+
 /* 主内容区域 */
 .main-content {
     display: grid;
