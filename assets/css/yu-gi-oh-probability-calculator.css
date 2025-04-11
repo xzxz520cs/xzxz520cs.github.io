@@ -26,7 +26,7 @@
 .card-input-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
-    gap: var(--space-sm);
+    gap: var(--space-xs);
 }
 
 /* 右侧区域样式 */
@@ -64,9 +64,9 @@
 }*/
 
 /* 条件区域 */
-.condition-section {
+/*.condition-section {
     margin: var(--space-xl) 0;
-}
+}*/
 
 /* 计算按钮区域 */
 .calculation-actions {

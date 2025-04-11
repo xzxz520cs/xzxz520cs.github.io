@@ -85,7 +85,7 @@
             <div class="main-content">
                 <!-- 卡牌输入 -->
                 <div class="card-input-section">
-                    <h2 class="mt-2">卡牌输入</h2>
+                    <h2 class="mt-1 mb-2">卡牌输入</h2>
                     <div id="cardInputs" class="card-input-grid"></div>
                 </div>
 
@@ -93,13 +93,13 @@
                 <div class="right-section">
                     <!-- 饼图容器 -->
                     <div class="chart-section">
-                        <h2 class="mt-2">卡组构成</h2>
+                        <h2 class="mt-1 mb-2">卡组构成</h2>
                         <canvas id="deckPieChart"></canvas>
                     </div>
 
                     <!-- 抽卡设置 -->
                     <div class="draw-settings">
-                        <h2 class="mt-2">抽卡设置</h2>
+                        <h2 class="mt-1 mb-2">抽卡设置</h2>
                         <div class="draw-inputs grid">
                             <div class="form-group">
                                 <label for="total">卡组总数</label>
@@ -116,20 +116,20 @@
 
             <!-- 逻辑判断条件 -->
             <div class="condition-section">
-                <h2 class="mt-2">逻辑判断条件</h2>
+                <h2 class="mt-1 mb-2">逻辑判断条件</h2>
                 <div class="form-group">
                     <textarea id="condition" class="form-control" rows="3"
                         placeholder="输入逻辑判断条件，例如：a > 0 && b == 1"></textarea>
                 </div>
                 <div class="operator-help">
                     <strong>运算符优先级说明：</strong><br>
-                    1.括号()  2.逻辑非!  3.乘*除/取模%  4.加+减-  5.比较 大于&gt; 大于等于&gt;= 小于&lt; 小于等于&lt;= 等于== 不等!=  6.逻辑与&&  7.逻辑或||<br>
+                    1.括号()&nbsp;&nbsp;&nbsp;&nbsp;2.逻辑非!&nbsp;&nbsp;&nbsp;&nbsp;3.乘*除/取模%&nbsp;&nbsp;&nbsp;&nbsp;4.加+减-&nbsp;&nbsp;&nbsp;&nbsp;5.比较 大于&gt; 大于等于&gt;= 小于&lt; 小于等于&lt;= 等于== 不等!=&nbsp;&nbsp;&nbsp;&nbsp;6.逻辑与&&&nbsp;&nbsp;&nbsp;&nbsp;7.逻辑或||<br>
                     在条件表达式中，'=' 是赋值运算符。如果您要判断相等，请使用 '==' 或 '==='。
                 </div>
             </div>
 
             <!-- 计算按钮 -->
-            <div class="calculation-actions">
+            <div class="calculation-actions mt-2">
                 <button onclick="calculate()" class="btn btn--primary">开始计算</button>
                 <button onclick="cancelCalculation()" id="cancelBtn" class="btn btn--danger hidden">取消计算</button>
             </div>
@@ -145,7 +145,7 @@
 
             <!-- 结果输出 -->
             <div class="result-section">
-                <h2 class="mt-2">计算结果</h2>
+                <h2 class="mt-1 mb-2">计算结果</h2>
                 <div class="result-grid grid">
                     <div class="form-group">
                         <label for="probability">概率</label>
