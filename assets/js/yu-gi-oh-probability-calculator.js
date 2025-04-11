@@ -1,223 +1,239 @@
-        // 生成卡牌标签（A-Z, AA-AD）
-        function getCardLabel(index) {
-            if (index < 26) return String.fromCharCode(65 + index);
-            return `A${String.fromCharCode(65 + index - 26)}`;
-        }
+// 变量
+let fakeProgressInterval = null;
+let fakeProgress = 0;
 
-        // 创建30个卡牌输入框
-        function createCardInputs() {
-            const container = document.getElementById('cardInputs');
-            for (let i = 0; i < 30; i++) {
-                const div = document.createElement('div');
-                div.className = 'form-group';
-                div.innerHTML = `
+// 生成卡牌标签（A-Z, AA-AD）
+function getCardLabel(index) {
+    if (index < 26) return String.fromCharCode(65 + index);
+    return `A${String.fromCharCode(65 + index - 26)}`;
+}
+
+// 创建30个卡牌输入框
+function createCardInputs() {
+    const container = document.getElementById('cardInputs');
+    for (let i = 0; i < 30; i++) {
+        const div = document.createElement('div');
+        div.className = 'form-group';
+        div.innerHTML = `
                     <label>${getCardLabel(i)}类卡</label>
                     <input type="number" id="card${i}" value="0" min="0" class="form-control card-count" onchange="updateTotalDeck()">
                     <input type="text" id="cardName${i}" class="form-control mt-1" placeholder="卡名">
                 `;
-                container.appendChild(div);
-            }
+        container.appendChild(div);
+    }
+}
+
+// 保存卡组
+function saveDeck() {
+    const deckName = document.getElementById('deckName').value.trim();
+    if (!deckName) {
+        alert("请输入卡组名称");
+        return;
+    }
+
+    const deck = {
+        id: Date.now(),
+        name: deckName,
+        cards: [],
+        condition: document.getElementById('condition').value
+    };
+
+    for (let i = 0; i < 30; i++) {
+        deck.cards.push({
+            count: document.getElementById(`card${i}`).value,
+            name: document.getElementById(`cardName${i}`).value
+        });
+    }
+
+    const decks = JSON.parse(localStorage.getItem('decks') || '[]');
+    const existingIndex = decks.findIndex(d => d.name === deckName);
+
+    if (existingIndex !== -1) {
+        if (!confirm(`已存在同名卡组，确认覆盖 "${deckName}" 吗？`)) return;
+        decks[existingIndex] = deck;
+    } else {
+        decks.push(deck);
+    }
+
+    localStorage.setItem('decks', JSON.stringify(decks));
+    updateDeckList();
+    document.getElementById('deckName').value = '';
+    alert("卡组保存成功！");
+}
+
+// 加载卡组
+function loadDeck() {
+    const deckId = parseInt(document.getElementById('deckList').value);
+    if (!deckId) return;
+
+    const decks = JSON.parse(localStorage.getItem('decks') || '[]');
+    const deck = decks.find(d => d.id === deckId);
+    if (!deck) return;
+
+    deck.cards.forEach((card, i) => {
+        document.getElementById(`card${i}`).value = card.count;
+        document.getElementById(`cardName${i}`).value = card.name;
+    });
+    document.getElementById('condition').value = deck.condition;
+    updateTotalDeck();
+    alert("卡组加载成功！");
+}
+
+// 删除卡组
+function deleteDeck() {
+    const deckId = parseInt(document.getElementById('deckList').value);
+    if (!deckId) return;
+
+    if (!confirm("确认删除选中的卡组吗？")) return;
+
+    const decks = JSON.parse(localStorage.getItem('decks') || '[]');
+    const newDecks = decks.filter(d => d.id !== deckId);
+    localStorage.setItem('decks', JSON.stringify(newDecks));
+    updateDeckList();
+    alert("卡组删除成功！");
+}
+
+// 更新卡组列表
+function updateDeckList() {
+    const select = document.getElementById('deckList');
+    select.innerHTML = '<option value="">-- 选择卡组 --</option>';
+    const decks = JSON.parse(localStorage.getItem('decks') || '[]');
+
+    decks.forEach(deck => {
+        const option = document.createElement('option');
+        option.value = deck.id;
+        option.textContent = deck.name;
+        select.appendChild(option);
+    });
+}
+
+// 计算卡组总数
+function updateTotalDeck() {
+    let total = 0;
+    document.querySelectorAll('.card-count').forEach(input => {
+        total += parseInt(input.value) || 0;
+    });
+    document.getElementById('total').value = total;
+    updatePieChart();
+}
+
+// 更新饼图
+let chart = null;
+function updatePieChart() {
+    const labels = [];
+    const data = [];
+    const backgroundColors = [];
+
+    for (let i = 0; i < 30; i++) {
+        const count = parseInt(document.getElementById(`card${i}`).value) || 0;
+        const name = document.getElementById(`cardName${i}`).value.trim() || getCardLabel(i);
+        if (count > 0) {
+            labels.push(name);
+            data.push(count);
+            backgroundColors.push(getColor(i));
         }
+    }
 
-        // 保存卡组
-        function saveDeck() {
-            const deckName = document.getElementById('deckName').value.trim();
-            if (!deckName) {
-                alert("请输入卡组名称");
-                return;
-            }
+    const ctx = document.getElementById('deckPieChart').getContext('2d');
+    if (chart) chart.destroy();
 
-            const deck = {
-                id: Date.now(),
-                name: deckName,
-                cards: [],
-                condition: document.getElementById('condition').value
-            };
-
-            for (let i = 0; i < 30; i++) {
-                deck.cards.push({
-                    count: document.getElementById(`card${i}`).value,
-                    name: document.getElementById(`cardName${i}`).value
-                });
-            }
-
-            const decks = JSON.parse(localStorage.getItem('decks') || '[]');
-            const existingIndex = decks.findIndex(d => d.name === deckName);
-
-            if (existingIndex !== -1) {
-                if (!confirm(`已存在同名卡组，确认覆盖 "${deckName}" 吗？`)) return;
-                decks[existingIndex] = deck;
-            } else {
-                decks.push(deck);
-            }
-
-            localStorage.setItem('decks', JSON.stringify(decks));
-            updateDeckList();
-            document.getElementById('deckName').value = '';
-            alert("卡组保存成功！");
-        }
-
-        // 加载卡组
-        function loadDeck() {
-            const deckId = parseInt(document.getElementById('deckList').value);
-            if (!deckId) return;
-
-            const decks = JSON.parse(localStorage.getItem('decks') || '[]');
-            const deck = decks.find(d => d.id === deckId);
-            if (!deck) return;
-
-            deck.cards.forEach((card, i) => {
-                document.getElementById(`card${i}`).value = card.count;
-                document.getElementById(`cardName${i}`).value = card.name;
-            });
-            document.getElementById('condition').value = deck.condition;
-            updateTotalDeck();
-            alert("卡组加载成功！");
-        }
-
-        // 删除卡组
-        function deleteDeck() {
-            const deckId = parseInt(document.getElementById('deckList').value);
-            if (!deckId) return;
-
-            if (!confirm("确认删除选中的卡组吗？")) return;
-
-            const decks = JSON.parse(localStorage.getItem('decks') || '[]');
-            const newDecks = decks.filter(d => d.id !== deckId);
-            localStorage.setItem('decks', JSON.stringify(newDecks));
-            updateDeckList();
-            alert("卡组删除成功！");
-        }
-
-        // 更新卡组列表
-        function updateDeckList() {
-            const select = document.getElementById('deckList');
-            select.innerHTML = '<option value="">-- 选择卡组 --</option>';
-            const decks = JSON.parse(localStorage.getItem('decks') || '[]');
-
-            decks.forEach(deck => {
-                const option = document.createElement('option');
-                option.value = deck.id;
-                option.textContent = deck.name;
-                select.appendChild(option);
-            });
-        }
-
-        // 计算卡组总数
-        function updateTotalDeck() {
-            let total = 0;
-            document.querySelectorAll('.card-count').forEach(input => {
-                total += parseInt(input.value) || 0;
-            });
-            document.getElementById('total').value = total;
-            updatePieChart();
-        }
-
-        // 更新饼图
-        let chart = null;
-        function updatePieChart() {
-            const labels = [];
-            const data = [];
-            const backgroundColors = [];
-
-            for (let i = 0; i < 30; i++) {
-                const count = parseInt(document.getElementById(`card${i}`).value) || 0;
-                const name = document.getElementById(`cardName${i}`).value.trim() || getCardLabel(i);
-                if (count > 0) {
-                    labels.push(name);
-                    data.push(count);
-                    backgroundColors.push(getColor(i));
-                }
-            }
-
-            const ctx = document.getElementById('deckPieChart').getContext('2d');
-            if (chart) chart.destroy();
-
-            chart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: backgroundColors
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 10
-                                }
-                            }
+    chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: backgroundColors
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 10
                         }
                     }
                 }
-            });
-        }
-
-        // 生成颜色
-        function getColor(index) {
-            const colors = [
-                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                '#FF9F40', '#FFCD56', '#C9CBCF', '#4D5360', '#D6A2E8',
-                '#FF7F50', '#87CEEB', '#FFD700', '#7B68EE', '#FF69B4',
-                '#00CED1', '#FF4500', '#8A2BE2', '#20B2AA', '#FF6347',
-                '#7FFF00', '#DC143C', '#00BFFF', '#FF8C00', '#9932CC',
-                '#FFA07A', '#00FA9A', '#8B008B', '#FF1493', '#1E90FF'
-            ];
-            return colors[index % colors.length];
-        }
-
-        // Web Worker 相关变量
-        let calculationWorker = null;
-        let isCalculating = false;
-
-        // 开始计算
-        function calculate() {
-            if (isCalculating) {
-                alert("计算正在进行中，请稍后...");
-                return;
             }
+        }
+    });
+}
 
-            try {
-                // 显示进度条
-                document.getElementById('calculationProgress').value = 0;
-                document.getElementById('progressText').textContent = '计算中: 0%';
-                document.getElementById('progressContainer').classList.remove('hidden');
+// 生成颜色
+function getColor(index) {
+    const colors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+        '#FF9F40', '#FFCD56', '#C9CBCF', '#4D5360', '#D6A2E8',
+        '#FF7F50', '#87CEEB', '#FFD700', '#7B68EE', '#FF69B4',
+        '#00CED1', '#FF4500', '#8A2BE2', '#20B2AA', '#FF6347',
+        '#7FFF00', '#DC143C', '#00BFFF', '#FF8C00', '#9932CC',
+        '#FFA07A', '#00FA9A', '#8B008B', '#FF1493', '#1E90FF'
+    ];
+    return colors[index % colors.length];
+}
 
-                // 重置结果
-                document.getElementById('probability').value = '计算中...';
-                document.getElementById('validCombinations').value = '计算中...';
-                document.getElementById('totalCombinations').value = '计算中...';
+// Web Worker 相关变量
+let calculationWorker = null;
+let isCalculating = false;
 
-                // 读取输入数据
-                const cardCounts = [];
-                for (let i = 0; i < 30; i++) {
-                    cardCounts.push(parseInt(document.getElementById(`card${i}`).value) || 0);
-                }
-                const draws = parseInt(document.getElementById('draws').value);
-                const deckSize = parseInt(document.getElementById('total').value);
+// 开始计算
+function calculate() {
+    if (isCalculating) {
+        alert("计算正在进行中，请稍后...");
+        return;
+    }
 
-                // 输入验证
-                if (draws <= 0) throw new Error("抽卡数必须大于0");
-                if (deckSize <= 0) throw new Error("卡组中至少要有1张卡");
-                if (draws > deckSize) throw new Error("抽卡数不能超过卡组总数");
+    try {
+        // 显示进度条
+        document.getElementById('calculationProgress').value = 0;
+        document.getElementById('progressText').textContent = '计算中: 0%';
+        document.getElementById('progressContainer').classList.remove('hidden');
 
-                // 转换条件表达式
-                const condition = document.getElementById('condition').value;
-                if (!condition.trim()) throw new Error("请输入逻辑判断条件");
+        // 启动假进度
+        fakeProgress = 0;
+        fakeProgressInterval = setInterval(() => {
+            if (fakeProgress < 90) {
+                fakeProgress += 1;
+                document.getElementById('calculationProgress').value = fakeProgress;
+                document.getElementById('progressText').textContent = `计算中: ${fakeProgress}%`;
+            } else {
+                clearInterval(fakeProgressInterval);
+            }
+        }, 500); // 每半秒增加1%
 
-                // 提示用户关于使用 '==' 的建议
-                if (condition.includes('=') && !condition.includes('==')) {
-                    alert("提示：在条件表达式中，'=' 是赋值运算符。如果您要判断相等，请使用 '==' 或 '==='。例如：a == 1");
-                }
+        // 重置结果
+        document.getElementById('probability').value = '计算中...';
+        document.getElementById('validCombinations').value = '计算中...';
+        document.getElementById('totalCombinations').value = '计算中...';
 
-                // 创建Web Worker
-                calculationWorker = new Worker(URL.createObjectURL(new Blob([`
+        // 读取输入数据
+        const cardCounts = [];
+        for (let i = 0; i < 30; i++) {
+            cardCounts.push(parseInt(document.getElementById(`card${i}`).value) || 0);
+        }
+        const draws = parseInt(document.getElementById('draws').value);
+        const deckSize = parseInt(document.getElementById('total').value);
+
+        // 输入验证
+        if (draws <= 0) throw new Error("抽卡数必须大于0");
+        if (deckSize <= 0) throw new Error("卡组中至少要有1张卡");
+        if (draws > deckSize) throw new Error("抽卡数不能超过卡组总数");
+
+        // 转换条件表达式
+        const condition = document.getElementById('condition').value;
+        if (!condition.trim()) throw new Error("请输入逻辑判断条件");
+
+        // 提示用户关于使用 '==' 的建议
+        if (condition.includes('=') && !condition.includes('==')) {
+            alert("提示：在条件表达式中，'=' 是赋值运算符。如果您要判断相等，请使用 '==' 或 '==='。例如：a == 1");
+        }
+
+        // 创建Web Worker
+        calculationWorker = new Worker(URL.createObjectURL(new Blob([`
                     // 带缓存的组合数计算
                     const combinationCache = new Map();
                     function combination(n, k) {
@@ -310,81 +326,103 @@
                     };
                 `], { type: 'text/javascript' })));
 
-                // 设置Worker事件监听
-                calculationWorker.onmessage = function (e) {
-                    if (e.data.type === 'progress') {
-                        updateProgress(e.data.progress);
-                    } else if (e.data.type === 'result') {
-                        finalizeCalculation(e.data);
-                    } else if (e.data.type === 'error') {
-                        showError(e.data.message);
-                    }
-                };
-
-                // 发送计算任务
-                calculationWorker.postMessage({
-                    cardCounts,
-                    draws,
-                    condition
-                });
-
-                // 更新UI状态
-                isCalculating = true;
-                document.getElementById('cancelBtn').classList.remove('hidden');
-            } catch (error) {
-                showError(error.message);
+        // 设置Worker事件监听
+        calculationWorker.onmessage = function (e) {
+            if (e.data.type === 'progress') {
+                updateProgress(e.data.progress);
+            } else if (e.data.type === 'result') {
+                finalizeCalculation(e.data);
+            } else if (e.data.type === 'error') {
+                showError(e.data.message);
             }
-        }
-
-        // 更新进度
-        function updateProgress(progress) {
-            document.getElementById('calculationProgress').value = progress;
-            document.getElementById('progressText').textContent = `计算中: ${progress}%`;
-        }
-
-        // 完成计算
-        function finalizeCalculation(result) {
-            const probability = (Number(result.valid) / Number(result.total)) * 100;
-
-            document.getElementById('probability').value = `${probability.toFixed(20)}%`;
-            document.getElementById('validCombinations').value = result.valid.toString();
-            document.getElementById('totalCombinations').value = result.total.toString();
-
-            cleanupCalculation();
-        }
-
-        // 显示错误
-        function showError(message) {
-            alert(`计算错误: ${message}`);
-            cleanupCalculation();
-        }
-
-        // 取消计算
-        function cancelCalculation() {
-            if (calculationWorker) {
-                calculationWorker.terminate();
-                calculationWorker = null;
-            }
-            cleanupCalculation();
-            alert("计算已取消");
-        }
-
-        // 清理计算状态
-        function cleanupCalculation() {
-            isCalculating = false;
-            document.getElementById('progressContainer').classList.add('hidden');
-            document.getElementById('cancelBtn').classList.add('hidden');
-            calculationWorker = null;
-        }
-
-        // 初始化页面
-        window.onload = function () {
-            createCardInputs();
-            updateDeckList();
-            updateTotalDeck();
-
-            // 为所有输入框添加事件监听
-            document.querySelectorAll('.card-count').forEach(input => {
-                input.addEventListener('change', updateTotalDeck);
-            });
         };
+
+        // 发送计算任务
+        calculationWorker.postMessage({
+            cardCounts,
+            draws,
+            condition
+        });
+
+        // 更新UI状态
+        isCalculating = true;
+        document.getElementById('cancelBtn').classList.remove('hidden');
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+// 更新进度
+function updateProgress(progress) {
+    // 清除假进度
+    if (fakeProgressInterval) {
+        clearInterval(fakeProgressInterval);
+        fakeProgressInterval = null;
+    }
+
+    // 显示真实进度
+    document.getElementById('calculationProgress').value = progress;
+    document.getElementById('progressText').textContent = `计算中: ${progress}%`;
+}
+
+// 完成计算
+function finalizeCalculation(result) {
+    const probability = (Number(result.valid) / Number(result.total)) * 100;
+
+    document.getElementById('probability').value = `${probability.toFixed(20)}%`;
+    document.getElementById('validCombinations').value = result.valid.toString();
+    document.getElementById('totalCombinations').value = result.total.toString();
+
+    // 立即显示100%进度
+    document.getElementById('calculationProgress').value = 100;
+    document.getElementById('progressText').textContent = '计算完成: 100%';
+    
+    cleanupCalculation();
+}
+
+// 显示错误
+function showError(message) {
+    alert(`计算错误: ${message}`);
+    cleanupCalculation();
+}
+
+// 取消计算
+function cancelCalculation() {
+    if (calculationWorker) {
+        calculationWorker.terminate();
+        calculationWorker = null;
+    }
+    
+    // 显示取消状态
+    document.getElementById('calculationProgress').value = 0;
+    document.getElementById('progressText').textContent = '计算已取消';
+    
+    cleanupCalculation();
+    alert("计算已取消");
+}
+
+// 清理计算状态
+function cleanupCalculation() {
+    isCalculating = false;
+    // 不再自动隐藏进度条
+    document.getElementById('cancelBtn').classList.add('hidden');
+    calculationWorker = null;
+    
+    // 清除假进度
+    if (fakeProgressInterval) {
+        clearInterval(fakeProgressInterval);
+        fakeProgressInterval = null;
+    }
+}
+
+// 初始化页面
+window.onload = function () {
+    createCardInputs();
+    updateDeckList();
+    updateTotalDeck();
+
+    // 为所有输入框添加事件监听
+    document.querySelectorAll('.card-count').forEach(input => {
+        input.addEventListener('change', updateTotalDeck);
+    });
+};

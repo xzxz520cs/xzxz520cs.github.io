@@ -20,6 +20,7 @@
 .deck-management input[type="text"],
 .deck-management .btn {
     height: calc(var(--space-md) * 2 + 1rem);
+    width: 100%;
 }
 
 /* 主内容区域 */
