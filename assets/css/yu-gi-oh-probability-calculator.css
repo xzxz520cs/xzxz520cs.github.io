@@ -34,6 +34,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-lg);
+    justify-content: space-between;
 }
 
 /* 饼图容器样式 */
@@ -79,6 +80,10 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-md);
+}
+
+#calculationProgress {
+    width: 100%;
 }
 
 /* 移动端样式 */
