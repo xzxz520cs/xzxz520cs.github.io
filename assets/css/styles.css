@@ -125,6 +125,22 @@ body {
 }
 
 /* ======================
+  代码样式
+  ====================== */
+  code {
+    background-color: color-mix(in srgb, var(--color-medium) 50%, white 50%);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+    padding: 0 0.6em;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    code {
+      background-color: color-mix(in srgb, var(--color-medium) 90%, var(--color-light) 10%);
+    }
+  }
+
+/* ======================
   布局容器
   ====================== */
 .container {
