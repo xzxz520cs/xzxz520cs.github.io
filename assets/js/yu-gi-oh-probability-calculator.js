@@ -1,6 +1,6 @@
 // 变量
-let fakeProgressInterval = null;
-let fakeProgress = 0;
+let calculationWorker = null;
+let isCalculating = false;
 
 // 生成卡牌标签（A-Z, AA-AD）
 function getCardLabel(index) {
@@ -176,10 +176,6 @@ function getColor(index) {
     return colors[index % colors.length];
 }
 
-// Web Worker 相关变量
-let calculationWorker = null;
-let isCalculating = false;
-
 // 开始计算
 function calculate() {
     if (isCalculating) {
@@ -192,21 +188,6 @@ function calculate() {
         document.getElementById('calculationProgress').value = 0;
         document.getElementById('progressText').textContent = '计算中: 0%';
         document.getElementById('progressContainer').classList.remove('hidden');
-
-        // 启动假进度
-        fakeProgress = 0;
-        fakeProgressInterval = setInterval(() => {
-            if (fakeProgress < 90) {
-                fakeProgress += 1;
-                // 只有当没有真实进度时使用假进度
-                if (document.getElementById('calculationProgress').value < fakeProgress) {
-                    document.getElementById('calculationProgress').value = fakeProgress;
-                    document.getElementById('progressText').textContent = `计算中: ${fakeProgress}%`;
-                }
-            } else {
-                clearInterval(fakeProgressInterval);
-            }
-        }, 500); // 每半秒增加1%
 
         // 重置结果
         document.getElementById('probability').value = '计算中...';
@@ -293,7 +274,7 @@ function calculate() {
                             }
 
                             // 计算进度 - 基于递归深度
-                            const progress = Math.min(100, Math.floor((index / cardCounts.length) * 100 * 0.9) + 10);
+                            const progress = Math.min(100, Math.floor((index / cardCounts.length) * 100));
                             if (progress > lastReportedProgress) {
                                 lastReportedProgress = progress;
                                 postMessage({ type: 'progress', progress });
@@ -349,13 +330,6 @@ function calculate() {
 
 // 更新进度
 function updateProgress(progress) {
-    // 清除假进度
-    if (fakeProgressInterval) {
-        clearInterval(fakeProgressInterval);
-        fakeProgressInterval = null;
-    }
-
-    // 显示真实进度
     document.getElementById('calculationProgress').value = progress;
     document.getElementById('progressText').textContent = `计算中: ${progress}%`;
 }
@@ -399,15 +373,8 @@ function cancelCalculation() {
 // 清理计算状态
 function cleanupCalculation() {
     isCalculating = false;
-    // 不再自动隐藏进度条
     document.getElementById('cancelBtn').classList.add('hidden');
     calculationWorker = null;
-
-    // 清除假进度
-    if (fakeProgressInterval) {
-        clearInterval(fakeProgressInterval);
-        fakeProgressInterval = null;
-    }
 }
 
 // 初始化页面

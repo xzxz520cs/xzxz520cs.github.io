@@ -88,7 +88,6 @@
 .calculation-actions {
     display: flex;
     gap: var(--space-md);
-    margin-bottom: var(--space-lg);
 }
 
 /* 结果区域 */
