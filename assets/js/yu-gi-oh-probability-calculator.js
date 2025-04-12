@@ -1,9 +1,6 @@
 // 变量
 let fakeProgressInterval = null;
 let fakeProgress = 0;
-let calculationWorker = null;
-let isCalculating = false;
-let chart = null;
 
 // 生成卡牌标签（A-Z, AA-AD）
 function getCardLabel(index) {
@@ -14,15 +11,14 @@ function getCardLabel(index) {
 // 创建30个卡牌输入框
 function createCardInputs() {
     const container = document.getElementById('cardInputs');
-    container.innerHTML = ''; // 清空容器
     for (let i = 0; i < 30; i++) {
         const div = document.createElement('div');
         div.className = 'form-group';
         div.innerHTML = `
-            <label>${getCardLabel(i)}类卡</label>
-            <input type="number" id="card${i}" value="0" min="0" class="form-control card-count">
-            <input type="text" id="cardName${i}" class="form-control mt-1" placeholder="卡名">
-        `;
+                    <label>${getCardLabel(i)}类卡</label>
+                    <input type="number" id="card${i}" value="0" min="0" class="form-control card-count" onchange="updateTotalDeck()">
+                    <input type="text" id="cardName${i}" class="form-control mt-1" placeholder="卡名">
+                `;
         container.appendChild(div);
     }
 }
@@ -44,8 +40,8 @@ function saveDeck() {
 
     for (let i = 0; i < 30; i++) {
         deck.cards.push({
-            count: parseInt(document.getElementById(`card${i}`).value) || 0,
-            name: document.getElementById(`cardName${i}`).value.trim()
+            count: document.getElementById(`card${i}`).value,
+            name: document.getElementById(`cardName${i}`).value
         });
     }
 
@@ -76,9 +72,9 @@ function loadDeck() {
 
     deck.cards.forEach((card, i) => {
         document.getElementById(`card${i}`).value = card.count;
-        document.getElementById(`cardName${i}`).value = card.name || '';
+        document.getElementById(`cardName${i}`).value = card.name;
     });
-    document.getElementById('condition').value = deck.condition || '';
+    document.getElementById('condition').value = deck.condition;
     updateTotalDeck();
     alert("卡组加载成功！");
 }
@@ -122,6 +118,7 @@ function updateTotalDeck() {
 }
 
 // 更新饼图
+let chart = null;
 function updatePieChart() {
     const labels = [];
     const data = [];
@@ -140,32 +137,30 @@ function updatePieChart() {
     const ctx = document.getElementById('deckPieChart').getContext('2d');
     if (chart) chart.destroy();
 
-    if (data.length > 0) {
-        chart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: backgroundColors
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            font: {
-                                size: 10
-                            }
+    chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: backgroundColors
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 10
                         }
                     }
                 }
             }
-        });
-    }
+        }
+    });
 }
 
 // 生成颜色
@@ -180,6 +175,10 @@ function getColor(index) {
     ];
     return colors[index % colors.length];
 }
+
+// Web Worker 相关变量
+let calculationWorker = null;
+let isCalculating = false;
 
 // 开始计算
 function calculate() {
@@ -223,106 +222,104 @@ function calculate() {
         const deckSize = parseInt(document.getElementById('total').value);
 
         // 输入验证
-        if (isNaN(draws) || draws <= 0) throw new Error("抽卡数必须大于0");
-        if (isNaN(deckSize) || deckSize <= 0) throw new Error("卡组中至少要有1张卡");
+        if (draws <= 0) throw new Error("抽卡数必须大于0");
+        if (deckSize <= 0) throw new Error("卡组中至少要有1张卡");
         if (draws > deckSize) throw new Error("抽卡数不能超过卡组总数");
 
         // 转换条件表达式
-        const condition = document.getElementById('condition').value.trim();
-        if (!condition) throw new Error("请输入逻辑判断条件");
+        const condition = document.getElementById('condition').value;
+        if (!condition.trim()) throw new Error("请输入逻辑判断条件");
 
         // 提示用户关于使用 '==' 的建议
-        if (condition.includes('=') && !condition.includes('==') && !condition.includes('===')) {
+        if (condition.includes('=') && !condition.includes('==')) {
             alert("提示：在条件表达式中，'=' 是赋值运算符。如果您要判断相等，请使用 '==' 或 '==='。例如：a == 1");
         }
 
         // 创建Web Worker
         calculationWorker = new Worker(URL.createObjectURL(new Blob([`
-            // 带缓存的组合数计算
-            const combinationCache = new Map();
-            function combination(n, k) {
-                if (k < 0 || k > n) return 0n;
-                if (k === 0n || k === n) return 1n;
-                
-                const key = \`\${n},\${k}\`;
-                if (combinationCache.has(key)) return combinationCache.get(key);
-                
-                let result = 1n;
-                for (let i = 1n; i <= BigInt(k); i++) {
-                    result = result * (BigInt(n) - BigInt(k) + i) / i;
-                }
-                
-                combinationCache.set(key, result);
-                return result;
-            }
-
-            // 变量名转换
-            function varToIndex(varName) {
-                const lc = varName.toLowerCase();
-                if (lc.length === 1) {
-                    const code = lc.charCodeAt(0) - 97;
-                    if (code >= 0 && code < 26) return code;
-                }
-                if (lc.length === 2 && lc[0] === 'a') {
-                    const code = lc.charCodeAt(1) - 97;
-                    if (code >= 0 && code < 4) return 26 + code;
-                }
-                throw new Error(\`无效的卡名称: \${varName}\`);
-            }
-
-            // 主计算函数
-            function calculateProbability(cardCounts, draws, condition) {
-                const totalCards = cardCounts.reduce((a, b) => a + b, 0);
-                let valid = 0n, total = 0n;
-                let lastReportedProgress = 0;
-                
-                // 解析条件表达式
-                const conditionFunc = new Function('counts', \`return \${condition.replace(/([a-zA-Z]+)/g, (m) => \`counts[\${varToIndex(m)}]\`)}\`);
-
-                function recurse(index, counts, remaining, depthProgress) {
-                    if (index === cardCounts.length) {
-                        if (remaining !== 0) return;
+                    // 带缓存的组合数计算
+                    const combinationCache = new Map();
+                    function combination(n, k) {
+                        if (k < 0 || k > n) return 0n;
+                        if (k === 0n || k === n) return 1n;
                         
-                        let prob = 1n;
-                        for (let i = 0; i < counts.length; i++) {
-                            prob *= combination(cardCounts[i], counts[i]);
+                        const key = \`\${n},\${k}\`;
+                        if (combinationCache.has(key)) return combinationCache.get(key);
+                        
+                        let result = 1n;
+                        for (let i = 1n; i <= BigInt(k); i++) {
+                            result = result * (BigInt(n) - BigInt(k) + i) / i;
                         }
                         
-                        total += prob;
-                        if (conditionFunc(counts)) valid += prob;
-                        
-                        // 基于深度的进度计算
-                        const progress = Math.min(99, Math.floor(depthProgress * 100));
-                        if (progress > lastReportedProgress) {
-                            lastReportedProgress = progress;
-                            postMessage({ type: 'progress', progress });
+                        combinationCache.set(key, result);
+                        return result;
+                    }
+
+                    // 变量名转换
+                    function varToIndex(varName) {
+                        const lc = varName.toLowerCase();
+                        if (lc.length === 1) {
+                            const code = lc.charCodeAt(0) - 97;
+                            if (code >= 0 && code < 26) return code;
                         }
-                        return;
+                        if (lc.length === 2 && lc[0] === 'a') {
+                            const code = lc.charCodeAt(1) - 97;
+                            if (code >= 0 && code < 4) return 26 + code;
+                        }
+                        throw new Error(\`无效的卡名称: \${varName}\`);
                     }
 
-                    const max = Math.min(cardCounts[index], remaining);
-                    for (let k = 0; k <= max; k++) {
-                        counts[index] = k;
-                        // 更新深度进度 (0.9表示90%用于递归计算，最后10%留给结果处理)
-                        const newDepthProgress = 0.9 * (index / cardCounts.length + k / (max * cardCounts.length));
-                        recurse(index + 1, [...counts], remaining - k, newDepthProgress);
+                    // 主计算函数
+                    function calculateProbability(cardCounts, draws, condition) {
+                        const totalCards = cardCounts.reduce((a, b) => a + b, 0);
+                        let valid = 0n, total = 0n;
+                        let lastReportedProgress = 0;
+
+                        // 解析条件表达式
+                        const conditionFunc = new Function('counts', \`return \${condition.replace(/([a-zA-Z]+)/g, (m) => \`counts[\${varToIndex(m)}]\`)}\`);
+
+                        function recurse(index, counts, remaining) {
+                            if (index === cardCounts.length) {
+                                if (remaining !== 0) return;
+                                
+                                let prob = 1n;
+                                for (let i = 0; i < counts.length; i++) {
+                                    prob *= combination(cardCounts[i], counts[i]);
+                                }
+                                
+                                total += prob;
+                                if (conditionFunc(counts)) valid += prob;
+                                return;
+                            }
+
+                            // 计算进度 - 基于递归深度
+                            const progress = Math.min(100, Math.floor((index / cardCounts.length) * 100 * 0.9) + 10);
+                            if (progress > lastReportedProgress) {
+                                lastReportedProgress = progress;
+                                postMessage({ type: 'progress', progress });
+                            }
+
+                            const max = Math.min(cardCounts[index], remaining);
+                            for (let k = 0; k <= max; k++) {
+                                counts[index] = k;
+                                recurse(index + 1, [...counts], remaining - k);
+                            }
+                        }
+
+                        recurse(0, [], draws);
+                        return { valid, total };
                     }
-                }
 
-                recurse(0, [], draws, 0);
-                return { valid, total };
-            }
-
-            onmessage = function(e) {
-                const { cardCounts, draws, condition } = e.data;
-                try {
-                    const result = calculateProbability(cardCounts, draws, condition);
-                    postMessage({ type: 'result', ...result });
-                } catch (error) {
-                    postMessage({ type: 'error', message: error.message });
-                }
-            };
-        `], { type: 'text/javascript' })));
+                    onmessage = function(e) {
+                        const { cardCounts, draws, condition } = e.data;
+                        try {
+                            const result = calculateProbability(cardCounts, draws, condition);
+                            postMessage({ type: 'result', ...result });
+                        } catch (error) {
+                            postMessage({ type: 'error', message: error.message });
+                        }
+                    };
+                `], { type: 'text/javascript' })));
 
         // 设置Worker事件监听
         calculationWorker.onmessage = function (e) {
@@ -396,11 +393,13 @@ function cancelCalculation() {
     document.getElementById('progressText').textContent = '计算已取消';
 
     cleanupCalculation();
+    alert("计算已取消");
 }
 
 // 清理计算状态
 function cleanupCalculation() {
     isCalculating = false;
+    // 不再自动隐藏进度条
     document.getElementById('cancelBtn').classList.add('hidden');
     calculationWorker = null;
 

@@ -65,6 +65,14 @@
     /* 保持1:1宽高比 */
 }
 
+.draw-inputs {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.draw-inputs .form-group {
+    width: 100%;
+}
 
 /* 抽卡设置 */
 /*.draw-settings {
