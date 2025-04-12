@@ -1,6 +1,9 @@
 // 变量
 let calculationWorker = null;
 let isCalculating = false;
+let lastUpdateTime = 0;
+let lastRealProgress = 0;
+let animationFrameId = null;
 
 // 生成卡牌标签（A-Z, AA-AD）
 function getCardLabel(index) {
@@ -176,6 +179,36 @@ function getColor(index) {
     return colors[index % colors.length];
 }
 
+// 平滑更新进度条
+function smoothUpdateProgress(targetProgress) {
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+    }
+
+    const progressBar = document.getElementById('calculationProgress');
+    const progressText = document.getElementById('progressText');
+    const startTime = Date.now();
+    const duration = 300; // 动画持续时间(ms)
+    const startProgress = parseFloat(progressBar.value);
+
+    function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const currentValue = startProgress + (targetProgress - startProgress) * progress;
+
+        progressBar.value = currentValue;
+        progressText.textContent = `计算中: ${Math.round(currentValue)}%`;
+
+        if (progress < 1) {
+            animationFrameId = requestAnimationFrame(animate);
+        } else {
+            animationFrameId = null;
+        }
+    }
+
+    animate();
+}
+
 // 开始计算
 function calculate() {
     if (isCalculating) {
@@ -184,6 +217,10 @@ function calculate() {
     }
 
     try {
+        // 初始化进度状态
+        lastUpdateTime = 0;
+        lastRealProgress = 0;
+
         // 显示进度条
         document.getElementById('calculationProgress').value = 0;
         document.getElementById('progressText').textContent = '计算中: 0%';
@@ -255,6 +292,7 @@ function calculate() {
                         const totalCards = cardCounts.reduce((a, b) => a + b, 0);
                         let valid = 0n, total = 0n;
                         let lastReportedProgress = 0;
+                        let lastReportTime = 0;
 
                         // 解析条件表达式
                         const conditionFunc = new Function('counts', \`return \${condition.replace(/([a-zA-Z]+)/g, (m) => \`counts[\${varToIndex(m)}]\`)}\`);
@@ -275,8 +313,13 @@ function calculate() {
 
                             // 计算进度 - 基于递归深度
                             const progress = Math.min(100, Math.floor((index / cardCounts.length) * 100));
-                            if (progress > lastReportedProgress) {
+                            const now = Date.now();
+                            
+                            // 控制进度更新频率，至少间隔100ms或进度变化超过5%
+                            if ((now - lastReportTime > 100 || progress - lastReportedProgress > 5 || progress >= 100) && 
+                                progress > lastReportedProgress) {
                                 lastReportedProgress = progress;
+                                lastReportTime = now;
                                 postMessage({ type: 'progress', progress });
                             }
 
@@ -305,7 +348,21 @@ function calculate() {
         // 设置Worker事件监听
         calculationWorker.onmessage = function (e) {
             if (e.data.type === 'progress') {
-                updateProgress(e.data.progress);
+                const now = Date.now();
+                const targetProgress = e.data.progress;
+
+                // 使用平滑动画更新进度
+                smoothUpdateProgress(targetProgress);
+
+                // 记录最后真实的进度和时间
+                lastRealProgress = targetProgress;
+                lastUpdateTime = now;
+
+                // 如果是最终进度，立即更新
+                if (targetProgress >= 100) {
+                    document.getElementById('calculationProgress').value = 100;
+                    document.getElementById('progressText').textContent = '计算完成: 100%';
+                }
             } else if (e.data.type === 'result') {
                 finalizeCalculation(e.data);
             } else if (e.data.type === 'error') {
@@ -328,12 +385,6 @@ function calculate() {
     }
 }
 
-// 更新进度
-function updateProgress(progress) {
-    document.getElementById('calculationProgress').value = progress;
-    document.getElementById('progressText').textContent = `计算中: ${progress}%`;
-}
-
 // 完成计算
 function finalizeCalculation(result) {
     const probability = (Number(result.valid) / Number(result.total)) * 100;
@@ -342,7 +393,7 @@ function finalizeCalculation(result) {
     document.getElementById('validCombinations').value = result.valid.toString();
     document.getElementById('totalCombinations').value = result.total.toString();
 
-    // 立即显示100%进度
+    // 确保最终进度显示100%
     document.getElementById('calculationProgress').value = 100;
     document.getElementById('progressText').textContent = '计算完成: 100%';
 
@@ -362,6 +413,11 @@ function cancelCalculation() {
         calculationWorker = null;
     }
 
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+
     // 显示取消状态
     document.getElementById('calculationProgress').value = 0;
     document.getElementById('progressText').textContent = '计算已取消';
@@ -375,6 +431,11 @@ function cleanupCalculation() {
     isCalculating = false;
     document.getElementById('cancelBtn').classList.add('hidden');
     calculationWorker = null;
+
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
 }
 
 // 初始化页面
