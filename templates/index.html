@@ -20,7 +20,6 @@
                     <span class="site-title">天天发蛋糕的工具箱</span>
                 </a>
             </div>
-            <!-- 用 label 替换原 button -->
             <label for="menu-toggle-checkbox" class="menu-toggle" aria-label="打开菜单">☰</label>
             <nav class="nav-menu">
                 <ul class="nav-list">
@@ -38,16 +37,14 @@
                 </ul>
             </nav>
         </div>
-        <!-- 增加隐藏的复选框用于切换 -->
         <input type="checkbox" id="menu-toggle-checkbox" hidden>
-        <!-- 移动端侧边抽屉 -->
         <div class="drawer">
             <div class="container">
                 <label for="menu-toggle-checkbox" class="menu-toggle close-menu" aria-label="关闭菜单">×</label>
             </div>
             <nav class="drawer-menu">
-                <!-- 将关闭按钮放入导航容器中 -->
                 <ul class="drawer-list">
+                    <!-- 父菜单 -->
                     <li class="drawer-item">
                         <a href="#" class="drawer-link">工具</a>
                         <ul class="drawer-submenu">
@@ -61,7 +58,6 @@
                 </ul>
             </nav>
         </div>
-        <!-- 新增：点击遮罩关闭侧边菜单 -->
         <label for="menu-toggle-checkbox" class="drawer-overlay"></label>
     </header>
 
