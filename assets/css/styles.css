@@ -226,6 +226,32 @@ a:focus-visible {
 }
 
 /* ======================
+  图片样式
+  ====================== */
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
+/* 卡片中的图片样式 */
+.card img {
+  margin-bottom: var(--space-sm);
+}
+
+/* 暗色模式图片调整 */
+@media (prefers-color-scheme: dark) {
+  img {
+    opacity: 0.9;
+  }
+
+  img:hover {
+    opacity: 1;
+  }
+}
+
+/* ======================
   Header 样式
   ====================== */
 .site-header {

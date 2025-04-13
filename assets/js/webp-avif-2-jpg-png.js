@@ -70,7 +70,7 @@ function convertImageFormat(img, format) {
 
 function addPreview(data, originalName) {
     const preview = document.createElement('div');
-    preview.className = 'card preview-card animate-fade';
+    preview.className = 'card';
     preview.innerHTML = `
         <img src="${URL.createObjectURL(data.blob)}">
         <div>
