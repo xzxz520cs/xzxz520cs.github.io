@@ -9,36 +9,36 @@
 </head>
 
 <body>
-    <div class="container">
+    <div>
         <h1>图片格式转换工具</h1>
 
-        <div class="card">
-            <div class="upload-section flex flex--column">
-                <div class="form-group">
-                    <label for="formatSelect">输出格式</label>
-                    <select id="formatSelect" class="btn btn--outline">
+        <div>
+            <div>
+                <div>
+                    <label>输出格式</label>
+                    <select id="formatSelect">
                         <option value="jpg">JPG</option>
                         <option value="png">PNG</option>
                     </select>
                 </div>
 
-                <div class="form-group">
+                <div>
                     <label for="fileInput">选择图片文件</label>
                     <input type="file" id="fileInput" accept=".avif,.webp" multiple>
-                    <p class="text-muted mt-2">支持格式：AVIF 和 WebP</p>
+                    <p>支持格式：AVIF 和 WebP</p>
                 </div>
 
-                <div id="status" class="text-center">就绪</div>
+                <div id="status">就绪</div>
 
-                <div class="progress-bar mt-3 mb-3">
-                    <div class="progress"></div>
+                <div>
+                    <div></div>
                 </div>
             </div>
         </div>
 
-        <button id="downloadBtn" class="btn btn--primary btn--block hidden mt-4">下载全部图片</button>
+        <button id="downloadBtn">下载全部图片</button>
 
-        <div id="previewContainer" class="grid mt-5"></div>
+        <div id="previewContainer"></div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
     <script src="../../assets/js/webp-avif-2-jpg-png.js"></script>

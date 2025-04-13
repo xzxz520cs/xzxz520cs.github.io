@@ -72,9 +72,9 @@ function addPreview(data, originalName) {
     const preview = document.createElement('div');
     preview.className = 'card preview-card animate-fade';
     preview.innerHTML = `
-        <img class="preview-img" src="${URL.createObjectURL(data.blob)}">
-        <div class="file-name text-center mt-2">
-            <span class="text-muted">${originalName}</span> 
+        <img src="${URL.createObjectURL(data.blob)}">
+        <div>
+            <span>${originalName}</span> 
             <span>→</span> 
             <strong>${data.name}</strong>
         </div>
