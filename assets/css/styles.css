@@ -38,7 +38,7 @@
 
   /* 背景色 */
   --color-bg: var(--color-white);
-  --color-bg-alt: #e7eaed;
+  --color-bg-alt: #f5f7fa;
 
   /* 边框 */
   --color-border: var(--color-medium);
