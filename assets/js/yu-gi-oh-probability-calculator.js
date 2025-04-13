@@ -1,9 +1,8 @@
 // 变量
 let calculationWorker = null;
 let isCalculating = false;
-let lastUpdateTime = 0;
-let lastRealProgress = 0;
-let animationFrameId = null;
+let calculationStartTime = 0;
+let progressUpdateInterval = null;
 
 // 生成卡牌标签（A-Z, AA-AD）
 function getCardLabel(index) {
@@ -18,10 +17,10 @@ function createCardInputs() {
         const div = document.createElement('div');
         div.className = 'form-group';
         div.innerHTML = `
-                    <label>${getCardLabel(i)}类卡</label>
-                    <input type="number" id="card${i}" value="0" min="0" class="form-control card-count" onchange="updateTotalDeck()">
-                    <input type="text" id="cardName${i}" class="form-control mt-1" placeholder="卡名">
-                `;
+            <label>${getCardLabel(i)}类卡</label>
+            <input type="number" id="card${i}" value="0" min="0" class="form-control card-count" onchange="updateTotalDeck()">
+            <input type="text" id="cardName${i}" class="form-control mt-1" placeholder="卡名">
+        `;
         container.appendChild(div);
     }
 }
@@ -179,34 +178,9 @@ function getColor(index) {
     return colors[index % colors.length];
 }
 
-// 平滑更新进度条
-function smoothUpdateProgress(targetProgress) {
-    if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-    }
-
-    const progressBar = document.getElementById('calculationProgress');
-    const progressText = document.getElementById('progressText');
-    const startTime = Date.now();
-    const duration = 300; // 动画持续时间(ms)
-    const startProgress = parseFloat(progressBar.value);
-
-    function animate() {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const currentValue = startProgress + (targetProgress - startProgress) * progress;
-
-        progressBar.value = currentValue;
-        progressText.textContent = `计算中: ${Math.round(currentValue)}%`;
-
-        if (progress < 1) {
-            animationFrameId = requestAnimationFrame(animate);
-        } else {
-            animationFrameId = null;
-        }
-    }
-
-    animate();
+// 获取计算用时（秒）
+function getElapsedSeconds() {
+    return Math.floor((Date.now() - calculationStartTime) / 1000);
 }
 
 // 开始计算
@@ -217,13 +191,20 @@ function calculate() {
     }
 
     try {
-        // 初始化进度状态
-        lastUpdateTime = 0;
-        lastRealProgress = 0;
+        // 记录开始时间
+        calculationStartTime = Date.now();
+
+        // 启动定时器更新用时显示
+        progressUpdateInterval = setInterval(() => {
+            const elapsedSeconds = getElapsedSeconds();
+            const progress = document.getElementById('calculationProgress').value;
+            document.getElementById('progressText').textContent =
+                `计算中: ${progress}%  计算用时: ${elapsedSeconds}秒`;
+        }, 1000);
 
         // 显示进度条
         document.getElementById('calculationProgress').value = 0;
-        document.getElementById('progressText').textContent = '计算中: 0%';
+        document.getElementById('progressText').textContent = '计算中: 0%  计算用时: 0秒';
         document.getElementById('progressContainer').classList.remove('hidden');
 
         // 重置结果
@@ -255,114 +236,94 @@ function calculate() {
 
         // 创建Web Worker
         calculationWorker = new Worker(URL.createObjectURL(new Blob([`
-                    // 带缓存的组合数计算
-                    const combinationCache = new Map();
-                    function combination(n, k) {
-                        if (k < 0 || k > n) return 0n;
-                        if (k === 0n || k === n) return 1n;
+            // 带缓存的组合数计算
+            const combinationCache = new Map();
+            function combination(n, k) {
+                if (k < 0 || k > n) return 0n;
+                if (k === 0n || k === n) return 1n;
+                
+                const key = \`\${n},\${k}\`;
+                if (combinationCache.has(key)) return combinationCache.get(key);
+                
+                let result = 1n;
+                for (let i = 1n; i <= BigInt(k); i++) {
+                    result = result * (BigInt(n) - BigInt(k) + i) / i;
+                }
+                
+                combinationCache.set(key, result);
+                return result;
+            }
+
+            // 变量名转换
+            function varToIndex(varName) {
+                const lc = varName.toLowerCase();
+                if (lc.length === 1) {
+                    const code = lc.charCodeAt(0) - 97;
+                    if (code >= 0 && code < 26) return code;
+                }
+                if (lc.length === 2 && lc[0] === 'a') {
+                    const code = lc.charCodeAt(1) - 97;
+                    if (code >= 0 && code < 4) return 26 + code;
+                }
+                throw new Error(\`无效的卡名称: \${varName}\`);
+            }
+
+            // 主计算函数
+            function calculateProbability(cardCounts, draws, condition) {
+                const totalCards = cardCounts.reduce((a, b) => a + b, 0);
+                let valid = 0n, total = 0n;
+                let lastReportedProgress = 0;
+
+                // 解析条件表达式
+                const conditionFunc = new Function('counts', \`return \${condition.replace(/([a-zA-Z]+)/g, (m) => \`counts[\${varToIndex(m)}]\`)}\`);
+
+                function recurse(index, counts, remaining) {
+                    if (index === cardCounts.length) {
+                        if (remaining !== 0) return;
                         
-                        const key = \`\${n},\${k}\`;
-                        if (combinationCache.has(key)) return combinationCache.get(key);
-                        
-                        let result = 1n;
-                        for (let i = 1n; i <= BigInt(k); i++) {
-                            result = result * (BigInt(n) - BigInt(k) + i) / i;
+                        let prob = 1n;
+                        for (let i = 0; i < counts.length; i++) {
+                            prob *= combination(cardCounts[i], counts[i]);
                         }
                         
-                        combinationCache.set(key, result);
-                        return result;
+                        total += prob;
+                        if (conditionFunc(counts)) valid += prob;
+                        return;
                     }
 
-                    // 变量名转换
-                    function varToIndex(varName) {
-                        const lc = varName.toLowerCase();
-                        if (lc.length === 1) {
-                            const code = lc.charCodeAt(0) - 97;
-                            if (code >= 0 && code < 26) return code;
-                        }
-                        if (lc.length === 2 && lc[0] === 'a') {
-                            const code = lc.charCodeAt(1) - 97;
-                            if (code >= 0 && code < 4) return 26 + code;
-                        }
-                        throw new Error(\`无效的卡名称: \${varName}\`);
+                    // 计算进度 - 基于递归深度
+                    const progress = Math.min(100, Math.floor((index / cardCounts.length) * 100));
+                    if (progress > lastReportedProgress) {
+                        lastReportedProgress = progress;
+                        postMessage({ type: 'progress', progress });
                     }
 
-                    // 主计算函数
-                    function calculateProbability(cardCounts, draws, condition) {
-                        const totalCards = cardCounts.reduce((a, b) => a + b, 0);
-                        let valid = 0n, total = 0n;
-                        let lastReportedProgress = 0;
-                        let lastReportTime = 0;
-
-                        // 解析条件表达式
-                        const conditionFunc = new Function('counts', \`return \${condition.replace(/([a-zA-Z]+)/g, (m) => \`counts[\${varToIndex(m)}]\`)}\`);
-
-                        function recurse(index, counts, remaining) {
-                            if (index === cardCounts.length) {
-                                if (remaining !== 0) return;
-                                
-                                let prob = 1n;
-                                for (let i = 0; i < counts.length; i++) {
-                                    prob *= combination(cardCounts[i], counts[i]);
-                                }
-                                
-                                total += prob;
-                                if (conditionFunc(counts)) valid += prob;
-                                return;
-                            }
-
-                            // 计算进度 - 基于递归深度
-                            const progress = Math.min(100, Math.floor((index / cardCounts.length) * 100));
-                            const now = Date.now();
-                            
-                            // 控制进度更新频率，至少间隔100ms或进度变化超过5%
-                            if ((now - lastReportTime > 100 || progress - lastReportedProgress > 5 || progress >= 100) && 
-                                progress > lastReportedProgress) {
-                                lastReportedProgress = progress;
-                                lastReportTime = now;
-                                postMessage({ type: 'progress', progress });
-                            }
-
-                            const max = Math.min(cardCounts[index], remaining);
-                            for (let k = 0; k <= max; k++) {
-                                counts[index] = k;
-                                recurse(index + 1, [...counts], remaining - k);
-                            }
-                        }
-
-                        recurse(0, [], draws);
-                        return { valid, total };
+                    const max = Math.min(cardCounts[index], remaining);
+                    for (let k = 0; k <= max; k++) {
+                        counts[index] = k;
+                        recurse(index + 1, [...counts], remaining - k);
                     }
+                }
 
-                    onmessage = function(e) {
-                        const { cardCounts, draws, condition } = e.data;
-                        try {
-                            const result = calculateProbability(cardCounts, draws, condition);
-                            postMessage({ type: 'result', ...result });
-                        } catch (error) {
-                            postMessage({ type: 'error', message: error.message });
-                        }
-                    };
-                `], { type: 'text/javascript' })));
+                recurse(0, [], draws);
+                return { valid, total };
+            }
+
+            onmessage = function(e) {
+                const { cardCounts, draws, condition } = e.data;
+                try {
+                    const result = calculateProbability(cardCounts, draws, condition);
+                    postMessage({ type: 'result', ...result });
+                } catch (error) {
+                    postMessage({ type: 'error', message: error.message });
+                }
+            };
+        `], { type: 'text/javascript' })));
 
         // 设置Worker事件监听
         calculationWorker.onmessage = function (e) {
             if (e.data.type === 'progress') {
-                const now = Date.now();
-                const targetProgress = e.data.progress;
-
-                // 使用平滑动画更新进度
-                smoothUpdateProgress(targetProgress);
-
-                // 记录最后真实的进度和时间
-                lastRealProgress = targetProgress;
-                lastUpdateTime = now;
-
-                // 如果是最终进度，立即更新
-                if (targetProgress >= 100) {
-                    document.getElementById('calculationProgress').value = 100;
-                    document.getElementById('progressText').textContent = '计算完成: 100%';
-                }
+                updateProgress(e.data.progress);
             } else if (e.data.type === 'result') {
                 finalizeCalculation(e.data);
             } else if (e.data.type === 'error') {
@@ -385,42 +346,59 @@ function calculate() {
     }
 }
 
+// 更新进度
+function updateProgress(progress) {
+    document.getElementById('calculationProgress').value = progress;
+    const elapsedSeconds = getElapsedSeconds();
+    document.getElementById('progressText').textContent =
+        `计算中: ${progress}%  计算用时: ${elapsedSeconds}秒`;
+}
+
 // 完成计算
 function finalizeCalculation(result) {
+    clearInterval(progressUpdateInterval);
+    progressUpdateInterval = null;
+
     const probability = (Number(result.valid) / Number(result.total)) * 100;
+    const elapsedSeconds = getElapsedSeconds();
 
     document.getElementById('probability').value = `${probability.toFixed(20)}%`;
     document.getElementById('validCombinations').value = result.valid.toString();
     document.getElementById('totalCombinations').value = result.total.toString();
 
-    // 确保最终进度显示100%
+    // 立即显示100%进度
     document.getElementById('calculationProgress').value = 100;
-    document.getElementById('progressText').textContent = '计算完成: 100%';
+    document.getElementById('progressText').textContent =
+        `计算完成: 100%  计算用时: ${elapsedSeconds}秒`;
 
     cleanupCalculation();
 }
 
 // 显示错误
 function showError(message) {
+    clearInterval(progressUpdateInterval);
+    progressUpdateInterval = null;
+
     alert(`计算错误: ${message}`);
     cleanupCalculation();
 }
 
 // 取消计算
 function cancelCalculation() {
+    clearInterval(progressUpdateInterval);
+    progressUpdateInterval = null;
+
+    const elapsedSeconds = getElapsedSeconds();
+
     if (calculationWorker) {
         calculationWorker.terminate();
         calculationWorker = null;
     }
 
-    if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-    }
-
     // 显示取消状态
     document.getElementById('calculationProgress').value = 0;
-    document.getElementById('progressText').textContent = '计算已取消';
+    document.getElementById('progressText').textContent =
+        `计算已取消  计算用时: ${elapsedSeconds}秒`;
 
     cleanupCalculation();
     alert("计算已取消");
@@ -431,11 +409,6 @@ function cleanupCalculation() {
     isCalculating = false;
     document.getElementById('cancelBtn').classList.add('hidden');
     calculationWorker = null;
-
-    if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-    }
 }
 
 // 初始化页面

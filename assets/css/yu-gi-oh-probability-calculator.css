@@ -90,6 +90,10 @@
     gap: var(--space-md);
 }
 
+.calculation-actions button {
+    width: 100%;
+}
+
 /* 结果区域 */
 .result-grid {
     display: grid;
@@ -119,10 +123,6 @@
 
     .result-grid {
         grid-template-columns: 1fr;
-    }
-
-    .calculation-actions {
-        flex-direction: column;
     }
 
     .btn-group {
