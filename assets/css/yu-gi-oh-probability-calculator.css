@@ -105,6 +105,11 @@
     width: 100%;
 }
 
+.source-info {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
 /* 移动端样式 */
 @media (max-width: 768px) {
     .deck-management {
