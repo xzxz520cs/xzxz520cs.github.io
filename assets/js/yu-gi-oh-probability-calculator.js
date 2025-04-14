@@ -379,6 +379,17 @@ function showError(message) {
     clearInterval(progressUpdateInterval);
     progressUpdateInterval = null;
 
+    // 更新结果区域显示错误状态
+    document.getElementById('probability').value = '计算错误';
+    document.getElementById('validCombinations').value = '计算错误';
+    document.getElementById('totalCombinations').value = '计算错误';
+    
+    // 更新进度显示
+    const elapsedSeconds = getElapsedSeconds();
+    document.getElementById('calculationProgress').value = 0;
+    document.getElementById('progressText').textContent = 
+        `计算错误  计算用时: ${elapsedSeconds}秒`;
+
     alert(`计算错误: ${message}`);
     cleanupCalculation();
 }
