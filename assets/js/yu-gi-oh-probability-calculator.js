@@ -4,6 +4,17 @@ let isCalculating = false;
 let calculationStartTime = 0;
 let progressUpdateInterval = null;
 
+// 辅助函数：转义正则表达式特殊字符
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// 辅助函数：获取变量名（a-z, aa-ad）
+function getVarName(index) {
+    if (index < 26) return String.fromCharCode(97 + index);
+    return 'a' + String.fromCharCode(97 + index - 26);
+}
+
 // 生成卡牌标签（A-Z, AA-AD）
 function getCardLabel(index) {
     if (index < 26) return String.fromCharCode(65 + index);
@@ -31,6 +42,19 @@ function saveDeck() {
     if (!deckName) {
         alert("请输入卡组名称");
         return;
+    }
+
+    // 检查卡名重复
+    const cardNames = [];
+    for (let i = 0; i < 30; i++) {
+        const name = document.getElementById(`cardName${i}`).value.trim();
+        if (name) {
+            if (cardNames.includes(name)) {
+                alert(`卡名重复：${name}`);
+                return;
+            }
+            cardNames.push(name);
+        }
     }
 
     const deck = {
@@ -194,6 +218,18 @@ function calculate() {
         // 记录开始时间
         calculationStartTime = Date.now();
 
+        // 检查卡名重复
+        const cardNames = [];
+        for (let i = 0; i < 30; i++) {
+            const name = document.getElementById(`cardName${i}`).value.trim();
+            if (name) {
+                if (cardNames.includes(name)) {
+                    throw new Error(`卡名重复：${name}`);
+                }
+                cardNames.push(name);
+            }
+        }
+
         // 启动定时器更新用时显示
         progressUpdateInterval = setInterval(() => {
             const elapsedSeconds = getElapsedSeconds();
@@ -226,8 +262,25 @@ function calculate() {
         if (draws > deckSize) throw new Error("抽卡数不能超过卡组总数");
 
         // 转换条件表达式
-        const condition = document.getElementById('condition').value;
-        if (!condition.trim()) throw new Error("请输入逻辑判断条件");
+        let condition = document.getElementById('condition').value.trim();
+        if (!condition) throw new Error("请输入逻辑判断条件");
+
+        // 替换条件中的卡名为变量名
+        const cardNameMap = {};
+        const sortedNames = [];
+        for (let i = 0; i < 30; i++) {
+            const name = document.getElementById(`cardName${i}`).value.trim();
+            if (name) {
+                cardNameMap[name] = getVarName(i);
+                sortedNames.push(name);
+            }
+        }
+        sortedNames.sort((a, b) => b.length - a.length);
+        for (const name of sortedNames) {
+            const regex = new RegExp(escapeRegExp(name), 'g');
+            condition = condition.replace(regex, cardNameMap[name]);
+        }
+        console.log("替换后的逻辑判断条件:", condition);
 
         // 提示用户关于使用 '==' 的建议
         if (condition.includes('=') && !condition.includes('==')) {
@@ -383,11 +436,11 @@ function showError(message) {
     document.getElementById('probability').value = '计算错误';
     document.getElementById('validCombinations').value = '计算错误';
     document.getElementById('totalCombinations').value = '计算错误';
-    
+
     // 更新进度显示
     const elapsedSeconds = getElapsedSeconds();
     document.getElementById('calculationProgress').value = 0;
-    document.getElementById('progressText').textContent = 
+    document.getElementById('progressText').textContent =
         `计算错误  计算用时: ${elapsedSeconds}秒`;
 
     alert(`计算错误: ${message}`);
