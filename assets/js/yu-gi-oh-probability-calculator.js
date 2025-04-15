@@ -44,17 +44,21 @@ function saveDeck() {
         return;
     }
 
-    // 检查卡名重复
-    const cardNames = [];
+    // 修改部分：检查卡名重复，列出所有重复卡名
+    let cardNames = [];
+    let duplicateNames = new Set();
     for (let i = 0; i < 30; i++) {
         const name = document.getElementById(`cardName${i}`).value.trim();
         if (name) {
             if (cardNames.includes(name)) {
-                alert(`卡名重复：${name}`);
-                return;
+                duplicateNames.add(name);
             }
             cardNames.push(name);
         }
+    }
+    if (duplicateNames.size > 0) {
+        alert(`保存失败: 卡名重复：${Array.from(duplicateNames).join(', ')}`);
+        return;
     }
 
     const deck = {
@@ -218,16 +222,20 @@ function calculate() {
         // 记录开始时间
         calculationStartTime = Date.now();
 
-        // 检查卡名重复
-        const cardNames = [];
+        // 修改部分：检查卡名重复，列出所有重复卡名
+        let cardNames = [];
+        let duplicateNames = new Set();
         for (let i = 0; i < 30; i++) {
             const name = document.getElementById(`cardName${i}`).value.trim();
             if (name) {
                 if (cardNames.includes(name)) {
-                    throw new Error(`卡名重复：${name}`);
+                    duplicateNames.add(name);
                 }
                 cardNames.push(name);
             }
+        }
+        if (duplicateNames.size > 0) {
+            throw new Error(`卡名重复：${Array.from(duplicateNames).join(', ')}`);
         }
 
         // 启动定时器更新用时显示
