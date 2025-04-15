@@ -328,13 +328,19 @@ img {
   top: 100%;
   left: auto;
   right: 0;
-  background: var(--color-bg-alt);
+  background: var(--color-white);
   box-shadow: var(--shadow-md);
   border-radius: var(--radius-sm);
   list-style: none;
   padding: var(--space-sm) 0;
   z-index: 1000;
   min-width: 200px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dropdown-menu {
+    background: var(--color-bg-alt);
+  }
 }
 
 .dropdown-item {
