@@ -283,8 +283,9 @@ function calculate() {
         console.log("替换后的逻辑判断条件:", condition);
 
         // 提示用户关于使用 '==' 的建议
-        if (!condition.includes("==") && /(?<![<>=!])=(?!=)/.test(condition)) {
-            alert("提示：在条件表达式中，单个 '=' 是赋值运算符。如果您要判断相等，请使用 '==' 或 '==='。例如：a == 1");
+        const conditionWithoutOperators = condition.replace(/==|<=|>=|!=/g, '');
+        if (conditionWithoutOperators.includes('=')) {
+            alert("提示：在条件表达式中，'=' 是赋值运算符。如果您要判断相等，请使用 '==' 或 '==='。例如：a == 1");
         }
 
         // 创建Web Worker
