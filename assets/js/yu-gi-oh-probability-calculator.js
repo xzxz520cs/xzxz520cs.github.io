@@ -32,6 +32,8 @@ function createCardInputs() {
             <input type="number" id="card${i}" value="0" min="0" class="form-control card-count" onchange="updateTotalDeck()">
             <input type="text" id="cardName${i}" class="form-control mt-1" placeholder="卡名">
         `;
+        const cardNameInput = div.querySelector(`#cardName${i}`);
+        cardNameInput.addEventListener('change', updatePieChart);
         container.appendChild(div);
     }
 }
