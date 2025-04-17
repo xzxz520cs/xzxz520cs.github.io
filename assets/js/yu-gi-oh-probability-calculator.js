@@ -229,10 +229,13 @@ function saveCalculationRecord(result, condition, errorMessage = null) {
         validCombinations: errorMessage ? '计算错误' : (result.valid !== undefined ? result.valid.toString() : '0'),
         totalCombinations: errorMessage ? '计算错误' : (result.total !== undefined ? result.total.toString() : '0'),
         condition,
-        cards: Array.from({ length: 30 }).map((_, i) => ({
-            name: document.getElementById(`cardName${i}`).value.trim(),
-            count: document.getElementById(`card${i}`).value
-        }))
+        cards: Array.from({ length: 30 }).map((_, i) => {
+            const inputName = document.getElementById(`cardName${i}`).value.trim();
+            return {
+                name: inputName || (getCardLabel(i) + '类卡'),
+                count: document.getElementById(`card${i}`).value
+            };
+        })
     };
 
     // 检测存储空间
@@ -262,8 +265,8 @@ function exportCalculationRecords() {
     const headers = [
         '日期', '概率', '卡组总数', '抽卡数', '满足条件的组合数', '总组合数', '逻辑判断条件',
         ...Array.from({ length: 30 }).flatMap((_, i) => [
-            `${getExportCardLabel(i)}类卡卡名`,
-            `${getExportCardLabel(i)}类卡数量`
+            `${getExportCardLabel(i)}卡名`,
+            `${getExportCardLabel(i)}数量`
         ])
     ];
 
