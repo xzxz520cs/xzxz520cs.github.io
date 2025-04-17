@@ -4,6 +4,9 @@ let isCalculating = false;
 let calculationStartTime = 0;
 let progressUpdateInterval = null;
 
+// 常量
+const MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB 浏览器 localStorage 限制大小
+
 // 辅助函数：转义正则表达式特殊字符
 function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -211,6 +214,103 @@ function getColor(index) {
 // 获取计算用时（秒）
 function getElapsedSeconds() {
     return Math.floor((Date.now() - calculationStartTime) / 1000);
+}
+
+// 保存计算记录到 localStorage
+function saveCalculationRecord(result, condition, errorMessage = null) {
+    const records = JSON.parse(localStorage.getItem('calculationRecords') || '[]');
+
+    // 生成新的记录
+    const record = {
+        date: new Date().toLocaleString(),
+        probability: errorMessage ? '计算错误' : `${((Number(result.valid) / Number(result.total)) * 100).toFixed(20)}%`,
+        total: document.getElementById('total').value,
+        draws: document.getElementById('draws').value,
+        validCombinations: errorMessage ? '计算错误' : (result.valid !== undefined ? result.valid.toString() : '0'),
+        totalCombinations: errorMessage ? '计算错误' : (result.total !== undefined ? result.total.toString() : '0'),
+        condition,
+        cards: Array.from({ length: 30 }).map((_, i) => ({
+            name: document.getElementById(`cardName${i}`).value.trim(),
+            count: document.getElementById(`card${i}`).value
+        }))
+    };
+
+    // 检测存储空间
+    const newSize = JSON.stringify([...records, record]).length * 2; // Rough estimation of size in bytes
+    if (newSize > MAX_STORAGE_SIZE) {
+        alert('存储空间不足，无法保存计算记录。请考虑导出并删除部分记录后重试。');
+        return;
+    }
+
+    records.push(record);
+    localStorage.setItem('calculationRecords', JSON.stringify(records));
+}
+
+// 导出计算记录到 CSV
+function exportCalculationRecords() {
+    const records = JSON.parse(localStorage.getItem('calculationRecords') || '[]');
+    if (records.length === 0) {
+        alert('没有可导出的计算记录。');
+        return;
+    }
+
+    // 生成正确顺序的卡牌标签（A-Z, AA, AB, AC, AD）
+    function getExportCardLabel(index) {
+        if (index < 26) return String.fromCharCode(65 + index); // A-Z
+        return 'A' + String.fromCharCode(65 + index - 26);      // AA, AB, AC, AD
+    }
+    const headers = [
+        '日期', '概率', '卡组总数', '抽卡数', '满足条件的组合数', '总组合数', '逻辑判断条件',
+        ...Array.from({ length: 30 }).flatMap((_, i) => [
+            `${getExportCardLabel(i)}类卡卡名`,
+            `${getExportCardLabel(i)}类卡数量`
+        ])
+    ];
+
+    // CSV 转义函数
+    function csvEscape(str) {
+        if (str == null) return '';
+        str = String(str);
+        str = str.replace(/"/g, '""');
+        if (/[",\r\n]/.test(str)) {
+            str = `"${str}"`;
+        }
+        return str;
+    }
+
+    const rows = records.map(record => [
+        csvEscape(record.date),
+        csvEscape(record.probability),
+        csvEscape(record.total),
+        csvEscape(record.draws),
+        csvEscape(record.validCombinations),
+        csvEscape(record.totalCombinations),
+        csvEscape(record.condition),
+        ...Array.from({ length: 30 }).flatMap((_, i) => {
+            const card = record.cards && record.cards[i] ? record.cards[i] : { name: '', count: '' };
+            return [csvEscape(card.name), csvEscape(card.count)];
+        })
+    ]);
+    const BOM = '\uFEFF';
+    const csvContent = BOM + [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '计算记录.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+// 删除计算记录
+function clearCalculationRecords() {
+    if (confirm('确定删除所有计算记录吗？')) {
+        localStorage.removeItem('calculationRecords');
+        alert('计算记录已删除。');
+    }
 }
 
 // 开始计算
@@ -423,6 +523,9 @@ function finalizeCalculation(result) {
     clearInterval(progressUpdateInterval);
     progressUpdateInterval = null;
 
+    // 先清理计算状态，确保按钮及时隐藏
+    cleanupCalculation();
+
     const probability = (Number(result.valid) / Number(result.total)) * 100;
     const elapsedSeconds = getElapsedSeconds();
 
@@ -435,13 +538,16 @@ function finalizeCalculation(result) {
     document.getElementById('progressText').textContent =
         `计算完成: 100%  计算用时: ${elapsedSeconds}秒`;
 
-    cleanupCalculation();
+    saveCalculationRecord(result, document.getElementById('condition').value); // 保存记录
 }
 
 // 显示错误
 function showError(message) {
     clearInterval(progressUpdateInterval);
     progressUpdateInterval = null;
+
+    // 先清理计算状态，确保按钮及时隐藏
+    cleanupCalculation();
 
     // 更新结果区域显示错误状态
     document.getElementById('probability').value = '计算错误';
@@ -455,7 +561,7 @@ function showError(message) {
         `计算错误  计算用时: ${elapsedSeconds}秒`;
 
     alert(`计算错误: ${message}`);
-    cleanupCalculation();
+    saveCalculationRecord({}, document.getElementById('condition').value, message); // 保存记录
 }
 
 // 取消计算
