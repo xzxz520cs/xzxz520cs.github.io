@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>条件构建器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .condition {
+            margin: 5px 0;
+            padding: 8px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+
+        .condition.single {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .condition.group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .group-children {
+            margin-left: 20px;
+        }
+
+        select,
+        input {
+            padding: 4px;
+        }
+
+        button {
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        .buttons {
+            margin-top: 8px;
+        }
+
+        .card-row {
+            display: flex;
+            align-items: center;
+            margin: 3px 0;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f5f5f5;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>条件构建器</h1>
+    <div id="builder"></div>
+
+    <h2>输出结果:</h2>
+    <div id="output"></div>
+    <datalist id="cardNamesDatalist">
+        <option value="a"></option>
+        <option value="b"></option>
+        <option value="c"></option>
+        <option value="d"></option>
+        <option value="e"></option>
+        <option value="f"></option>
+        <option value="g"></option>
+        <option value="h"></option>
+        <option value="i"></option>
+        <option value="j"></option>
+        <option value="k"></option>
+        <option value="l"></option>
+    </datalist>
+
+    <script>
+        // 卡片名称列表
+        const cardNames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
+        let rootCondition = null;
+
+        // 运算符映射
+        const operators = {
+            gt: '>', eq: '===', lt: '<', neq: '!==', gte: '>=', lte: '<='
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            rootCondition = createCondition('and', []);
+            renderBuilder();
+        });
+
+        function createCondition(type, children) {
+            return type === 'single' ? {
+                type: 'single',
+                cards: [{ name: cardNames[0] }],
+                symbol: 'gt',
+                num: '0'
+            } : { type, children: children || [] };
+        }
+
+        function renderBuilder() {
+            const builder = document.getElementById('builder');
+            builder.innerHTML = '';
+            rootCondition && builder.appendChild(renderCondition(rootCondition, true));
+            updateOutput();
+        }
+
+        function renderCondition(condition, isRoot = false) {
+            const container = document.createElement('div');
+            container.className = `condition ${condition.type}`;
+
+            if (condition.type === 'single') {
+                renderSingleCondition(condition, container, isRoot);
+            } else {
+                renderGroupCondition(condition, container, isRoot);
+            }
+
+            return container;
+        }
+
+        function renderSingleCondition(condition, container, isRoot) {
+            container.appendChild(document.createTextNode('抽到'));
+
+            const cardsWrapper = document.createElement('div');
+            condition.cards.forEach((card, index) => {
+                const cardRow = document.createElement('div');
+                cardRow.className = 'card-row';
+
+                if (index > 0) {
+                    const opSelect = createSelect(['+', '-', '*', '/'], card.operator || '+',
+                        e => { card.operator = e.target.value; updateOutput(); });
+                    cardRow.appendChild(opSelect);
+                }
+
+                // 使用容器包装卡名控件及切换按钮
+                const cardNameContainer = document.createElement('span');
+                let cardNameControl = createSelect(
+                    cardNames.map(name => ({ display: name, value: name })),
+                    card.name,
+                    e => { card.name = e.target.value; updateOutput(); }
+                );
+                cardNameContainer.appendChild(cardNameControl);
+
+                const toggleButton = createButton('自定义', () => {
+                    if (cardNameControl.tagName.toLowerCase() === 'select') {
+                        // 替换为文本输入，允许自由输入数字
+                        const customInput = createInput(card.name, e => { card.name = e.target.value; updateOutput(); }, '80px');
+                        cardNameContainer.replaceChild(customInput, cardNameControl);
+                        cardNameControl = customInput;
+                        toggleButton.textContent = '下拉';
+                    } else {
+                        // 恢复为下拉选择控件
+                        const newSelect = createSelect(
+                            cardNames.map(name => ({ display: name, value: name })),
+                            card.name,
+                            e => { card.name = e.target.value; updateOutput(); }
+                        );
+                        cardNameContainer.replaceChild(newSelect, cardNameControl);
+                        cardNameControl = newSelect;
+                        toggleButton.textContent = '自定义';
+                    }
+                });
+                cardRow.appendChild(cardNameContainer);
+                cardRow.appendChild(toggleButton);
+
+                if (condition.cards.length > 1) {
+                    cardRow.appendChild(createButton('×', () => {
+                        condition.cards.splice(index, 1);
+                        renderBuilder();
+                    }));
+                }
+
+                cardsWrapper.appendChild(cardRow);
+            });
+
+            container.appendChild(cardsWrapper);
+            container.appendChild(createButton('+', () => {
+                condition.cards.push({ name: cardNames[0], operator: '+' });
+                renderBuilder();
+            }));
+
+            container.appendChild(document.createTextNode('的数量'));
+
+            const symbolSelect = createSelect(
+                Object.entries(operators).map(([value, display]) => ({ display, value })),
+                condition.symbol,
+                e => { condition.symbol = e.target.value; updateOutput(); }
+            );
+            container.appendChild(symbolSelect);
+
+            container.appendChild(createInput(condition.num, e => { condition.num = e.target.value; updateOutput(); }, '40px'));
+
+            !isRoot && container.appendChild(createButton('删除', () => {
+                container.dispatchEvent(new CustomEvent('delete', { bubbles: true }));
+            }));
+        }
+
+        function renderGroupCondition(condition, container, isRoot) {
+            const header = document.createElement('div');
+            header.className = 'group-header';
+
+            header.appendChild(document.createTextNode('满足以下'));
+            header.appendChild(createSelect(
+                ['全部', '任一'].map((text, i) => ({ display: text, value: i === 0 ? 'and' : 'or' })),
+                condition.type,
+                e => { condition.type = e.target.value; updateOutput(); }
+            ));
+            header.appendChild(document.createTextNode('条件'));
+
+            !isRoot && header.appendChild(createButton('删除', () => {
+                container.dispatchEvent(new CustomEvent('delete', { bubbles: true }));
+            }));
+
+            container.appendChild(header);
+
+            const childrenContainer = document.createElement('div');
+            childrenContainer.className = 'group-children';
+
+            condition.children.forEach(child => {
+                const childElement = renderCondition(child);
+                childElement.addEventListener('delete', e => {
+                    e.stopPropagation();
+                    const index = condition.children.indexOf(child);
+                    index !== -1 && condition.children.splice(index, 1) && renderBuilder();
+                });
+                childrenContainer.appendChild(childElement);
+            });
+
+            const buttons = document.createElement('div');
+            buttons.className = 'buttons';
+            buttons.appendChild(createButton('添加条件组', () => {
+                condition.children.push(createCondition('and', []));
+                renderBuilder();
+            }));
+            buttons.appendChild(createButton('添加条件', () => {
+                condition.children.push(createCondition('single'));
+                renderBuilder();
+            }));
+
+            childrenContainer.appendChild(buttons);
+            container.appendChild(childrenContainer);
+        }
+
+        function updateOutput() {
+            const output = document.getElementById('output');
+            output.textContent = rootCondition ? generateConditionText(rootCondition) : '';
+        }
+
+        function generateConditionText(condition) {
+            if (condition.type === 'single') {
+                const cardsText = condition.cards.map((c, i) =>
+                    i === 0 ? c.name : `${c.operator || '+'} ${c.name}`).join(' ');
+                return `(${cardsText}) ${operators[condition.symbol]} ${condition.num}`;
+            }
+            const childrenText = condition.children.map(generateConditionText).filter(Boolean);
+            return childrenText.length > 1
+                ? `(${childrenText.join(condition.type === 'and' ? ' && ' : ' || ')})`
+                : childrenText[0] || '';
+        }
+
+        // 辅助函数
+        function createSelect(options, value, onChange) {
+            const select = document.createElement('select');
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value || opt;
+                option.textContent = opt.display || opt;
+                select.appendChild(option);
+            });
+            select.value = value;
+            select.addEventListener('change', onChange);
+            return select;
+        }
+
+        function createInput(value, onChange, width) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = value;
+            input.setAttribute('list', 'cardNamesDatalist');
+            input.addEventListener('input', onChange); // 修改为使用 input 事件，实时响应输入
+            width && (input.style.width = width);
+            return input;
+        }
+
+        function createButton(text, onClick) {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.addEventListener('click', onClick);
+            return button;
+        }
+
+    </script>
+</body>
+
+</html>
