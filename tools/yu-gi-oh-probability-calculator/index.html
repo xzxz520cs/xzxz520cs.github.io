@@ -231,12 +231,23 @@ a + b >= 3  // A和B类卡合计至少3张
     // --- 条件构建器核心逻辑 ---
     // 变量名自动获取
     function getAllCardNames() {
-        const names = [];
+        // 先生成变量名 a,b,c,...,z,aa,ab,ac...最多30个
+        const varNames = [];
+        for (let i = 0; i < 30; i++) {
+            if (i < 26) {
+                varNames.push(String.fromCharCode(97 + i));
+            } else {
+                varNames.push('a' + String.fromCharCode(97 + i - 26));
+            }
+        }
+        // 用户自定义卡名
+        const customNames = [];
         for (let i = 0; i < 30; i++) {
             const name = document.getElementById(`cardName${i}`)?.value.trim();
-            if (name) names.push(name);
+            if (name && !varNames.includes(name) && !customNames.includes(name)) customNames.push(name);
         }
-        return names.length ? names : Array.from({length: 12}, (_, i) => String.fromCharCode(97 + i));
+        // 返回变量名+自定义卡名
+        return [...varNames, ...customNames];
     }
     // 运算符映射
     const builderOperators = {
@@ -297,6 +308,7 @@ a + b >= 3  // A和B类卡合计至少3张
                     cardNameControl = customInput;
                     toggleButton.textContent = '选择';
                 } else {
+                    // 重新生成下拉选单，确保最新
                     const newSelect = builderCreateSelect(
                         getAllCardNames().map(name => ({ display: name, value: name })),
                         card.name,
@@ -477,6 +489,8 @@ a + b >= 3  // A和B类卡合计至少3张
         });
         // 初始化显示
         switchConditionInputMode('manual');
+        // 新增：监听卡牌输入变动
+        setupCardNameInputListener();
     });
     // 保存/加载支持
     window.getConditionInputMode = function () {
@@ -494,6 +508,27 @@ a + b >= 3  // A和B类卡合计至少3张
             builderRender();
         }
     };
+    // 监听卡牌输入变动，实时刷新条件构建器下拉选单
+    function setupCardNameInputListener() {
+        const cardInputs = document.getElementById('cardInputs');
+        if (!cardInputs) return;
+        // 事件委托，监听所有input
+        cardInputs.addEventListener('input', function (e) {
+            if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
+                // 重新渲染条件构建器
+                if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
+                    builderRender();
+                }
+            }
+        });
+        cardInputs.addEventListener('blur', function (e) {
+            if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
+                if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
+                    builderRender();
+                }
+            }
+        }, true);
+    }
     </script>
 </body>
 
