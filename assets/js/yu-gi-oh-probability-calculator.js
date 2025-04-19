@@ -66,11 +66,20 @@ function saveDeck() {
         return;
     }
 
+    // 新增：保存条件输入模式和构建器数据
+    let conditionInputMode = window.getConditionInputMode ? window.getConditionInputMode() : 'manual';
+    let builderConditionData = '';
+    if (conditionInputMode === 'builder' && window.getBuilderConditionData) {
+        builderConditionData = window.getBuilderConditionData();
+    }
+
     const deck = {
         id: Date.now(),
         name: deckName,
         cards: [],
-        condition: document.getElementById('condition').value
+        condition: document.getElementById('condition').value,
+        conditionInputMode,
+        builderConditionData
     };
 
     for (let i = 0; i < 30; i++) {
@@ -109,7 +118,27 @@ function loadDeck() {
         document.getElementById(`card${i}`).value = card.count;
         document.getElementById(`cardName${i}`).value = card.name;
     });
-    document.getElementById('condition').value = deck.condition;
+    document.getElementById('condition').value = deck.condition || '';
+
+    // 新增：恢复条件输入模式和构建器数据
+    if (deck.conditionInputMode === 'builder') {
+        document.querySelector('input[name="conditionInputMode"][value="builder"]').checked = true;
+        if (window.setBuilderConditionData && deck.builderConditionData) {
+            window.setBuilderConditionData(deck.builderConditionData);
+        }
+        // 切换显示
+        const manualDiv = document.getElementById('manualConditionInput');
+        const builderDiv = document.getElementById('builderConditionInput');
+        manualDiv.classList.add('hidden');
+        builderDiv.classList.remove('hidden');
+    } else {
+        document.querySelector('input[name="conditionInputMode"][value="manual"]').checked = true;
+        const manualDiv = document.getElementById('manualConditionInput');
+        const builderDiv = document.getElementById('builderConditionInput');
+        manualDiv.classList.remove('hidden');
+        builderDiv.classList.add('hidden');
+    }
+
     updateTotalDeck();
     alert("卡组加载成功！");
 }
@@ -341,6 +370,13 @@ function calculate() {
         }
         if (duplicateNames.size > 0) {
             throw new Error(`卡名重复：${Array.from(duplicateNames).join(', ')}`);
+        }
+
+        // 新增：如果是构建器模式，确保同步条件表达式
+        if (window.getConditionInputMode && window.getConditionInputMode() === 'builder') {
+            if (window.getBuilderConditionData && window.setBuilderConditionData) {
+                // builderUpdateOutput 已自动同步到 #condition
+            }
         }
 
         // 启动定时器更新用时显示
