@@ -116,7 +116,20 @@
 
             <!-- 逻辑判断条件 -->
             <div class="condition-section">
-                <h2 class="mt-1 mb-2">逻辑判断条件</h2>
+                <div>
+                    <h2 class="mt-1 mb-2">逻辑判断条件</h2>
+                    <!-- 新增：单选按钮组 -->
+                    <div class="condition-mode">
+                        <label>
+                            <input type="radio" name="conditionInputMode" value="manual" checked>
+                            手动输入
+                        </label>
+                        <label>
+                            <input type="radio" name="conditionInputMode" value="builder">
+                            条件构建器输入
+                        </label>
+                    </div>
+                </div>
                 <div class="form-group">
                     <textarea id="condition" class="form-control" rows="3"
                         placeholder="输入逻辑判断条件，例如：

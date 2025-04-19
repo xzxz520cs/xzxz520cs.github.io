@@ -103,7 +103,17 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            rootCondition = createCondition('and', []);
+            // 尝试从 localStorage 读取保存的数据
+            const savedCondition = localStorage.getItem('builderCondition');
+            if (savedCondition) {
+                try {
+                    rootCondition = JSON.parse(savedCondition);
+                } catch (e) {
+                    rootCondition = createCondition('and', []);
+                }
+            } else {
+                rootCondition = createCondition('and', []);
+            }
             renderBuilder();
         });
 
@@ -161,13 +171,11 @@
 
                 const toggleButton = createButton('自定义', () => {
                     if (cardNameControl.tagName.toLowerCase() === 'select') {
-                        // 替换为文本输入，允许自由输入数字
                         const customInput = createInput(card.name, e => { card.name = e.target.value; updateOutput(); }, '80px');
                         cardNameContainer.replaceChild(customInput, cardNameControl);
                         cardNameControl = customInput;
-                        toggleButton.textContent = '下拉';
+                        toggleButton.textContent = '选择';
                     } else {
-                        // 恢复为下拉选择控件
                         const newSelect = createSelect(
                             cardNames.map(name => ({ display: name, value: name })),
                             card.name,
@@ -262,6 +270,8 @@
         function updateOutput() {
             const output = document.getElementById('output');
             output.textContent = rootCondition ? generateConditionText(rootCondition) : '';
+            // 保存构建数据到 localStorage
+            localStorage.setItem('builderCondition', JSON.stringify(rootCondition));
         }
 
         function generateConditionText(condition) {
