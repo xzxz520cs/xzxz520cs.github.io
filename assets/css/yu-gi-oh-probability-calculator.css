@@ -114,11 +114,15 @@
 
 .builder-card-row {
     display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 #builderConditionInput .btn {
     padding: 2px 10px;
+    min-width: auto;
 }
 
 #builderConditionInput input[type="text"],
