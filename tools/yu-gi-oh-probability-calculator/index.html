@@ -461,14 +461,13 @@ a + b >= 3  // A和B类卡合计至少3张
                 } else {
                     // 切换到手动输入，提示是否保留构建器条件
                     if (builderConditionText && builderConditionText.trim()) {
-                        const res = window.confirm('是否保留当前条件构建器生成的逻辑判断条件？\n选择“是”将保留，选择“否”将清空，选择“取消”则不切换。');
+                        const res = window.confirm('是否保留当前条件构建器生成的逻辑判断条件？\n选择“确定”将保留，选择“取消”则不切换。');
                         if (res) {
                             document.getElementById('condition').value = builderConditionText;
-                        } else {
-                            document.getElementById('condition').value = '';
+                            switchConditionInputMode('manual');
+                            lastBuilderMode = 'manual';
                         }
-                        switchConditionInputMode('manual');
-                        lastBuilderMode = 'manual';
+                        // 取消则什么都不做
                     } else {
                         switchConditionInputMode('manual');
                         lastBuilderMode = 'manual';
