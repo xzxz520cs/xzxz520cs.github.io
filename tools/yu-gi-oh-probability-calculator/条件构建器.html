@@ -103,17 +103,8 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            // 尝试从 localStorage 读取保存的数据
-            const savedCondition = localStorage.getItem('builderCondition');
-            if (savedCondition) {
-                try {
-                    rootCondition = JSON.parse(savedCondition);
-                } catch (e) {
-                    rootCondition = createCondition('and', []);
-                }
-            } else {
-                rootCondition = createCondition('and', []);
-            }
+            // 直接初始化为默认条件组
+            rootCondition = createCondition('and', []);
             renderBuilder();
         });
 
@@ -270,8 +261,6 @@
         function updateOutput() {
             const output = document.getElementById('output');
             output.textContent = rootCondition ? generateConditionText(rootCondition) : '';
-            // 保存构建数据到 localStorage
-            localStorage.setItem('builderCondition', JSON.stringify(rootCondition));
         }
 
         function generateConditionText(condition) {
