@@ -290,7 +290,9 @@ a + b >= 3  // A和B类卡合计至少3张
         }
         function builderRenderSingleCondition(condition, container, isRoot) {
             container.appendChild(document.createTextNode('抽到'));
+            // 修改：为cardsWrapper添加类
             const cardsWrapper = document.createElement('div');
+            cardsWrapper.className = 'builder-cards-wrapper';
             condition.cards.forEach((card, index) => {
                 const cardRow = document.createElement('div');
                 cardRow.className = 'builder-card-row';
@@ -307,16 +309,16 @@ a + b >= 3  // A和B类卡合计至少3张
                     e => { card.name = e.target.value; builderUpdateOutput(); }
                 );
                 cardNameContainer.appendChild(cardNameControl);
-                const toggleButton = builderCreateButton('自定义', () => {
+                const toggleButton = builderCreateButton('✏️', () => {
                     if (cardNameControl.tagName.toLowerCase() === 'select') {
-                        // 移除'80px'参数，改为添加样式类
+                        // 切换为自定义输入
                         const customInput = builderCreateInput(card.name, e => { card.name = e.target.value; builderUpdateOutput(); });
                         customInput.classList.add('builder-card-input');
                         cardNameContainer.replaceChild(customInput, cardNameControl);
                         cardNameControl = customInput;
-                        toggleButton.textContent = '选择';
+                        toggleButton.textContent = '📑';
                     } else {
-                        // 重新生成下拉选单，确保最新
+                        // 切换为下拉选择框
                         const newSelect = builderCreateSelect(
                             getAllCardNames().map(name => ({ display: name, value: name })),
                             card.name,
@@ -324,7 +326,7 @@ a + b >= 3  // A和B类卡合计至少3张
                         );
                         cardNameContainer.replaceChild(newSelect, cardNameControl);
                         cardNameControl = newSelect;
-                        toggleButton.textContent = '自定义';
+                        toggleButton.textContent = '✏️';
                     }
                 });
                 cardRow.appendChild(cardNameContainer);
@@ -435,7 +437,15 @@ a + b >= 3  // A和B类卡合计至少3张
             const button = document.createElement('button');
             button.type = 'button';
             button.textContent = text;
-            button.className = 'btn btn--outline';
+            let variant = 'btn--outline';
+            if (text.trim() === '×' || text.trim() === '删除') {
+                variant = 'btn--danger';
+            }
+            button.className = `btn ${variant}`;
+            // 新增：对于“添加条件组”和“添加条件”按钮，取消固定宽度设置
+            if (text.trim() === '添加条件组' || text.trim() === '添加条件') {
+                button.className += ' btn--auto-width';
+            }
             button.addEventListener('click', onClick);
             return button;
         }

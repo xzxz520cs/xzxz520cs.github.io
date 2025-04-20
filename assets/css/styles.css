@@ -569,8 +569,21 @@ textarea {
   border-radius: var(--radius-sm);
   font-size: 0.9em;
   transition: border-color var(--transition-fast);
-  background-color: var(--color-bg-alt);
+  background-color: var(--color-white);
   color: var(--color-text);
+}
+
+@media (prefers-color-scheme: dark) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  input[type="file"],
+  select,
+  textarea {
+    background-color: var(--color-bg-alt);
+  }
 }
 
 input:focus,
