@@ -70,8 +70,8 @@
   /* 断点 */
   --breakpoint-sm: 576px;
   --breakpoint-md: 768px;
-  --breakpoint-lg: 992px;
-  --breakpoint-xl: 1200px;
+  --breakpoint-lg: 1366px;
+  --breakpoint-xl: 1600px;
 }
 
 /* 暗色模式 - 对比度优化 */
