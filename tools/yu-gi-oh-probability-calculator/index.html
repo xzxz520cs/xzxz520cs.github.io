@@ -131,8 +131,7 @@
                     </div>
                 </div>
                 <div class="form-group" id="manualConditionInput">
-                    <textarea id="condition" class="form-control" rows="3"
-                        placeholder="输入逻辑判断条件，例如：
+                    <textarea id="condition" class="form-control" rows="3" placeholder="输入逻辑判断条件，例如：
 a >= 1  // 至少抽到1张A类卡
                         
 (a >= 1 || b >= 1) && c == 0  // 抽到A或B类卡且没有C类卡
@@ -146,12 +145,17 @@ a + b >= 3  // A和B类卡合计至少3张
                     <div id="conditionBuilder"></div>
                     <!-- 新增：实时显示构建器生成的条件表达式 -->
                     <label class="mt-1 mb-1" for="builderConditionPreview"><strong>生成的逻辑判断条件：</strong></label>
-                    <textarea id="builderConditionPreview" class="form-control" rows="2" readonly style="background:#f8f8f8;resize:vertical;"></textarea>
+                    <textarea id="builderConditionPreview" class="form-control" rows="2" readonly></textarea>
                 </div>
                 <div class="operator-help">
                     <strong>输入说明：</strong><br>
-                    <strong>运算符（优先级从高到低）:</strong><code>()</code> - 明确运算优先级；<code>!</code> - 逻辑非；<code>*</code> - 乘；<code>/</code> - 除；<code>%</code> - 取模；<code>+</code> - 加；<code>-</code> - 减；<strong>比较运算符：</strong><code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code> - 小于；<code>&lt;=</code> - 小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> - 逻辑与；<code>||</code> - 逻辑或；<br>
-                    <strong>变量名:</strong><code>a</code>,<code>b</code>,<code>c</code>,...,<code>z</code>,<code>aa</code>,<code>ab</code>,...对应 A类卡, B类卡, ...,
+                    <strong>运算符（优先级从高到低）:</strong><code>()</code> - 明确运算优先级；<code>!</code> - 逻辑非；<code>*</code> -
+                    乘；<code>/</code> - 除；<code>%</code> - 取模；<code>+</code> - 加；<code>-</code> -
+                    减；<strong>比较运算符：</strong><code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code> -
+                    小于；<code>&lt;=</code> - 小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> -
+                    逻辑与；<code>||</code> - 逻辑或；<br>
+                    <strong>变量名:</strong><code>a</code>,<code>b</code>,<code>c</code>,...,<code>z</code>,<code>aa</code>,<code>ab</code>,...对应
+                    A类卡, B类卡, ...,
                     Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
                     <strong>使用提示：</strong>计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易与逻辑判断条件混淆的名称(如a>1)。建议使用纯中文名。<br>
                     <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。
@@ -199,7 +203,9 @@ a + b >= 3  // A和B类卡合计至少3张
 
             <div class="source-info">
                 <p class="mb-1 mt-6">
-                    该工具部分代码与思路来源于<a href="https://tieba.baidu.com/home/main?id=tb.1.700dbce0.kfzKa-FBDB-cm-gMSey3Yw" target="_blank">@jyhyqw</a>在贴吧<a href="https://tieba.baidu.com/p/5516965391" target="_blank">上位卡组吧发帖</a>发布的<a href="概率计算器改.zip" target="_blank">游戏王概率计算器</a>。
+                    该工具部分代码与思路来源于<a href="https://tieba.baidu.com/home/main?id=tb.1.700dbce0.kfzKa-FBDB-cm-gMSey3Yw"
+                        target="_blank">@jyhyqw</a>在贴吧<a href="https://tieba.baidu.com/p/5516965391"
+                        target="_blank">上位卡组吧发帖</a>发布的<a href="概率计算器改.zip" target="_blank">游戏王概率计算器</a>。
                 </p>
             </div>
         </div>
@@ -228,307 +234,307 @@ a + b >= 3  // A和B类卡合计至少3张
     <script src="../../assets/js/yu-gi-oh-probability-calculator.js"></script>
     <!-- 新增：条件构建器脚本 -->
     <script>
-    // --- 条件构建器核心逻辑 ---
-    // 变量名自动获取
-    function getAllCardNames() {
-        // 先生成变量名 a,b,c,...,z,aa,ab,ac...最多30个
-        const varNames = [];
-        for (let i = 0; i < 30; i++) {
-            if (i < 26) {
-                varNames.push(String.fromCharCode(97 + i));
-            } else {
-                varNames.push('a' + String.fromCharCode(97 + i - 26));
-            }
-        }
-        // 用户自定义卡名
-        const customNames = [];
-        for (let i = 0; i < 30; i++) {
-            const name = document.getElementById(`cardName${i}`)?.value.trim();
-            if (name && !varNames.includes(name) && !customNames.includes(name)) customNames.push(name);
-        }
-        // 返回变量名+自定义卡名
-        return [...varNames, ...customNames];
-    }
-    // 运算符映射
-    const builderOperators = {
-        gt: '>', eq: '==', lt: '<', neq: '!=', gte: '>=', lte: '<='
-    };
-    // 构建器根节点
-    let builderRootCondition = null;
-    // 构建器模式下的条件表达式缓存
-    let builderConditionText = '';
-    // 构建器初始化
-    function builderCreateCondition(type, children) {
-        return type === 'single' ? {
-            type: 'single',
-            cards: [{ name: getAllCardNames()[0] }],
-            symbol: 'gt',
-            num: '0'
-        } : { type, children: children || [] };
-    }
-    function builderRender() {
-        const builder = document.getElementById('conditionBuilder');
-        builder.innerHTML = '';
-        builderRootCondition && builder.appendChild(builderRenderCondition(builderRootCondition, true));
-        builderUpdateOutput();
-    }
-    function builderRenderCondition(condition, isRoot = false) {
-        const container = document.createElement('div');
-        container.className = `condition-builder condition-${condition.type}`;
-        if (condition.type === 'single') {
-            builderRenderSingleCondition(condition, container, isRoot);
-        } else {
-            builderRenderGroupCondition(condition, container, isRoot);
-        }
-        return container;
-    }
-    function builderRenderSingleCondition(condition, container, isRoot) {
-        container.appendChild(document.createTextNode('抽到'));
-        const cardsWrapper = document.createElement('div');
-        condition.cards.forEach((card, index) => {
-            const cardRow = document.createElement('div');
-            cardRow.className = 'builder-card-row';
-            if (index > 0) {
-                const opSelect = builderCreateSelect(['+', '-', '*', '/'], card.operator || '+',
-                    e => { card.operator = e.target.value; builderUpdateOutput(); });
-                cardRow.appendChild(opSelect);
-            }
-            // 卡名选择/自定义切换
-            const cardNameContainer = document.createElement('span');
-            let cardNameControl = builderCreateSelect(
-                getAllCardNames().map(name => ({ display: name, value: name })),
-                card.name,
-                e => { card.name = e.target.value; builderUpdateOutput(); }
-            );
-            cardNameContainer.appendChild(cardNameControl);
-            const toggleButton = builderCreateButton('自定义', () => {
-                if (cardNameControl.tagName.toLowerCase() === 'select') {
-                    const customInput = builderCreateInput(card.name, e => { card.name = e.target.value; builderUpdateOutput(); }, '80px');
-                    cardNameContainer.replaceChild(customInput, cardNameControl);
-                    cardNameControl = customInput;
-                    toggleButton.textContent = '选择';
+        // --- 条件构建器核心逻辑 ---
+        // 变量名自动获取
+        function getAllCardNames() {
+            // 先生成变量名 a,b,c,...,z,aa,ab,ac...最多30个
+            const varNames = [];
+            for (let i = 0; i < 30; i++) {
+                if (i < 26) {
+                    varNames.push(String.fromCharCode(97 + i));
                 } else {
-                    // 重新生成下拉选单，确保最新
-                    const newSelect = builderCreateSelect(
-                        getAllCardNames().map(name => ({ display: name, value: name })),
-                        card.name,
-                        e => { card.name = e.target.value; builderUpdateOutput(); }
-                    );
-                    cardNameContainer.replaceChild(newSelect, cardNameControl);
-                    cardNameControl = newSelect;
-                    toggleButton.textContent = '自定义';
+                    varNames.push('a' + String.fromCharCode(97 + i - 26));
                 }
-            });
-            cardRow.appendChild(cardNameContainer);
-            cardRow.appendChild(toggleButton);
-            if (condition.cards.length > 1) {
-                cardRow.appendChild(builderCreateButton('×', () => {
-                    condition.cards.splice(index, 1);
-                    builderRender();
-                }));
             }
-            cardsWrapper.appendChild(cardRow);
-        });
-        container.appendChild(cardsWrapper);
-        container.appendChild(builderCreateButton('+', () => {
-            condition.cards.push({ name: getAllCardNames()[0], operator: '+' });
-            builderRender();
-        }));
-        container.appendChild(document.createTextNode('的数量'));
-        const symbolSelect = builderCreateSelect(
-            Object.entries(builderOperators).map(([value, display]) => ({ display, value })),
-            condition.symbol,
-            e => { condition.symbol = e.target.value; builderUpdateOutput(); }
-        );
-        container.appendChild(symbolSelect);
-        container.appendChild(builderCreateInput(condition.num, e => { condition.num = e.target.value; builderUpdateOutput(); }, '40px'));
-        !isRoot && container.appendChild(builderCreateButton('删除', () => {
-            container.dispatchEvent(new CustomEvent('delete', { bubbles: true }));
-        }));
-    }
-    function builderRenderGroupCondition(condition, container, isRoot) {
-        const header = document.createElement('div');
-        header.className = 'builder-group-header';
-        header.appendChild(document.createTextNode('满足以下'));
-        header.appendChild(builderCreateSelect(
-            ['全部', '任一'].map((text, i) => ({ display: text, value: i === 0 ? 'and' : 'or' })),
-            condition.type,
-            e => { condition.type = e.target.value; builderUpdateOutput(); }
-        ));
-        header.appendChild(document.createTextNode('条件'));
-        !isRoot && header.appendChild(builderCreateButton('删除', () => {
-            container.dispatchEvent(new CustomEvent('delete', { bubbles: true }));
-        }));
-        container.appendChild(header);
-        const childrenContainer = document.createElement('div');
-        childrenContainer.className = 'builder-group-children';
-        condition.children.forEach(child => {
-            const childElement = builderRenderCondition(child);
-            childElement.addEventListener('delete', e => {
-                e.stopPropagation();
-                const index = condition.children.indexOf(child);
-                index !== -1 && condition.children.splice(index, 1) && builderRender();
-            });
-            childrenContainer.appendChild(childElement);
-        });
-        const buttons = document.createElement('div');
-        buttons.className = 'builder-buttons';
-        buttons.appendChild(builderCreateButton('添加条件组', () => {
-            condition.children.push(builderCreateCondition('and', []));
-            builderRender();
-        }));
-        buttons.appendChild(builderCreateButton('添加条件', () => {
-            condition.children.push(builderCreateCondition('single'));
-            builderRender();
-        }));
-        childrenContainer.appendChild(buttons);
-        container.appendChild(childrenContainer);
-    }
-    function builderUpdateOutput() {
-        builderConditionText = builderRootCondition ? builderGenerateConditionText(builderRootCondition) : '';
-        // 同步到隐藏的textarea（用于保存/计算）
-        document.getElementById('condition').value = builderConditionText;
-        // 新增：实时显示到预览区域
-        const preview = document.getElementById('builderConditionPreview');
-        if (preview) preview.value = builderConditionText;
-    }
-    function builderGenerateConditionText(condition) {
-        if (condition.type === 'single') {
-            const cardsText = condition.cards.map((c, i) =>
-                i === 0 ? c.name : `${c.operator || '+'} ${c.name}`).join(' ');
-            return `(${cardsText}) ${builderOperators[condition.symbol]} ${condition.num}`;
+            // 用户自定义卡名
+            const customNames = [];
+            for (let i = 0; i < 30; i++) {
+                const name = document.getElementById(`cardName${i}`)?.value.trim();
+                if (name && !varNames.includes(name) && !customNames.includes(name)) customNames.push(name);
+            }
+            // 返回变量名+自定义卡名
+            return [...varNames, ...customNames];
         }
-        const childrenText = condition.children.map(builderGenerateConditionText).filter(Boolean);
-        return childrenText.length > 1
-            ? `(${childrenText.join(condition.type === 'and' ? ' && ' : ' || ')})`
-            : childrenText[0] || '';
-    }
-    function builderCreateSelect(options, value, onChange) {
-        const select = document.createElement('select');
-        options.forEach(opt => {
-            const option = document.createElement('option');
-            option.value = opt.value || opt;
-            option.textContent = opt.display || opt;
-            select.appendChild(option);
-        });
-        select.value = value;
-        select.addEventListener('change', onChange);
-        return select;
-    }
-    function builderCreateInput(value, onChange, width) {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = value;
-        input.setAttribute('list', 'cardNamesDatalist');
-        input.addEventListener('input', onChange);
-        width && (input.style.width = width);
-        return input;
-    }
-    function builderCreateButton(text, onClick) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.textContent = text;
-        button.className = 'btn btn--outline';
-        button.addEventListener('click', onClick);
-        return button;
-    }
-    // 切换输入方式逻辑
-    let lastManualCondition = '';
-    let lastBuilderCondition = null;
-    let lastBuilderMode = 'manual';
-    function switchConditionInputMode(mode) {
-        const manualDiv = document.getElementById('manualConditionInput');
-        const builderDiv = document.getElementById('builderConditionInput');
-        if (mode === 'manual') {
-            builderDiv.classList.add('hidden');
-            manualDiv.classList.remove('hidden');
-        } else {
-            manualDiv.classList.add('hidden');
-            builderDiv.classList.remove('hidden');
+        // 运算符映射
+        const builderOperators = {
+            gt: '>', eq: '==', lt: '<', neq: '!=', gte: '>=', lte: '<='
+        };
+        // 构建器根节点
+        let builderRootCondition = null;
+        // 构建器模式下的条件表达式缓存
+        let builderConditionText = '';
+        // 构建器初始化
+        function builderCreateCondition(type, children) {
+            return type === 'single' ? {
+                type: 'single',
+                cards: [{ name: getAllCardNames()[0] }],
+                symbol: 'gt',
+                num: '0'
+            } : { type, children: children || [] };
         }
-    }
-    // 监听切换
-    document.addEventListener('DOMContentLoaded', function () {
-        // 初始化构建器
-        builderRootCondition = builderCreateCondition('and', []);
-        builderRender();
-        // 监听输入方式切换
-        document.querySelectorAll('input[name="conditionInputMode"]').forEach(radio => {
-            radio.addEventListener('change', function (e) {
-                const mode = e.target.value;
-                if (mode === lastBuilderMode) return;
-                if (mode === 'builder') {
-                    // 切换到构建器，提示现有条件不会保留
-                    if (document.getElementById('condition').value.trim()) {
-                        if (!confirm('切换到条件构建器输入将不会保留现有的逻辑判断条件，是否切换？')) {
-                            document.querySelector('input[name="conditionInputMode"][value="manual"]').checked = true;
-                            return;
-                        }
+        function builderRender() {
+            const builder = document.getElementById('conditionBuilder');
+            builder.innerHTML = '';
+            builderRootCondition && builder.appendChild(builderRenderCondition(builderRootCondition, true));
+            builderUpdateOutput();
+        }
+        function builderRenderCondition(condition, isRoot = false) {
+            const container = document.createElement('div');
+            container.className = `condition-builder condition-${condition.type}`;
+            if (condition.type === 'single') {
+                builderRenderSingleCondition(condition, container, isRoot);
+            } else {
+                builderRenderGroupCondition(condition, container, isRoot);
+            }
+            return container;
+        }
+        function builderRenderSingleCondition(condition, container, isRoot) {
+            container.appendChild(document.createTextNode('抽到'));
+            const cardsWrapper = document.createElement('div');
+            condition.cards.forEach((card, index) => {
+                const cardRow = document.createElement('div');
+                cardRow.className = 'builder-card-row';
+                if (index > 0) {
+                    const opSelect = builderCreateSelect(['+', '-', '*', '/'], card.operator || '+',
+                        e => { card.operator = e.target.value; builderUpdateOutput(); });
+                    cardRow.appendChild(opSelect);
+                }
+                // 卡名选择/自定义切换
+                const cardNameContainer = document.createElement('span');
+                let cardNameControl = builderCreateSelect(
+                    getAllCardNames().map(name => ({ display: name, value: name })),
+                    card.name,
+                    e => { card.name = e.target.value; builderUpdateOutput(); }
+                );
+                cardNameContainer.appendChild(cardNameControl);
+                const toggleButton = builderCreateButton('自定义', () => {
+                    if (cardNameControl.tagName.toLowerCase() === 'select') {
+                        const customInput = builderCreateInput(card.name, e => { card.name = e.target.value; builderUpdateOutput(); }, '80px');
+                        cardNameContainer.replaceChild(customInput, cardNameControl);
+                        cardNameControl = customInput;
+                        toggleButton.textContent = '选择';
+                    } else {
+                        // 重新生成下拉选单，确保最新
+                        const newSelect = builderCreateSelect(
+                            getAllCardNames().map(name => ({ display: name, value: name })),
+                            card.name,
+                            e => { card.name = e.target.value; builderUpdateOutput(); }
+                        );
+                        cardNameContainer.replaceChild(newSelect, cardNameControl);
+                        cardNameControl = newSelect;
+                        toggleButton.textContent = '自定义';
                     }
-                    // 重置构建器
-                    builderRootCondition = builderCreateCondition('and', []);
-                    builderRender();
-                    switchConditionInputMode('builder');
-                    lastBuilderMode = 'builder';
-                } else {
-                    // 切换到手动输入，提示是否保留构建器条件
-                    if (builderConditionText && builderConditionText.trim()) {
-                        const res = window.confirm('是否保留当前条件构建器生成的逻辑判断条件？\n选择“确定”将保留，选择“取消”则不切换。');
-                        if (res) {
-                            document.getElementById('condition').value = builderConditionText;
+                });
+                cardRow.appendChild(cardNameContainer);
+                cardRow.appendChild(toggleButton);
+                if (condition.cards.length > 1) {
+                    cardRow.appendChild(builderCreateButton('×', () => {
+                        condition.cards.splice(index, 1);
+                        builderRender();
+                    }));
+                }
+                cardsWrapper.appendChild(cardRow);
+            });
+            container.appendChild(cardsWrapper);
+            container.appendChild(builderCreateButton('+', () => {
+                condition.cards.push({ name: getAllCardNames()[0], operator: '+' });
+                builderRender();
+            }));
+            container.appendChild(document.createTextNode('的数量'));
+            const symbolSelect = builderCreateSelect(
+                Object.entries(builderOperators).map(([value, display]) => ({ display, value })),
+                condition.symbol,
+                e => { condition.symbol = e.target.value; builderUpdateOutput(); }
+            );
+            container.appendChild(symbolSelect);
+            container.appendChild(builderCreateInput(condition.num, e => { condition.num = e.target.value; builderUpdateOutput(); }, '40px'));
+            !isRoot && container.appendChild(builderCreateButton('删除', () => {
+                container.dispatchEvent(new CustomEvent('delete', { bubbles: true }));
+            }));
+        }
+        function builderRenderGroupCondition(condition, container, isRoot) {
+            const header = document.createElement('div');
+            header.className = 'builder-group-header';
+            header.appendChild(document.createTextNode('满足以下'));
+            header.appendChild(builderCreateSelect(
+                ['全部', '任一'].map((text, i) => ({ display: text, value: i === 0 ? 'and' : 'or' })),
+                condition.type,
+                e => { condition.type = e.target.value; builderUpdateOutput(); }
+            ));
+            header.appendChild(document.createTextNode('条件'));
+            !isRoot && header.appendChild(builderCreateButton('删除', () => {
+                container.dispatchEvent(new CustomEvent('delete', { bubbles: true }));
+            }));
+            container.appendChild(header);
+            const childrenContainer = document.createElement('div');
+            childrenContainer.className = 'builder-group-children';
+            condition.children.forEach(child => {
+                const childElement = builderRenderCondition(child);
+                childElement.addEventListener('delete', e => {
+                    e.stopPropagation();
+                    const index = condition.children.indexOf(child);
+                    index !== -1 && condition.children.splice(index, 1) && builderRender();
+                });
+                childrenContainer.appendChild(childElement);
+            });
+            const buttons = document.createElement('div');
+            buttons.className = 'builder-buttons';
+            buttons.appendChild(builderCreateButton('添加条件组', () => {
+                condition.children.push(builderCreateCondition('and', []));
+                builderRender();
+            }));
+            buttons.appendChild(builderCreateButton('添加条件', () => {
+                condition.children.push(builderCreateCondition('single'));
+                builderRender();
+            }));
+            childrenContainer.appendChild(buttons);
+            container.appendChild(childrenContainer);
+        }
+        function builderUpdateOutput() {
+            builderConditionText = builderRootCondition ? builderGenerateConditionText(builderRootCondition) : '';
+            // 同步到隐藏的textarea（用于保存/计算）
+            document.getElementById('condition').value = builderConditionText;
+            // 新增：实时显示到预览区域
+            const preview = document.getElementById('builderConditionPreview');
+            if (preview) preview.value = builderConditionText;
+        }
+        function builderGenerateConditionText(condition) {
+            if (condition.type === 'single') {
+                const cardsText = condition.cards.map((c, i) =>
+                    i === 0 ? c.name : `${c.operator || '+'} ${c.name}`).join(' ');
+                return `(${cardsText}) ${builderOperators[condition.symbol]} ${condition.num}`;
+            }
+            const childrenText = condition.children.map(builderGenerateConditionText).filter(Boolean);
+            return childrenText.length > 1
+                ? `(${childrenText.join(condition.type === 'and' ? ' && ' : ' || ')})`
+                : childrenText[0] || '';
+        }
+        function builderCreateSelect(options, value, onChange) {
+            const select = document.createElement('select');
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value || opt;
+                option.textContent = opt.display || opt;
+                select.appendChild(option);
+            });
+            select.value = value;
+            select.addEventListener('change', onChange);
+            return select;
+        }
+        function builderCreateInput(value, onChange, width) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = value;
+            input.setAttribute('list', 'cardNamesDatalist');
+            input.addEventListener('input', onChange);
+            width && (input.style.width = width);
+            return input;
+        }
+        function builderCreateButton(text, onClick) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = text;
+            button.className = 'btn btn--outline';
+            button.addEventListener('click', onClick);
+            return button;
+        }
+        // 切换输入方式逻辑
+        let lastManualCondition = '';
+        let lastBuilderCondition = null;
+        let lastBuilderMode = 'manual';
+        function switchConditionInputMode(mode) {
+            const manualDiv = document.getElementById('manualConditionInput');
+            const builderDiv = document.getElementById('builderConditionInput');
+            if (mode === 'manual') {
+                builderDiv.classList.add('hidden');
+                manualDiv.classList.remove('hidden');
+            } else {
+                manualDiv.classList.add('hidden');
+                builderDiv.classList.remove('hidden');
+            }
+        }
+        // 监听切换
+        document.addEventListener('DOMContentLoaded', function () {
+            // 初始化构建器
+            builderRootCondition = builderCreateCondition('and', []);
+            builderRender();
+            // 监听输入方式切换
+            document.querySelectorAll('input[name="conditionInputMode"]').forEach(radio => {
+                radio.addEventListener('change', function (e) {
+                    const mode = e.target.value;
+                    if (mode === lastBuilderMode) return;
+                    if (mode === 'builder') {
+                        // 切换到构建器，提示现有条件不会保留
+                        if (document.getElementById('condition').value.trim()) {
+                            if (!confirm('切换到条件构建器输入将不会保留现有的逻辑判断条件，是否切换？')) {
+                                document.querySelector('input[name="conditionInputMode"][value="manual"]').checked = true;
+                                return;
+                            }
+                        }
+                        // 重置构建器
+                        builderRootCondition = builderCreateCondition('and', []);
+                        builderRender();
+                        switchConditionInputMode('builder');
+                        lastBuilderMode = 'builder';
+                    } else {
+                        // 切换到手动输入，提示是否保留构建器条件
+                        if (builderConditionText && builderConditionText.trim()) {
+                            const res = window.confirm('是否保留当前条件构建器生成的逻辑判断条件？\n选择“确定”将保留，选择“取消”则不切换。');
+                            if (res) {
+                                document.getElementById('condition').value = builderConditionText;
+                                switchConditionInputMode('manual');
+                                lastBuilderMode = 'manual';
+                            }
+                            // 取消则什么都不做
+                        } else {
                             switchConditionInputMode('manual');
                             lastBuilderMode = 'manual';
                         }
-                        // 取消则什么都不做
-                    } else {
-                        switchConditionInputMode('manual');
-                        lastBuilderMode = 'manual';
+                    }
+                });
+            });
+            // 初始化显示
+            switchConditionInputMode('manual');
+            // 新增：监听卡牌输入变动
+            setupCardNameInputListener();
+        });
+        // 保存/加载支持
+        window.getConditionInputMode = function () {
+            return document.querySelector('input[name="conditionInputMode"]:checked')?.value || 'manual';
+        };
+        window.getBuilderConditionData = function () {
+            return builderRootCondition ? JSON.stringify(builderRootCondition) : '';
+        };
+        window.setBuilderConditionData = function (json) {
+            try {
+                builderRootCondition = JSON.parse(json);
+                builderRender();
+            } catch (e) {
+                builderRootCondition = builderCreateCondition('and', []);
+                builderRender();
+            }
+        };
+        // 监听卡牌输入变动，实时刷新条件构建器下拉选单
+        function setupCardNameInputListener() {
+            const cardInputs = document.getElementById('cardInputs');
+            if (!cardInputs) return;
+            // 事件委托，监听所有input
+            cardInputs.addEventListener('input', function (e) {
+                if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
+                    // 重新渲染条件构建器
+                    if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
+                        builderRender();
                     }
                 }
             });
-        });
-        // 初始化显示
-        switchConditionInputMode('manual');
-        // 新增：监听卡牌输入变动
-        setupCardNameInputListener();
-    });
-    // 保存/加载支持
-    window.getConditionInputMode = function () {
-        return document.querySelector('input[name="conditionInputMode"]:checked')?.value || 'manual';
-    };
-    window.getBuilderConditionData = function () {
-        return builderRootCondition ? JSON.stringify(builderRootCondition) : '';
-    };
-    window.setBuilderConditionData = function (json) {
-        try {
-            builderRootCondition = JSON.parse(json);
-            builderRender();
-        } catch (e) {
-            builderRootCondition = builderCreateCondition('and', []);
-            builderRender();
+            cardInputs.addEventListener('blur', function (e) {
+                if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
+                    if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
+                        builderRender();
+                    }
+                }
+            }, true);
         }
-    };
-    // 监听卡牌输入变动，实时刷新条件构建器下拉选单
-    function setupCardNameInputListener() {
-        const cardInputs = document.getElementById('cardInputs');
-        if (!cardInputs) return;
-        // 事件委托，监听所有input
-        cardInputs.addEventListener('input', function (e) {
-            if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
-                // 重新渲染条件构建器
-                if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
-                    builderRender();
-                }
-            }
-        });
-        cardInputs.addEventListener('blur', function (e) {
-            if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
-                if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
-                    builderRender();
-                }
-            }
-        }, true);
-    }
     </script>
 </body>
 
