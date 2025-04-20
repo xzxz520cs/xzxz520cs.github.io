@@ -258,6 +258,7 @@ function saveCalculationRecord(result, condition, errorMessage = null) {
         validCombinations: errorMessage ? '计算错误' : (result.valid !== undefined ? result.valid.toString() : '0'),
         totalCombinations: errorMessage ? '计算错误' : (result.total !== undefined ? result.total.toString() : '0'),
         condition,
+        calculationMethod: result.calculationMethod || "精确计算",
         cards: Array.from({ length: 30 }).map((_, i) => {
             const inputName = document.getElementById(`cardName${i}`).value.trim();
             return {
@@ -292,7 +293,7 @@ function exportCalculationRecords() {
         return 'A' + String.fromCharCode(65 + index - 26);      // AA, AB, AC, AD
     }
     const headers = [
-        '日期', '概率', '卡组总数', '抽卡数', '满足条件的组合数', '总组合数', '逻辑判断条件',
+        '日期', '概率', '卡组总数', '抽卡数', '满足条件的组合数', '总组合数', '逻辑判断条件', '计算方式',
         ...Array.from({ length: 30 }).flatMap((_, i) => [
             `${getExportCardLabel(i)}卡名`,
             `${getExportCardLabel(i)}数量`
@@ -318,6 +319,7 @@ function exportCalculationRecords() {
         csvEscape(record.validCombinations),
         csvEscape(record.totalCombinations),
         csvEscape(record.condition),
+        csvEscape(record.calculationMethod),
         ...Array.from({ length: 30 }).flatMap((_, i) => {
             const card = record.cards && record.cards[i] ? record.cards[i] : { name: '', count: '' };
             return [csvEscape(card.name), csvEscape(card.count)];
@@ -629,6 +631,176 @@ function cleanupCalculation() {
     isCalculating = false;
     document.getElementById('cancelBtn').classList.add('hidden');
     calculationWorker = null;
+}
+
+// 新增：蒙特卡洛模拟计算函数
+function monteCarloCalculate() {
+    if (isCalculating) {
+        if (!confirm("当前计算正在进行，是否取消并使用蒙特卡洛模拟计算？")) return;
+        cancelCalculation();
+    }
+    try {
+        calculationStartTime = Date.now();
+
+        // 检查卡名重复
+        let cardNames = [];
+        let duplicateNames = new Set();
+        for (let i = 0; i < 30; i++) {
+            const name = document.getElementById(`cardName${i}`).value.trim();
+            if (name) {
+                if (cardNames.includes(name)) {
+                    duplicateNames.add(name);
+                }
+                cardNames.push(name);
+            }
+        }
+        if (duplicateNames.size > 0) {
+            throw new Error(`卡名重复：${Array.from(duplicateNames).join(', ')}`);
+        }
+
+        // 读取输入数据
+        const cardCounts = [];
+        for (let i = 0; i < 30; i++) {
+            cardCounts.push(parseInt(document.getElementById(`card${i}`).value) || 0);
+        }
+        const draws = parseInt(document.getElementById('draws').value);
+        const deckSize = parseInt(document.getElementById('total').value);
+        if (draws <= 0) throw new Error("抽卡数必须大于0");
+        if (deckSize <= 0) throw new Error("卡组中至少要有1张卡");
+        if (draws > deckSize) throw new Error("抽卡数不能超过卡组总数");
+
+        let condition = document.getElementById('condition').value.trim();
+        if (!condition) throw new Error("请输入逻辑判断条件");
+
+        // 替换条件中的卡名为变量名（与 calculate() 保持一致）
+        const cardNameMap = {};
+        const sortedNames = [];
+        for (let i = 0; i < 30; i++) {
+            const name = document.getElementById(`cardName${i}`).value.trim();
+            if (name) {
+                cardNameMap[name] = getVarName(i);
+                sortedNames.push(name);
+            }
+        }
+        sortedNames.sort((a, b) => b.length - a.length);
+        for (const name of sortedNames) {
+            const regex = new RegExp(escapeRegExp(name), 'g');
+            condition = condition.replace(regex, cardNameMap[name]);
+        }
+        console.log("替换后的逻辑判断条件（蒙特卡洛）:", condition);
+
+        // 更新UI状态
+        isCalculating = true;
+        document.getElementById('cancelBtn').classList.remove('hidden');
+        document.getElementById('calculationProgress').value = 0;
+        document.getElementById('progressText').textContent = '蒙特卡洛模拟计算中: 0%  用时: 0秒';
+
+        // 创建蒙特卡洛模拟 Worker
+        const simulationWorker = new Worker(URL.createObjectURL(new Blob([`
+            // Monte Carlo simulation worker with chunking and optimized drawing
+            function varToIndex(varName) {
+                const lc = varName.toLowerCase();
+                if (lc.length === 1) {
+                    const code = lc.charCodeAt(0) - 97;
+                    if (code >= 0 && code < 26) return code;
+                }
+                if (lc.length === 2 && lc[0] === 'a') {
+                    const code = lc.charCodeAt(1) - 97;
+                    if (code >= 0 && code < 4) return 26 + code;
+                }
+                throw new Error("无效的卡名称: " + varName);
+            }
+            // 优化版抽牌函数：不重复计算牌堆（抽牌不使用 splice）
+            function drawCards(shuffledDeck, draws) {
+                let counts = Array(30).fill(0);
+                const drawn = shuffledDeck.slice(0, draws);
+                drawn.forEach(idx => { counts[idx]++; });
+                return counts;
+            }
+            // 修改后的洗牌函数: 固定使用 Math.random() 的 Fisher–Yates 算法
+            function shuffleArray(arr) {
+                let array = arr.slice();
+                for (let i = array.length - 1; i > 0; i--) {
+                    let j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+            onmessage = function(e) {
+                const { cardCounts, draws, condition } = e.data;
+                // 构建牌堆数组
+                let deck = [];
+                for (let i = 0; i < cardCounts.length; i++) {
+                    for (let j = 0; j < cardCounts[i]; j++) {
+                        deck.push(i);
+                    }
+                }
+                if (deck.length === 0) {
+                    postMessage({ type: 'result', valid: 0, total: 500000, calculationMethod: "蒙特卡洛模拟" });
+                    return;
+                }
+                const totalSimulations = 500000;
+                let valid = 0;
+                // 修正：将 condition 中的变量名替换为 counts[<index>]
+                const replacedCondition = condition.replace(/([a-zA-Z]+)/g, function(m) {
+                    return "counts[" + varToIndex(m) + "]";
+                });
+                const conditionFunc = new Function("counts", "return " + replacedCondition);
+                let iter = 0;
+                let lastReported = 0;
+                function runChunk() {
+                    const chunkSize = 5000;
+                    for (let i = 0; i < chunkSize && iter < totalSimulations; i++, iter++) {
+                        // 始终使用新的洗牌函数
+                        const shuffled = shuffleArray(deck);
+                        const result = drawCards(shuffled, draws);
+                        if (conditionFunc(result)) valid++;
+                    }
+                    const progress = Math.floor((iter / totalSimulations) * 100);
+                    if (progress > lastReported) {
+                        lastReported = progress;
+                        postMessage({ type: 'progress', progress });
+                    }
+                    if (iter < totalSimulations) {
+                        setTimeout(runChunk, 0);
+                    } else {
+                        postMessage({ type: 'result', valid, total: totalSimulations, calculationMethod: "蒙特卡洛模拟" });
+                    }
+                }
+                runChunk();
+            };
+        `], { type: 'text/javascript' })));
+
+        simulationWorker.onmessage = function(e) {
+            if (e.data.type === 'progress') {
+                updateProgress(e.data.progress);
+            } else if (e.data.type === 'result') {
+                clearInterval(progressUpdateInterval);
+                progressUpdateInterval = null;
+                cleanupCalculation();
+                const probability = (Number(e.data.valid) / Number(e.data.total)) * 100;
+                const elapsedSeconds = getElapsedSeconds();
+                document.getElementById('probability').value = `${probability.toFixed(20)}%`;
+                document.getElementById('validCombinations').value = e.data.valid.toString();
+                document.getElementById('totalCombinations').value = e.data.total.toString();
+                document.getElementById('calculationProgress').value = 100;
+                document.getElementById('progressText').textContent =
+                    `蒙特卡洛模拟完成: 100% 用时: ${elapsedSeconds}秒`;
+                saveCalculationRecord(e.data, document.getElementById('condition').value);
+            }
+        };
+
+        simulationWorker.postMessage({ cardCounts, draws, condition });
+        progressUpdateInterval = setInterval(() => {
+            const elapsedSeconds = getElapsedSeconds();
+            const progress = document.getElementById('calculationProgress').value;
+            document.getElementById('progressText').textContent =
+                `蒙特卡洛模拟计算中: ${progress}% 用时: ${elapsedSeconds}秒`;
+        }, 1000);
+
+    } catch (error) {
+        showError(error.message);
+    }
 }
 
 // 初始化页面
