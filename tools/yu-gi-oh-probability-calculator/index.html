@@ -309,7 +309,9 @@ a + b >= 3  // A和B类卡合计至少3张
                 cardNameContainer.appendChild(cardNameControl);
                 const toggleButton = builderCreateButton('自定义', () => {
                     if (cardNameControl.tagName.toLowerCase() === 'select') {
-                        const customInput = builderCreateInput(card.name, e => { card.name = e.target.value; builderUpdateOutput(); }, '80px');
+                        // 移除'80px'参数，改为添加样式类
+                        const customInput = builderCreateInput(card.name, e => { card.name = e.target.value; builderUpdateOutput(); });
+                        customInput.classList.add('builder-card-input');
                         cardNameContainer.replaceChild(customInput, cardNameControl);
                         cardNameControl = customInput;
                         toggleButton.textContent = '选择';
@@ -427,7 +429,6 @@ a + b >= 3  // A和B类卡合计至少3张
             input.value = value;
             input.setAttribute('list', 'cardNamesDatalist');
             input.addEventListener('input', onChange);
-            width && (input.style.width = width);
             return input;
         }
         function builderCreateButton(text, onClick) {

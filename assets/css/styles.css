@@ -469,7 +469,6 @@ img {
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
-  min-width: 100px;
   position: relative;
   overflow: hidden;
 }
