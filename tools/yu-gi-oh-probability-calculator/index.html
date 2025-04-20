@@ -449,61 +449,165 @@ a + b >= 3  // A和B类卡合计至少3张
             button.addEventListener('click', onClick);
             return button;
         }
-        // 切换输入方式逻辑
-        let lastManualCondition = '';
-        let lastBuilderCondition = null;
-        let lastBuilderMode = 'manual';
+        // 令牌化函数：将输入拆分为标识符、数字、运算符和括号
+        function tokenize(expr) {
+            const tokens = [];
+            const regex = /\s*([A-Za-z0-9\u4e00-\u9fa5]+|>=|<=|==|!=|&&|\|\||[()+><])\s*/g;
+            let m;
+            while ((m = regex.exec(expr)) !== null) {
+                tokens.push(m[1]);
+            }
+            return tokens;
+        }
+
+        // 解析器状态
+        function Parser(tokens) {
+            this.tokens = tokens;
+            this.pos = 0;
+        }
+        Parser.prototype.peek = function () {
+            return this.tokens[this.pos];
+        };
+        Parser.prototype.consume = function (token) {
+            if (token && this.tokens[this.pos] !== token) {
+                throw new Error("预期 " + token + "，但得到 " + this.tokens[this.pos]);
+            }
+            return this.tokens[this.pos++];
+        };
+        Parser.prototype.eof = function () {
+            return this.pos >= this.tokens.length;
+        };
+
+        // 解析入口：解析完整表达式（支持逻辑 && 和 ||）
+        function parseExpression(parser) {
+            return parseLogicalOr(parser);
+        }
+        function parseLogicalOr(parser) {
+            let node = parseLogicalAnd(parser);
+            while (!parser.eof() && parser.peek() === '||') {
+                parser.consume('||');
+                const right = parseLogicalAnd(parser);
+                node = { type: "or", children: [node, right] };
+            }
+            return node;
+        }
+        function parseLogicalAnd(parser) {
+            let node = parseRelational(parser);
+            while (!parser.eof() && parser.peek() === '&&') {
+                parser.consume('&&');
+                const right = parseRelational(parser);
+                node = { type: "and", children: [node, right] };
+            }
+            return node;
+        }
+
+        // 解析关系表达式，例如 sumExpression > 0
+        function parseRelational(parser) {
+            let left = parseSum(parser);
+            if (!parser.eof() && /^(>=|<=|==|!=|>|<)$/.test(parser.peek())) {
+                const op = parser.consume();
+                const num = parser.consume();
+                if (!/^\d+$/.test(num)) {
+                    throw new Error("预期数字，但得到 " + num);
+                }
+                // 构造单一条件节点：拆分加法表达式
+                let cards = [];
+                if (Array.isArray(left)) {
+                    // left为标识符数组
+                    cards.push({ name: left[0] });
+                    left.slice(1).forEach(item => {
+                        cards.push({ operator: "+", name: item });
+                    });
+                } else {
+                    cards.push({ name: left });
+                }
+                return { type: "single", cards: cards, symbol: mapOperator(op), num: num };
+            }
+            return left;
+        }
+
+        // 解析加法表达式或者原子表达式
+        // 如果遇到括号则调用 parseExpression，否则返回标识符（或拆分加法）
+        function parseSum(parser) {
+            if (parser.peek() === '(') {
+                parser.consume('(');
+                const node = parseExpression(parser);
+                parser.consume(')');
+                return node;
+            }
+            // 解析一串标识符用 '+' 连接，在此简单只支持加法
+            let items = [];
+            items.push(parser.consume());
+            while (!parser.eof() && parser.peek() === '+') {
+                parser.consume('+');
+                items.push(parser.consume());
+            }
+            // 若仅有一个标识符，则返回单个值，否则返回数组
+            return items.length === 1 ? items[0] : items;
+        }
+
+        // 运算符映射
+        function mapOperator(op) {
+            const opMap = { ">": "gt", "<": "lt", "==": "eq", "!=": "neq", ">=": "gte", "<=": "lte" };
+            if (!opMap[op]) throw new Error("不支持的运算符：" + op);
+            return opMap[op];
+        }
+
+        // 主解析函数。返回构建器条件数据
+        function parseManualCondition(manualStr) {
+            manualStr = manualStr.trim();
+            if (!manualStr) throw new Error("空的条件");
+            const tokens = tokenize(manualStr);
+            const parser = new Parser(tokens);
+            const tree = parseExpression(parser);
+            if (!parser.eof()) {
+                throw new Error("无法解析条件：" + manualStr);
+            }
+            return tree;
+        }
+
+        // 修改：切换输入方式逻辑，支持手动条件与构建器条件的互转
         function switchConditionInputMode(mode) {
             const manualDiv = document.getElementById('manualConditionInput');
             const builderDiv = document.getElementById('builderConditionInput');
             if (mode === 'manual') {
+                // 从构建器转换为手动
+                if (builderRootCondition) {
+                    document.getElementById('condition').value = builderGenerateConditionText(builderRootCondition);
+                }
                 builderDiv.classList.add('hidden');
                 manualDiv.classList.remove('hidden');
             } else {
+                // 从手动转换为构建器，尝试转换手动输入的条件
+                let manualStr = document.getElementById('condition').value.trim();
+                if (manualStr) {
+                    try {
+                        builderRootCondition = parseManualCondition(manualStr);
+                        builderRender();
+                    } catch (err) {
+                        alert("手动条件转换失败：" + err.message);
+                        document.querySelector('input[name="conditionInputMode"][value="manual"]').checked = true;
+                        return;
+                    }
+                }
                 manualDiv.classList.add('hidden');
                 builderDiv.classList.remove('hidden');
             }
         }
-        // 监听切换
+        // 修改：监听输入方式切换时移除阻止模式切换的判断
+        document.querySelectorAll('input[name="conditionInputMode"]').forEach(radio => {
+            radio.addEventListener('change', function (e) {
+                const mode = e.target.value;
+                // 移除阻止切换的判断，确保每次切换都能执行
+                switchConditionInputMode(mode);
+                lastBuilderMode = mode;
+            });
+        });
+        // 监听输入方式切换
         document.addEventListener('DOMContentLoaded', function () {
             // 初始化构建器
             builderRootCondition = builderCreateCondition('and', []);
             builderRender();
-            // 监听输入方式切换
-            document.querySelectorAll('input[name="conditionInputMode"]').forEach(radio => {
-                radio.addEventListener('change', function (e) {
-                    const mode = e.target.value;
-                    if (mode === lastBuilderMode) return;
-                    if (mode === 'builder') {
-                        // 切换到构建器，提示现有条件不会保留
-                        if (document.getElementById('condition').value.trim()) {
-                            if (!confirm('切换到条件构建器输入将不会保留现有的逻辑判断条件，是否切换？')) {
-                                document.querySelector('input[name="conditionInputMode"][value="manual"]').checked = true;
-                                return;
-                            }
-                        }
-                        // 重置构建器
-                        builderRootCondition = builderCreateCondition('and', []);
-                        builderRender();
-                        switchConditionInputMode('builder');
-                        lastBuilderMode = 'builder';
-                    } else {
-                        // 切换到手动输入，提示是否保留构建器条件
-                        if (builderConditionText && builderConditionText.trim()) {
-                            const res = window.confirm('是否保留当前条件构建器生成的逻辑判断条件？\n选择“确定”将保留，选择“取消”则不切换。');
-                            if (res) {
-                                document.getElementById('condition').value = builderConditionText;
-                                switchConditionInputMode('manual');
-                                lastBuilderMode = 'manual';
-                            }
-                            // 取消则什么都不做
-                        } else {
-                            switchConditionInputMode('manual');
-                            lastBuilderMode = 'manual';
-                        }
-                    }
-                });
-            });
             // 初始化显示
             switchConditionInputMode('manual');
             // 新增：监听卡牌输入变动
