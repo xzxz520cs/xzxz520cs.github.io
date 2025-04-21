@@ -1133,7 +1133,11 @@ function mapOperator(op) {
         "==": "eq",
         "!=": "neq",
         ">=": "gte",
-        "<=": "lte"
+        "<=": "lte",
+        "大于等于": "gte",
+        "小于等于": "lte",
+        "大于": "gt",
+        "小于": "lt"
     };
     if (!opMap[op]) throw new Error("不支持的运算符：" + op);
     return opMap[op];
