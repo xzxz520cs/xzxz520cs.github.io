@@ -1126,9 +1126,20 @@ function parseSum(parser) {
 }
 // 运算符映射
 function mapOperator(op) {
-    const opMap = { ">": "gt", "<": "lt", "==": "eq", "!=": "neq", ">=": "gte", "<=": "lte" };
+    const opMap = {
+        ">": "gt",
+        "<": "lt",
+        "==": "eq",
+        "!=": "neq",
+        ">=": "gte",
+        "<=": "lte",
+        "大于等于": "gte",
+        "小于等于": "lte",
+        "大于": "gt",
+        "小于": "lt"
+    };
     if (!opMap[op]) throw new Error("不支持的运算符：" + op);
-    return opMap;
+    return opMap[op];
 }
 // 主解析函数。返回构建器条件数据
 function parseManualCondition(manualStr) {
