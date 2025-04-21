@@ -694,6 +694,7 @@ function monteCarloCalculate() {
         document.getElementById('cancelBtn').classList.remove('hidden');
         document.getElementById('calculationProgress').value = 0;
         document.getElementById('progressText').textContent = '蒙特卡洛模拟计算中: 0%  用时: 0秒';
+        document.getElementById('progressContainer').classList.remove('hidden'); // 新增：显示进度条
 
         // 创建蒙特卡洛模拟 Worker
         const simulationWorker = new Worker(URL.createObjectURL(new Blob([`
