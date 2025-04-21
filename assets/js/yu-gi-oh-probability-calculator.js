@@ -1036,13 +1036,75 @@ function builderCreateButton(text, onClick) {
 // 令牌化函数：将输入拆分为标识符、数字、运算符和括号
 function tokenize(expr) {
     const tokens = [];
-    const regex = /\s*([A-Za-z0-9\u4e00-\u9fa5]+|>=|<=|==|!=|&&|\|\||[()+><])\s*/g;
+    const regex = /\s*([A-Za-z0-9\u4e00-\u9fa5]+|>=|<=|==|!=|&&|\|\||[-*\/%+()><])\s*/g;
     let m;
     while ((m = regex.exec(expr)) !== null) {
         tokens.push(m[1]);
     }
     return tokens;
 }
+
+// 新增：将解析表达式的树状结构扁平化为字符串
+function flattenExpression(node) {
+    if (typeof node === 'string') return node;
+    return flattenExpression(node.left) + " " + node.operator + " " + flattenExpression(node.right);
+}
+
+// 新增：解析最基本的表达式
+function parsePrimary(parser) {
+    if (parser.peek() === '(') {
+        parser.consume('(');
+        const node = parseExpression(parser);
+        parser.consume(')');
+        return node;
+    }
+    return parser.consume();
+}
+
+// 新增：处理 * / % 运算
+function parseTerm(parser) {
+    let node = parsePrimary(parser);
+    while (!parser.eof() && ['*','/','%'].includes(parser.peek())) {
+        const op = parser.consume();
+        const right = parsePrimary(parser);
+        node = { type: "binary", operator: op, left: node, right: right };
+    }
+    return node;
+}
+
+// 修改：处理 + - 运算，将调用 parseTerm 而非直接处理
+function parseSum(parser) {
+    let node = parseTerm(parser);
+    while (!parser.eof() && ['+','-'].includes(parser.peek())) {
+        const op = parser.consume();
+        const right = parseTerm(parser);
+        node = { type: "binary", operator: op, left: node, right: right };
+    }
+    return node;
+}
+
+// 修改：解析关系表达式，支持算术运算后对表达式做扁平化处理
+function parseRelational(parser) {
+    let left = parseSum(parser);
+    if (!parser.eof() && /^(>=|<=|==|!=|>|<)$/.test(parser.peek())) {
+        const op = parser.consume();
+        const num = parser.consume();
+        if (!/^\d+$/.test(num)) {
+            throw new Error("预期数字，但得到 " + num);
+        }
+        // 将解析的左侧算数表达式转换为字符串，然后分解成卡牌表达式
+        const exprStr = flattenExpression(left);
+        const tokens = exprStr.split(/\s+/);
+        let cards = [];
+        cards.push({ name: tokens[0] });
+        for (let i = 1; i < tokens.length; i += 2) {
+            cards.push({ operator: tokens[i], name: tokens[i+1] });
+        }
+        return { type: "single", cards: cards, symbol: mapOperator(op), num: num };
+    }
+    return left;
+}
+
 // 解析器状态
 function Parser(tokens) {
     this.tokens = tokens;
@@ -1082,49 +1144,6 @@ function parseLogicalAnd(parser) {
     }
     return node;
 }
-// 解析关系表达式，例如 sumExpression > 0
-function parseRelational(parser) {
-    let left = parseSum(parser);
-    if (!parser.eof() && /^(>=|<=|==|!=|>|<)$/.test(parser.peek())) {
-        const op = parser.consume();
-        const num = parser.consume();
-        if (!/^\d+$/.test(num)) {
-            throw new Error("预期数字，但得到 " + num);
-        }
-        // 构造单一条件节点：拆分加法表达式
-        let cards = [];
-        if (Array.isArray(left)) {
-            // left为标识符数组
-            cards.push({ name: left[0] });
-            left.slice(1).forEach(item => {
-                cards.push({ operator: "+", name: item });
-            });
-        } else {
-            cards.push({ name: left });
-        }
-        return { type: "single", cards: cards, symbol: mapOperator(op), num: num };
-    }
-    return left;
-}
-// 解析加法表达式或者原子表达式
-// 如果遇到括号则调用 parseExpression，否则返回标识符（或拆分加法）
-function parseSum(parser) {
-    if (parser.peek() === '(') {
-        parser.consume('(');
-        const node = parseExpression(parser);
-        parser.consume(')');
-        return node;
-    }
-    // 解析一串标识符用 '+' 连接，在此简单只支持加法
-    let items = [];
-    items.push(parser.consume());
-    while (!parser.eof() && parser.peek() === '+') {
-        parser.consume('+');
-        items.push(parser.consume());
-    }
-    // 若仅有一个标识符，则返回单个值，否则返回数组
-    return items.length === 1 ? items[0] : items;
-}
 // 运算符映射
 function mapOperator(op) {
     const opMap = {
@@ -1140,7 +1159,7 @@ function mapOperator(op) {
         "小于": "lt"
     };
     if (!opMap[op]) throw new Error("不支持的运算符：" + op);
-    return opMap[op];
+    return opMap;
 }
 // 主解析函数。返回构建器条件数据
 function parseManualCondition(manualStr) {
