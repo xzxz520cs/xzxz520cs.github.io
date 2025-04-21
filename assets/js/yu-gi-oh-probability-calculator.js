@@ -1152,6 +1152,10 @@ function parseManualCondition(manualStr) {
     if (!parser.eof()) {
         throw new Error("无法解析条件：" + manualStr);
     }
+    // 新增：如果解析结果为单条件，则包装为根节点
+    if (tree && tree.type === 'single') {
+        return { type: 'and', children: [tree] };
+    }
     return tree;
 }
 // 修改：切换输入方式逻辑，支持手动条件与构建器条件的互转
