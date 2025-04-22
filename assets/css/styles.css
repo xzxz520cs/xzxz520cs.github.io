@@ -459,7 +459,7 @@ img {
   color: var(--btn-color);
   border: none;
   border-radius: var(--radius-sm);
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-sm) var(--space-sm);
   cursor: pointer;
   font-size: 1em;
   font-weight: 600;
