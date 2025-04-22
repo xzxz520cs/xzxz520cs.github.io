@@ -1035,8 +1035,8 @@ function builderCreateButton(text, onClick) {
 }
 // 令牌化函数：将输入拆分为标识符、数字、运算符和括号
 function tokenize(expr) {
-    const tokens = [];
-    const regex = /\s*([A-Za-z0-9\u4e00-\u9fa5]+|>=|<=|==|!=|&&|\|\||[()+><])\s*/g;
+    const regex = /\s*([A-Za-z0-9\u4e00-\u9fa5]+|>=|<=|==|!=|&&|\|\||[-+*/()<>])\s*/g;
+    let tokens = [];
     let m;
     while ((m = regex.exec(expr)) !== null) {
         tokens.push(m[1]);
@@ -1094,11 +1094,12 @@ function parseRelational(parser) {
         // 构造单一条件节点：拆分加法表达式
         let cards = [];
         if (Array.isArray(left)) {
-            // left为标识符数组
             cards.push({ name: left[0] });
-            left.slice(1).forEach(item => {
-                cards.push({ operator: "+", name: item });
-            });
+            for (let i = 1; i < left.length; i += 2) {
+                let operator = left[i];      // 保留实际运算符
+                let operand = left[i + 1];
+                cards.push({ operator, name: operand });
+            }
         } else {
             cards.push({ name: left });
         }
@@ -1115,14 +1116,14 @@ function parseSum(parser) {
         parser.consume(')');
         return node;
     }
-    // 解析一串标识符用 '+' 连接，在此简单只支持加法
+    // 解析一串由 '+' 或 '-' 连接的标识符
     let items = [];
     items.push(parser.consume());
-    while (!parser.eof() && parser.peek() === '+') {
-        parser.consume('+');
+    while (!parser.eof() && (parser.peek() === '+' || parser.peek() === '-')) {
+        let operator = parser.consume(); // 获取 '+' 或 '-'
+        items.push(operator);
         items.push(parser.consume());
     }
-    // 若仅有一个标识符，则返回单个值，否则返回数组
     return items.length === 1 ? items[0] : items;
 }
 // 运算符映射
