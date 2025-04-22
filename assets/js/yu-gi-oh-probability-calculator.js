@@ -843,6 +843,44 @@ function getAllCardNames() {
 const builderOperators = {
     gt: '>', eq: '==', lt: '<', neq: '!=', gte: '>=', lte: '<='
 };
+
+// 新增：确保以下函数在条件构建器调用前已定义
+function builderCreateSelect(options, value, onChange) {
+    const select = document.createElement('select');
+    options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value || opt;
+        option.textContent = opt.display || opt;
+        select.appendChild(option);
+    });
+    select.value = value;
+    select.addEventListener('change', onChange);
+    return select;
+}
+function builderCreateInput(value, onChange, width) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = value;
+    input.setAttribute('list', 'cardNamesDatalist');
+    input.addEventListener('input', onChange);
+    return input;
+}
+function builderCreateButton(text, onClick) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = text;
+    let variant = 'btn--outline';
+    if (text.trim() === '×' || text.trim() === '删除') {
+        variant = 'btn--danger';
+    }
+    button.className = `btn ${variant}`;
+    if (text.trim() === '添加条件组' || text.trim() === '添加条件') {
+        button.className += ' btn--auto-width';
+    }
+    button.addEventListener('click', onClick);
+    return button;
+}
+
 // 构建器根节点
 let builderRootCondition = null;
 // 构建器模式下的条件表达式缓存
@@ -987,51 +1025,31 @@ function builderUpdateOutput() {
     if (preview) preview.value = builderConditionText;
 }
 function builderGenerateConditionText(condition) {
+    function exprToText(expr) {
+        if (typeof expr === 'string') return expr; // 标识符或数字
+        if (Array.isArray(expr)) {
+            return '(' + expr.map(exprToText).join(' ') + ')'; // 递归处理嵌套表达式
+        }
+        if (expr && typeof expr === 'object' && expr.type) {
+            return builderGenerateConditionText(expr); // 递归处理条件树
+        }
+        return '';
+    }
+
     if (condition.type === 'single') {
         const cardsText = condition.cards.map((c, i) =>
             i === 0 ? c.name : `${c.operator || '+'} ${c.name}`).join(' ');
         return `(${cardsText}) ${builderOperators[condition.symbol]} ${condition.num}`;
     }
+
+    if (condition.type === 'expr') {
+        return `(${exprToText(condition.expr)}) ${builderOperators[condition.symbol]} ${condition.num}`;
+    }
+
     const childrenText = condition.children.map(builderGenerateConditionText).filter(Boolean);
     return childrenText.length > 1
         ? `(${childrenText.join(condition.type === 'and' ? ' && ' : ' || ')})`
         : childrenText[0] || '';
-}
-function builderCreateSelect(options, value, onChange) {
-    const select = document.createElement('select');
-    options.forEach(opt => {
-        const option = document.createElement('option');
-        option.value = opt.value || opt;
-        option.textContent = opt.display || opt;
-        select.appendChild(option);
-    });
-    select.value = value;
-    select.addEventListener('change', onChange);
-    return select;
-}
-function builderCreateInput(value, onChange, width) {
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.value = value;
-    input.setAttribute('list', 'cardNamesDatalist');
-    input.addEventListener('input', onChange);
-    return input;
-}
-function builderCreateButton(text, onClick) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = text;
-    let variant = 'btn--outline';
-    if (text.trim() === '×' || text.trim() === '删除') {
-        variant = 'btn--danger';
-    }
-    button.className = `btn ${variant}`;
-    // 新增：对于“添加条件组”和“添加条件”按钮，取消固定宽度设置
-    if (text.trim() === '添加条件组' || text.trim() === '添加条件') {
-        button.className += ' btn--auto-width';
-    }
-    button.addEventListener('click', onClick);
-    return button;
 }
 // 令牌化函数：将输入拆分为标识符、数字、运算符和括号
 function tokenize(expr) {
@@ -1107,25 +1125,40 @@ function parseRelational(parser) {
     }
     return left;
 }
-// 解析加法表达式或者原子表达式
-// 如果遇到括号则调用 parseExpression，否则返回标识符（或拆分加法）
-function parseSum(parser) {
+// 解析因子表达式
+function parseFactor(parser) {
     if (parser.peek() === '(') {
         parser.consume('(');
-        const node = parseExpression(parser);
+        const expr = parseExpression(parser);
         parser.consume(')');
-        return node;
+        return expr;
+    } else {
+        return parser.consume(); // 返回标识符或数字
     }
-    // 解析一串由 '+' 或 '-' 连接的标识符
-    let items = [];
-    items.push(parser.consume());
-    while (!parser.eof() && (parser.peek() === '+' || parser.peek() === '-')) {
-        let operator = parser.consume(); // 获取 '+' 或 '-'
-        items.push(operator);
-        items.push(parser.consume());
-    }
-    return items.length === 1 ? items[0] : items;
 }
+
+// 解析乘除表达式
+function parseTerm(parser) {
+    let left = parseFactor(parser);
+    while (!parser.eof() && (parser.peek() === '*' || parser.peek() === '/')) {
+        const op = parser.consume(); // 获取 '*' 或 '/'
+        const right = parseFactor(parser);
+        left = [left, op, right]; // 构造表达式树
+    }
+    return left;
+}
+
+// 解析加减表达式
+function parseSum(parser) {
+    let left = parseTerm(parser);
+    while (!parser.eof() && (parser.peek() === '+' || parser.peek() === '-')) {
+        const op = parser.consume(); // 获取 '+' 或 '-'
+        const right = parseTerm(parser);
+        left = [left, op, right]; // 构造表达式树
+    }
+    return left;
+}
+
 // 运算符映射
 function mapOperator(op) {
     const opMap = {
@@ -1141,7 +1174,7 @@ function mapOperator(op) {
         "小于": "lt"
     };
     if (!opMap[op]) throw new Error("不支持的运算符：" + op);
-    return opMap[op];
+    return opMap;
 }
 // 主解析函数。返回构建器条件数据
 function parseManualCondition(manualStr) {
