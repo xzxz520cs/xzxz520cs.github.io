@@ -1176,16 +1176,13 @@ function switchConditionInputMode(mode) {
         if (manualStr) {
             try {
                 builderRootCondition = parseManualCondition(manualStr);
+                builderRender();
             } catch (err) {
                 alert("手动条件转换失败：" + err.message);
                 document.querySelector('input[name="conditionInputMode"][value="manual"]').checked = true;
                 return;
             }
-        } else {
-            // 如果手动输入为空，则重置条件构建器内容
-            builderRootCondition = builderCreateCondition('and', []);
         }
-        builderRender();
         manualDiv.classList.add('hidden');
         builderDiv.classList.remove('hidden');
     }
