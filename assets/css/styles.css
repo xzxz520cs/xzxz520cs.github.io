@@ -1,15 +1,15 @@
-/* ======================
-   设计系统变量
-   ====================== */
+/* 新版全局样式文件 - 定义网站全局样式与系统变量 */
 
-/* 颜色系统 */
+/* 全局变量设置：定义颜色、间距、阴影等设计系统变量 */
 :root {
-  /* 主色 */
+  /* 主要色调：深蓝黑色 */
   --color-primary: #0f172a;
+  /* 主色悬停状态 */
   --color-primary-hover: #0b1220;
+  /* 主色激活状态 */
   --color-primary-active: #080e1a;
 
-  /* 次要色 - 调整为更深的蓝色保证对比度 */
+  /* 次要色调：蓝色系列 */
   --color-secondary: #2563eb;
   --color-secondary-hover: #1d4ed8;
   --color-secondary-active: #1e40af;
@@ -18,43 +18,43 @@
   --color-accent: #0d9488;
   --color-accent-hover: #0f766e;
 
-  /* 状态色 - 增强对比度 */
+  /* 状态提示色 */
   --color-success: #15803d;
   --color-warning: #ca8a04;
   --color-danger: #b91c1c;
   --color-info: #1d4ed8;
 
-  /* 中性色 */
+  /* 中性色系 */
   --color-white: #ffffff;
   --color-light: #f1f5f9;
   --color-medium: #94a3b8;
   --color-dark: #334155;
   --color-black: #0f172a;
 
-  /* 文本色 - 加深提高可读性 */
+  /* 文本颜色 */
   --color-text: #1e293b;
   --color-text-light: var(--color-white);
   --color-text-muted: #64748b;
 
-  /* 背景色 */
+  /* 背景色设置 */
   --color-bg: var(--color-white);
   --color-bg-alt: #f3f5f7;
 
-  /* 边框 */
+  /* 边框颜色 */
   --color-border: var(--color-medium);
 
-  /* 阴影 */
+  /* 阴影效果 */
   --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.1);
   --shadow-md: 0 4px 6px rgba(15, 23, 42, 0.1);
   --shadow-lg: 0 10px 15px rgba(15, 23, 42, 0.1);
 
-  /* 圆角 */
+  /* 圆角设置 */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-full: 9999px;
 
-  /* 间距系统 */
+  /* 间距变量 */
   --space-xxs: 0.25rem;
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
@@ -63,20 +63,21 @@
   --space-xl: 2rem;
   --space-xxl: 3rem;
 
-  /* 过渡效果 */
+  /* 过渡时间 */
   --transition-fast: 0.15s ease;
   --transition-normal: 0.3s ease;
 
-  /* 断点 */
+  /* 响应式断点 */
   --breakpoint-sm: 576px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1366px;
   --breakpoint-xl: 1600px;
 }
 
-/* 暗色模式 - 对比度优化 */
+/* 暗色模式变量重定义 */
 @media (prefers-color-scheme: dark) {
   :root {
+    /* 调整暗模式下的主要颜色 */
     --color-primary: #2d4a72;
     --color-secondary: #3b82f6;
     --color-accent: #2dd4bf;
@@ -96,9 +97,7 @@
   }
 }
 
-/* ======================
-  基础重置
-  ====================== */
+/* 全局重置及基础设置 */
 *,
 *::before,
 *::after {
@@ -124,9 +123,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ======================
-  代码样式
-  ====================== */
+/* 代码块样式：用于内嵌代码显示 */
 code {
   background-color: color-mix(in srgb, var(--color-medium) 50%, white 50%);
   color: var(--color-text);
@@ -140,18 +137,14 @@ code {
   }
 }
 
-/* ======================
-  布局容器
-  ====================== */
+/* 主体容器布局 */
 .container {
   width: min(calc(100% - 2rem), var(--breakpoint-xl));
   margin-inline: auto;
   padding: var(--space-xl);
 }
 
-/* ======================
-  排版
-  ====================== */
+/* 标题样式（h1～h6）：统一字体与颜色 */
 h1,
 h2,
 h3,
@@ -162,12 +155,10 @@ h6 {
   margin: 0.5em 0;
   line-height: 1.2;
   font-weight: 700;
-  /* 加粗提高可读性 */
 }
 
 /* 暗色模式标题颜色 */
 @media (prefers-color-scheme: dark) {
-
   h1,
   h2,
   h3,
@@ -178,6 +169,7 @@ h6 {
   }
 }
 
+/* h1样式：大标题、居中及下边装饰线 */
 h1 {
   font-size: clamp(1.8rem, 5vw, 2.5rem);
   text-align: center;
@@ -207,12 +199,12 @@ p {
   max-width: 75ch;
 }
 
+/* 超链接样式及鼠标悬停效果 */
 a {
   color: var(--color-secondary);
   text-decoration: none;
   transition: color var(--transition-fast);
   font-weight: 500;
-  /* 链接加粗 */
 }
 
 a:hover {
@@ -225,9 +217,7 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
-/* ======================
-  图片样式
-  ====================== */
+/* 图片自适应显示 */
 img {
   max-width: 100%;
   height: auto;
@@ -235,12 +225,12 @@ img {
   display: block;
 }
 
-/* 卡片中的图片样式 */
+/* 卡片内图片样式 */
 .card img {
   margin-bottom: var(--space-sm);
 }
 
-/* 暗色模式图片调整 */
+/* 暗色模式下图片效果调整 */
 @media (prefers-color-scheme: dark) {
   img {
     opacity: 0.9;
@@ -251,9 +241,7 @@ img {
   }
 }
 
-/* ======================
-  Header 样式
-  ====================== */
+/* 页头样式：背景色、阴影及固定顶部 */
 .site-header {
   background: var(--color-primary);
   color: var(--color-text-light);
@@ -270,6 +258,7 @@ img {
   padding: var(--space-sm) var(--space-md);
 }
 
+/* 站点标题样式 */
 .site-title {
   font-size: 1.25rem;
   font-weight: 700;
@@ -279,12 +268,14 @@ img {
   color: var(--color-text-light);
 }
 
+/* 导航菜单布局 */
 .nav-menu {
   display: flex;
   gap: var(--space-lg);
   list-style: none;
 }
 
+/* 单个导航链接样式 */
 .nav-link {
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
@@ -304,16 +295,14 @@ img {
   font-weight: 600;
 }
 
-/* 新增样式: 去除桌面端菜单列表默认的点 */
+/* 下拉菜单基本列表样式 */
 .nav-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-/* ======================
-   下拉菜单样式
-   ====================== */
+/* 下拉菜单项目容器 */
 .nav-item {
   position: relative;
 }
@@ -322,6 +311,7 @@ img {
   cursor: pointer;
 }
 
+/* 下拉菜单面板的样式设置 */
 .dropdown-menu {
   display: none;
   position: absolute;
@@ -343,6 +333,7 @@ img {
   }
 }
 
+/* 下拉菜单单项链接样式 */
 .dropdown-item {
   padding: var(--space-sm) var(--space-md);
   color: var(--color-text);
@@ -355,13 +346,12 @@ img {
   color: var(--color-text-light);
 }
 
+/* 鼠标悬停时显示下拉菜单 */
 .nav-item:hover .dropdown-menu {
   display: block;
 }
 
-/* ======================
-  Footer 样式
-  ====================== */
+/* 页脚基本样式：背景及边框 */
 .site-footer {
   background: var(--color-primary);
   color: var(--color-text-light);
@@ -369,6 +359,7 @@ img {
   border-top: 3px solid var(--color-secondary);
 }
 
+/* 页脚内部网格布局 */
 .footer-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -376,12 +367,14 @@ img {
   padding: var(--space-xl) 0;
 }
 
+/* 页脚标题文字样式 */
 .footer-title {
   color: var(--color-secondary);
   margin-bottom: var(--space-sm);
   font-weight: 600;
 }
 
+/* 页脚链接样式及交互效果设置 */
 .footer-links a {
   color: var(--color-text-light);
   opacity: 0.9;
@@ -396,6 +389,7 @@ img {
   opacity: 1;
 }
 
+/* 页脚底部区域样式 */
 .footer-bottom {
   border-top: 1px solid var(--color-primary-hover);
   padding-top: var(--space-md);
@@ -406,6 +400,7 @@ img {
   gap: var(--space-md);
 }
 
+/* 返回顶部按钮样式 */
 .back-to-top {
   background: var(--color-secondary);
   color: var(--color-text-light);
@@ -419,18 +414,14 @@ img {
   background: var(--color-secondary-hover);
 }
 
-/* ======================
-  网格布局
-  ====================== */
+/* 网格系统布局 */
 .grid {
   display: grid;
   gap: var(--space-md);
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
 }
 
-/* ======================
-  卡片组件
-  ====================== */
+/* 卡片组件样式设置 */
 .card {
   background-color: var(--color-bg-alt);
   border-radius: var(--radius-md);
@@ -448,9 +439,7 @@ img {
   box-shadow: var(--shadow-md);
 }
 
-/* ======================
-  按钮组件 - 对比度优化
-  ====================== */
+/* 按钮基础样式及交互状态 */
 .btn {
   --btn-bg: var(--color-secondary);
   --btn-color: var(--color-text-light);
@@ -492,7 +481,7 @@ img {
   cursor: not-allowed;
 }
 
-/* 按钮变体 */
+/* 按钮的主要变体：主按钮、成功、危险、警告及描边按钮 */
 .btn--primary {
   --btn-bg: var(--color-primary);
   --btn-color: var(--color-text-light);
@@ -541,9 +530,7 @@ img {
   width: 100%;
 }
 
-/* ======================
-  表单组件
-  ====================== */
+/* 表单组件样式：容器、标签与输入框 */
 .form-group {
   margin-bottom: 0;
 }
@@ -599,9 +586,7 @@ textarea {
   min-height: 200px;
 }
 
-/* ======================
-   移动端侧边抽屉样式
-   ====================== */
+/* 移动端侧边抽屉样式及动画效果 */
 .drawer {
   display: none;
   position: fixed;
@@ -622,6 +607,7 @@ textarea {
   transform: translateX(0);
 }
 
+/* 侧边抽屉内菜单布局 */
 .drawer-menu {
   display: flex;
   justify-content: space-between;
@@ -630,6 +616,7 @@ textarea {
   flex-direction: row-reverse;
 }
 
+/* 侧边抽屉列表及列表项样式 */
 .drawer-list {
   list-style: none;
   padding: 0;
@@ -646,6 +633,7 @@ textarea {
   text-decoration: none;
 }
 
+/* 侧边抽屉子菜单样式 */
 .drawer-submenu {
   list-style: none;
   margin-top: var(--space-sm);
@@ -665,12 +653,12 @@ textarea {
   color: var(--color-secondary);
 }
 
-/* 当复选框被选中时显示抽屉 */
+/* 复选框选中状态：显示抽屉菜单 */
 #menu-toggle-checkbox:checked~.drawer {
   transform: translateX(0);
 }
 
-/* 新增：侧边菜单遮罩 */
+/* 侧边抽屉背景遮罩样式 */
 .drawer-overlay {
   position: fixed;
   top: 0;
@@ -678,7 +666,6 @@ textarea {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.3);
-  /* 半透明遮罩 */
   z-index: 1900;
   display: none;
 }
@@ -687,9 +674,7 @@ textarea {
   display: block;
 }
 
-/* ======================
-   菜单按钮样式
-   ====================== */
+/* 菜单按钮样式：打开与关闭菜单 */
 .menu-toggle {
   display: none;
   background: none;
@@ -699,17 +684,13 @@ textarea {
   margin-bottom: 0;
   font-weight: 900;
   color: var(--color-text-light);
-  /* 新增：设置打开菜单按钮颜色 */
 }
 
 .menu-toggle.close-menu {
   color: var(--color-text);
-  /* 新增：设置关闭菜单按钮颜色 */
 }
 
-/* ======================
-  工具类
-  ====================== */
+/* 工具类：弹性布局与常用辅助类 */
 .flex {
   display: flex;
   gap: var(--space-md);
@@ -729,14 +710,13 @@ textarea {
   font-weight: 400;
 }
 
-/* 暗色模式下的 muted 文本 */
 @media (prefers-color-scheme: dark) {
   .text-muted {
     color: #a8a8a8;
   }
 }
 
-/* 间距工具 */
+/* 边距辅助类：上下间距设置 */
 .mt-1 {
   margin-top: var(--space-xxs);
 }
@@ -785,9 +765,7 @@ textarea {
   margin-bottom: var(--space-xl);
 }
 
-/* ======================
-  响应式设计
-  ====================== */
+/* 响应式设计设置：中、小屏幕适配 */
 @media (max-width: 768px) {
   .container {
     padding: var(--space-md);
@@ -843,11 +821,13 @@ textarea {
   }
 }
 
+/* 外部链接标识样式 */
 .external-indicator {
   font-size: 0.8em;
   margin-left: 2px;
 }
 
+/* 通用隐藏类 */
 .hidden {
   display: none;
 }
