@@ -1154,33 +1154,6 @@ function parseManualCondition(manualStr) {
     return tree;
 }
 
-// 新增：格式化逻辑判断条件函数（从构建器转换为手动时调用）
-function formatCondition(expr) {
-  // 阶段1：去除冗余括号
-  let formatted = expr
-    .replace(/\((\w+)\)/g, '$1') // 去除包裹单个变量的括号
-    .replace(/\)\(/g, ') && (') // 为隐式AND添加运算符
-    .replace(/\)\s*&&\s*\(/g, ' && '); // 简化单层AND
-
-  // 阶段2：拆分逻辑结构
-  const splitRegex = /(\|\|)/g;
-  formatted = formatted.replace(splitRegex, '\n$1 ');
-
-  // 阶段3：添加分层缩进
-  let indentLevel = 0;
-  return formatted.split('\n')
-    .map(line => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('||')) {
-        return '  '.repeat(indentLevel) + trimmed;
-      }
-      indentLevel++;
-      return '  '.repeat(indentLevel - 1) + trimmed;
-    })
-    .join('\n')
-    .replace(/(\w+)\s*([<>+])\s*(\w+)/g, '$1 $2 $3'); // 标准化运算符间距
-}
-
 // 全局记录当前条件输入模式（手动或构建器）
 let currentConditionInputMode = 'manual';
 
@@ -1204,7 +1177,7 @@ function switchConditionInputMode(mode, skipConfirm = false) {
     if (mode === 'manual') {
         if (builderRootCondition) {
             const raw = builderGenerateConditionText(builderRootCondition);
-            document.getElementById('condition').value = formatCondition(raw);
+            document.getElementById('condition').value = raw;
         }
         builderDiv.classList.add('hidden');
         manualDiv.classList.remove('hidden');
