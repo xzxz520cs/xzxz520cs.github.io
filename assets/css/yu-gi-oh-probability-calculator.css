@@ -1,8 +1,9 @@
-/* ======================
-   游戏王概率计算器特定样式
-   ====================== */
+/* =====================================================
+    游戏王概率计算器专用样式定义
+    本文件包含计算器各组件的布局及设计标准。
+   ===================================================== */
 
-/* 卡组管理区域 */
+/* 卡组管理面板样式 */
 .deck-management {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -10,12 +11,13 @@
     align-items: end;
 }
 
+/* 卡组操作按钮布局 */
 .deck-actions {
     display: flex;
     gap: var(--space-md);
 }
 
-/* 统一按钮和输入框高度 */
+/* 统一控件尺寸（下拉框、文本框、按钮） */
 .deck-management select,
 .deck-management input[type="text"],
 .deck-management .btn {
@@ -23,21 +25,21 @@
     width: 100%;
 }
 
-/* 主内容区域 */
+/* 主页面内容区域布局 */
 .main-content {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: var(--space-xl);
 }
 
-/* 卡牌输入网格 */
+/* 卡牌输入网格布局样式 */
 .card-input-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
     gap: var(--space-xs);
 }
 
-/* 右侧区域样式 */
+/* 右侧信息显示区整体布局 */
 .right-section {
     display: flex;
     flex-direction: column;
@@ -45,24 +47,21 @@
     justify-content: space-between;
 }
 
-/* 饼图容器样式 */
+/* 饼图展示容器样式 */
 .chart-section {
     position: relative;
     width: 100%;
     height: 300px;
-    /* 固定高度 */
     min-height: 300px;
-    /* 确保最小高度 */
 }
 
-/* 饼图canvas样式 */
+/* 饼图 canvas 自适应样式 */
 #deckPieChart {
     width: 100% !important;
     height: 100% !important;
     max-width: 100%;
     max-height: 100%;
     aspect-ratio: 1;
-    /* 保持1:1宽高比 */
 }
 
 .draw-inputs {
@@ -74,7 +73,7 @@
     width: 100%;
 }
 
-/* 条件构建器样式 */
+/* 条件构建器基础组件样式 */
 .condition-builder {
     border: 1px solid var(--color-border);
     padding: var(--space-xxs);
@@ -86,9 +85,9 @@
     display: flex;
     align-items: center;
     gap: var(--space-xs);
-    /* 横向滚动和nowrap已由父级控制，无需重复 */
 }
 
+/* 构建器组标题样式 */
 .builder-group-header {
     display: flex;
     align-items: center;
@@ -96,6 +95,7 @@
     margin-bottom: var(--space-xs);
 }
 
+/* 构建器子项整体布局 */
 .builder-group-children {
     margin-left: var(--space-md);
     display: flex;
@@ -103,12 +103,14 @@
     gap: var(--space-xs);
 }
 
+/* 构建器操作按钮组样式 */
 .builder-buttons {
     display: flex;
     gap: var(--space-xs);
     margin-top: var(--space-xs);
 }
 
+/* 构建器卡牌输入行布局 */
 .builder-card-row {
     display: flex;
     align-items: center;
@@ -129,19 +131,19 @@
     height: 32px;
 }
 
-/* 保证自定义输入框宽度与下拉选择框一致，优先级提升 */
+/* 保持自定义输入框与下拉选择框一致宽度 */
 #builderConditionInput .builder-card-input {
-    width: 80px ;
-    min-width: 80px ;
-    max-width: 80px ;
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
 }
 
-/* 保证“选择”按钮与“自定义”按钮宽度一致，优先级提升 */
+/* 按钮尺寸统一调整（“选择”和“自定义”按钮） */
 #builderConditionInput .btn {
     height: 32px;
     padding: 0 12px;
-    min-width: 50px ;
-    width: 50px ;
+    min-width: 50px;
+    width: 50px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -162,7 +164,7 @@
     width: 80px;
 }
 
-/* 计算按钮区域 */
+/* 计算操作按钮区域布局设置 */
 .calculation-actions {
     display: flex;
     gap: var(--space-md);
@@ -172,7 +174,7 @@
     width: 100%;
 }
 
-/* 结果区域 */
+/* 计算结果展示网格布局 */
 .result-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -188,7 +190,7 @@
     flex-direction: row-reverse;
 }
 
-/* 移动端样式 */
+/* 响应式设计：移动设备样式适配 */
 @media (max-width: 768px) {
     .deck-management {
         grid-template-columns: 1fr;
