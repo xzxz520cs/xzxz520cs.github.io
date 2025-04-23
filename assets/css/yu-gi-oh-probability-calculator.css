@@ -160,6 +160,10 @@
     margin-bottom: var(--space-xs);
 }
 
+.condition-mode {
+    display: flex; align-items: center; gap: var(--space-md);
+}
+
 .builder-card-input {
     width: 80px;
 }
