@@ -805,7 +805,7 @@ function monteCarloCalculate() {
 
 // 页面初始化：创建卡牌输入组件并绑定相关事件
 window.onload = function () {
-    createCardInputs();
+    // createCardInputs(); // 已移至HTML中直接静态写入
     updateDeckList();
     updateTotalDeck();
 
