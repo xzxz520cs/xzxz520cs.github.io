@@ -1135,8 +1135,8 @@ function mapOperator(op) {
         "大于": "gt",
         "小于": "lt"
     };
-    if (!opMap[op]) throw new Error("不支持的运算符：" + op);
-    return opMap[op];
+    if (!opMap[op]) throw new Error("不支持的运算符：" + op);//修改这里会出错
+    return opMap[op];//修改这里会出错
 }
 // 主解析函数，将手动输入的条件转换为构建器数据
 function parseManualCondition(manualStr) {
