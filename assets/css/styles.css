@@ -196,7 +196,6 @@ h2 {
 
 p {
   margin-bottom: var(--space-md);
-  max-width: 75ch;
 }
 
 /* 超链接样式及鼠标悬停效果 */

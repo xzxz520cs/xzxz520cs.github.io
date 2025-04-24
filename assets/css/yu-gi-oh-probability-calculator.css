@@ -39,8 +39,8 @@
 /* 卡牌输入网格布局样式 */
 .card-input-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
-    gap: var(--space-xs);
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: var(--space-xxs);
 }
 
 /* 右侧信息显示区整体布局 */
@@ -165,7 +165,9 @@
 }
 
 .condition-mode {
-    display: flex; align-items: center; gap: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
 }
 
 .builder-card-input {
@@ -257,8 +259,28 @@
     min-width: 0;
 }
 
+textarea#condition {
+    min-height: 192px;
+}
+
 @media (max-width: 1024px) {
     .condition-results-container {
         flex-direction: column;
+    }
+}
+
+/* 新增：输入说明响应式显示 */
+.operator-help-mobile {
+    display: none;
+}
+.operator-help-desktop {
+    display: block;
+}
+@media (max-width: 1024px) {
+    .operator-help-mobile {
+        display: block;
+    }
+    .operator-help-desktop {
+        display: none;
     }
 }
