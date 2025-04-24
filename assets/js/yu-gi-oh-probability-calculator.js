@@ -24,24 +24,6 @@ function getCardLabel(index) {
     return `A${String.fromCharCode(65 + index - 26)}`;
 }
 
-// 初始化生成30个卡牌输入组件
-function createCardInputs() {
-    const container = document.getElementById('cardInputs');
-    for (let i = 0; i < 30; i++) {
-        // 创建单个卡牌输入区域
-        const div = document.createElement('div');
-        div.className = 'form-group';
-        div.innerHTML = `
-            <label>${getCardLabel(i)}类卡</label>
-            <input type="number" id="card${i}" value="0" min="0" class="form-control card-count" onchange="updateTotalDeck()">
-            <input type="text" id="cardName${i}" class="form-control mt-1" placeholder="卡名">
-        `;
-        const cardNameInput = div.querySelector(`#cardName${i}`);
-        cardNameInput.addEventListener('change', updatePieChart);
-        container.appendChild(div);
-    }
-}
-
 // 保存卡组数据到 localStorage
 function saveDeck() {
     const deckName = document.getElementById('deckName').value.trim();
@@ -805,7 +787,6 @@ function monteCarloCalculate() {
 
 // 页面初始化：创建卡牌输入组件并绑定相关事件
 window.onload = function () {
-    // createCardInputs(); // 已移至HTML中直接静态写入
     updateDeckList();
     updateTotalDeck();
 

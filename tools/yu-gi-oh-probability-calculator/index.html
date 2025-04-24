@@ -286,7 +286,7 @@
                             </div>
                         </div>
                         <div class="form-group" id="manualConditionInput">
-                            <textarea id="condition" class="form-control" rows="3" placeholder="输入逻辑判断条件，例如：
+                            <textarea id="condition" rows="3" placeholder="输入逻辑判断条件，例如：
 a >= 1  // 至少抽到1张A类卡
                         
 (a >= 1 || b >= 1) && c == 0  // 抽到A或B类卡且没有C类卡
@@ -300,7 +300,7 @@ a + b >= 3  // A和B类卡合计至少3张
                             <div id="conditionBuilder"></div>
                             <!-- 新增：实时显示构建器生成的条件表达式 -->
                             <label class="mt-1 mb-1" for="builderConditionPreview"><strong>生成的逻辑判断条件：</strong></label>
-                            <textarea id="builderConditionPreview" class="form-control" rows="2" readonly></textarea>
+                            <textarea id="builderConditionPreview" rows="2" readonly></textarea>
                         </div>
                         <div class="operator-help">
                             <strong>输入说明：</strong><br>
@@ -319,6 +319,7 @@ a + b >= 3  // A和B类卡合计至少3张
                     </div>
                 </div>
                 <div class="calculation-column">
+                    <h2 class="mt-1 mb-2">计算操作</h2>
                     <!-- 计算按钮组 -->
                     <div class="calculation-actions mt-2 mb-2">
                         <button onclick="calculate()" class="btn btn--primary">精确计算</button>

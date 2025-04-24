@@ -32,10 +32,14 @@
     gap: var(--space-xl);
 }
 
+.form-control {
+    font-size: 0.7em;
+}
+
 /* 卡牌输入网格布局样式 */
 .card-input-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
     gap: var(--space-xs);
 }
 
