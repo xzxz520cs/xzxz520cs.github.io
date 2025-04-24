@@ -259,10 +259,6 @@
     min-width: 0;
 }
 
-textarea#condition {
-    min-height: 192px;
-}
-
 @media (max-width: 1024px) {
     .condition-results-container {
         flex-direction: column;
