@@ -445,7 +445,7 @@ img {
 
   background-color: var(--btn-bg);
   color: var(--btn-color);
-  border: none;
+  border: 2px solid transparent;
   border-radius: var(--radius-sm);
   padding: var(--space-sm) var(--space-sm);
   cursor: pointer;
