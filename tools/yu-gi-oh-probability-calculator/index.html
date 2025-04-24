@@ -266,24 +266,27 @@
                 </div>
             </div>
 
-            <!-- 逻辑判断条件 -->
-            <div class="condition-section">
-                <div>
-                    <h2 class="mt-1 mb-2">逻辑判断条件</h2>
-                    <!-- 新增：单选按钮组 -->
-                    <div class="condition-mode">
-                        <label>
-                            <input type="radio" name="conditionInputMode" value="manual" checked>
-                            手动输入
-                        </label>
-                        <label>
-                            <input type="radio" name="conditionInputMode" value="builder">
-                            条件构建器输入
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group" id="manualConditionInput">
-                    <textarea id="condition" class="form-control" rows="3" placeholder="输入逻辑判断条件，例如：
+            <!-- 新布局：左右分栏容器 -->
+            <div class="condition-results-container">
+                <div class="condition-column">
+                    <!-- 逻辑判断条件 -->
+                    <div class="condition-section">
+                        <div>
+                            <h2 class="mt-1 mb-2">逻辑判断条件</h2>
+                            <!-- 新增：单选按钮组 -->
+                            <div class="condition-mode">
+                                <label>
+                                    <input type="radio" name="conditionInputMode" value="manual" checked>
+                                    手动输入
+                                </label>
+                                <label>
+                                    <input type="radio" name="conditionInputMode" value="builder">
+                                    条件构建器输入
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group" id="manualConditionInput">
+                            <textarea id="condition" class="form-control" rows="3" placeholder="输入逻辑判断条件，例如：
 a >= 1  // 至少抽到1张A类卡
                         
 (a >= 1 || b >= 1) && c == 0  // 抽到A或B类卡且没有C类卡
@@ -291,69 +294,69 @@ a >= 1  // 至少抽到1张A类卡
 a + b >= 3  // A和B类卡合计至少3张
                         
 灰流丽 >= 1 && 增殖的G >= 1 && 抹杀之指名者 == 0  // 使用自定的卡名来写表达式"></textarea>
-                </div>
-                <!-- 新增：条件构建器区域 -->
-                <div id="builderConditionInput" class="form-group hidden">
-                    <div id="conditionBuilder"></div>
-                    <!-- 新增：实时显示构建器生成的条件表达式 -->
-                    <label class="mt-1 mb-1" for="builderConditionPreview"><strong>生成的逻辑判断条件：</strong></label>
-                    <textarea id="builderConditionPreview" class="form-control" rows="2" readonly></textarea>
-                </div>
-                <div class="operator-help">
-                    <strong>输入说明：</strong><br>
-                    <strong>运算符（优先级从高到低）:</strong><code>()</code> - 明确运算优先级；<code>!</code> - 逻辑非；<code>*</code> -
-                    乘；<code>/</code> - 除；<code>%</code> - 取模；<code>+</code> - 加；<code>-</code> -
-                    减；<strong>比较运算符：</strong><code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code> -
-                    小于；<code>&lt;=</code> - 小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> -
-                    逻辑与；<code>||</code> - 逻辑或；<br>
-                    <strong>变量名:</strong><code>a</code>,<code>b</code>,<code>c</code>,...,<code>z</code>,<code>aa</code>,<code>ab</code>,...对应
-                    A类卡, B类卡, ...,
-                    Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
-                    <strong>使用提示：</strong>计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易与逻辑判断条件混淆的名称(如a>1)。建议使用纯中文名。<br>
-                    <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。
-                    <br>
-                </div>
-            </div>
-
-            <!-- 计算按钮 -->
-            <div class="calculation-actions mt-2 mb-2">
-                <button onclick="calculate()" class="btn btn--primary">精确计算</button>
-                <button onclick="monteCarloCalculate()" class="btn btn--secondary">快速估算</button>
-                <button onclick="cancelCalculation()" id="cancelBtn" class="btn btn--danger hidden">取消计算</button>
-            </div>
-            <div class="calculation-actions mt-2 mb-2">
-                <button onclick="exportCalculationRecords()" class="btn btn--outline">导出记录</button>
-                <button onclick="clearCalculationRecords()" class="btn btn--danger">删除记录</button>
-            </div>
-
-            <!-- 进度条 -->
-            <div id="progressContainer" class="progress-container hidden">
-                <div class="form-group">
-                    <label>计算进度</label>
-                    <progress id="calculationProgress" value="0" max="100"></progress>
-                    <div id="progressText" class="text-center">等待计算...</div>
-                </div>
-            </div>
-
-            <!-- 结果输出 -->
-            <div class="result-section">
-                <h2 class="mt-1 mb-2">计算结果</h2>
-                <div class="result-grid grid">
-                    <div class="form-group">
-                        <label for="probability">概率</label>
-                        <input type="text" id="probability" class="form-control" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="validCombinations">满足条件的组合数</label>
-                        <input type="text" id="validCombinations" class="form-control" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="totalCombinations">总组合数</label>
-                        <input type="text" id="totalCombinations" class="form-control" readonly>
+                        </div>
+                        <!-- 新增：条件构建器区域 -->
+                        <div id="builderConditionInput" class="form-group hidden">
+                            <div id="conditionBuilder"></div>
+                            <!-- 新增：实时显示构建器生成的条件表达式 -->
+                            <label class="mt-1 mb-1" for="builderConditionPreview"><strong>生成的逻辑判断条件：</strong></label>
+                            <textarea id="builderConditionPreview" class="form-control" rows="2" readonly></textarea>
+                        </div>
+                        <div class="operator-help">
+                            <strong>输入说明：</strong><br>
+                            <strong>运算符（优先级从高到低）:</strong><code>()</code> - 明确运算优先级；<code>!</code> - 逻辑非；<code>*</code> -
+                            乘；<code>/</code> - 除；<code>%</code> - 取模；<code>+</code> - 加；<code>-</code> -
+                            减；<strong>比较运算符：</strong><code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code> -
+                            小于；<code>&lt;=</code> - 小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> -
+                            逻辑与；<code>||</code> - 逻辑或；<br>
+                            <strong>变量名:</strong><code>a</code>,<code>b</code>,<code>c</code>,...,<code>z</code>,<code>aa</code>,<code>ab</code>,...对应
+                            A类卡, B类卡, ...,
+                            Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
+                            <strong>使用提示：</strong>计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易与逻辑判断条件混淆的名称(如a>1)。建议使用纯中文名。<br>
+                            <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。
+                            <br>
+                        </div>
                     </div>
                 </div>
+                <div class="calculation-column">
+                    <!-- 计算按钮组 -->
+                    <div class="calculation-actions mt-2 mb-2">
+                        <button onclick="calculate()" class="btn btn--primary">精确计算</button>
+                        <button onclick="monteCarloCalculate()" class="btn btn--secondary">快速估算</button>
+                        <button onclick="cancelCalculation()" id="cancelBtn" class="btn btn--danger hidden">取消计算</button>
+                    </div>
+                    <div class="calculation-actions mt-2 mb-2">
+                        <button onclick="exportCalculationRecords()" class="btn btn--outline">导出记录</button>
+                        <button onclick="clearCalculationRecords()" class="btn btn--danger">删除记录</button>
+                    </div>
+                    <!-- 进度条 -->
+                    <div id="progressContainer" class="progress-container hidden">
+                        <div class="form-group">
+                            <label>计算进度</label>
+                            <progress id="calculationProgress" value="0" max="100"></progress>
+                            <div id="progressText" class="text-center">等待计算...</div>
+                        </div>
+                    </div>
+                    <!-- 结果输出 -->
+                    <div class="result-section">
+                        <h2 class="mt-1 mb-2">计算结果</h2>
+                        <div class="result-grid grid">
+                            <div class="form-group">
+                                <label for="probability">概率</label>
+                                <input type="text" id="probability" class="form-control" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="validCombinations">满足条件的组合数</label>
+                                <input type="text" id="validCombinations" class="form-control" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="totalCombinations">总组合数</label>
+                                <input type="text" id="totalCombinations" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
             <div class="source-info">
                 <p class="mb-1 mt-6">
                     该工具部分代码与思路来源于<a href="https://tieba.baidu.com/home/main?id=tb.1.700dbce0.kfzKa-FBDB-cm-gMSey3Yw"

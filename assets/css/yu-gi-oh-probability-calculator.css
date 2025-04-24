@@ -236,3 +236,23 @@
     width: auto !important;
     min-width: auto !important;
 }
+
+/* 新增：左右分栏布局样式 */
+.condition-results-container {
+    display: flex;
+    gap: var(--space-xl);
+}
+
+.condition-column {
+    flex: 1;
+}
+
+.calculation-column {
+    flex: 1;
+}
+
+@media (max-width: 1024px) {
+    .condition-results-container {
+        flex-direction: column;
+    }
+}
