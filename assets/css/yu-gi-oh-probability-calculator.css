@@ -244,11 +244,13 @@
 }
 
 .condition-column {
-    flex: 1;
+    flex: 1 1 100px;
+    min-width: 0;
 }
 
 .calculation-column {
-    flex: 1;
+    flex: 1 1 100px;
+    min-width: 0;
 }
 
 @media (max-width: 1024px) {
