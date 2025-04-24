@@ -152,7 +152,7 @@ h4,
 h5,
 h6 {
   color: var(--color-primary);
-  margin: 0.5em 0;
+  margin-bottom: 0.5em;
   line-height: 1.2;
   font-weight: 700;
 }

@@ -29,7 +29,7 @@
 .main-content {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    gap: var(--space-xl);
+    gap: var(--space-lg);
 }
 
 .form-control {
