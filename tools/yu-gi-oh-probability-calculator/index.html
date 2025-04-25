@@ -345,7 +345,8 @@ a + b >= 3  // A和B类卡合计至少3张
                             A类卡, B类卡, ...,
                             Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
                             <strong>使用提示：</strong>计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易与逻辑判断条件混淆的名称(如a>1)。建议使用纯中文名。<br>
-                            <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。
+                            <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。<br>
+                            <strong>注意：</strong>当卡种类和抽卡数较高时，计算时间会呈指数级上升，此时推荐使用快速估算。
                         </div>
                         <!-- 新增：条件构建器区域 -->
                         <div id="builderConditionInput" class="form-group hidden">
@@ -401,15 +402,13 @@ a + b >= 3  // A和B类卡合计至少3张
             <div class="operator-help-desktop">
                 <strong>输入说明：</strong><br>
                 <strong>运算符（优先级从高到低）:</strong><code>()</code> - 明确运算优先级；<code>!</code> - 逻辑非；<code>*</code> -
-                乘；<code>/</code> - 除；<code>%</code> - 取模；<code>+</code> - 加；<code>-</code> -
-                减；<strong>比较运算符：</strong><code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code> -
-                小于；<code>&lt;=</code> - 小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> -
-                逻辑与；<code>||</code> - 逻辑或；<br>
+                乘；<code>/</code> - 除；<code>%</code> - 取模；<code>+</code> - 加；<code>-</code> - 减；<strong>比较运算符：</strong><code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code> - 小于；<code>&lt;=</code> - 小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> - 逻辑与；<code>||</code> - 逻辑或；<br>
                 <strong>变量名:</strong><code>a</code>,<code>b</code>,<code>c</code>,...,<code>z</code>,<code>aa</code>,<code>ab</code>,...对应
                 A类卡, B类卡, ...,
                 Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
                 <strong>使用提示：</strong>计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易与逻辑判断条件混淆的名称(如a>1)。建议使用纯中文名。<br>
-                <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。
+                <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。<br>
+                <strong>注意：</strong>当卡种类和抽卡数较高时，计算时间会呈指数级上升，此时推荐使用快速估算。
             </div>
             <div class="source-info">
                 <p class="mb-1 mt-6">
