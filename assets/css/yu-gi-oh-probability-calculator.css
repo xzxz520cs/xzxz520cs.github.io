@@ -201,6 +201,13 @@
 }
 
 /* 响应式设计：移动设备样式适配 */
+
+@media (max-width: 1024px) {
+    .draw-inputs {
+        flex-wrap: wrap;
+    }
+}
+
 @media (max-width: 768px) {
     .deck-management {
         grid-template-columns: 1fr;
@@ -223,6 +230,10 @@
     .btn-group {
         display: flex;
         gap: var(--space-sm);
+    }
+
+    .draw-inputs {
+        flex-wrap: nowrap;
     }
 
     .condition-builder,
@@ -269,13 +280,16 @@
 .operator-help-mobile {
     display: none;
 }
+
 .operator-help-desktop {
     display: block;
 }
+
 @media (max-width: 1024px) {
     .operator-help-mobile {
         display: block;
     }
+
     .operator-help-desktop {
         display: none;
     }

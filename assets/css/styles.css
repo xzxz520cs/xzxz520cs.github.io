@@ -692,7 +692,7 @@ textarea {
 /* 工具类：弹性布局与常用辅助类 */
 .flex {
   display: flex;
-  gap: var(--space-md);
+  gap: var(--space-xs);
 }
 
 .flex--column {
