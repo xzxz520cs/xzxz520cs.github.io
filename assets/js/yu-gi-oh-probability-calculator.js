@@ -376,7 +376,6 @@ function calculate() {
         // 显示进度条和重置结果区域
         document.getElementById('calculationProgress').value = 0;
         document.getElementById('progressText').textContent = '计算中: 0%  计算用时: 0秒';
-        document.getElementById('progressContainer').classList.remove('hidden');
 
         document.getElementById('probability').value = '计算中...';
         document.getElementById('validCombinations').value = '计算中...';
@@ -682,7 +681,6 @@ function monteCarloCalculate() {
         document.getElementById('cancelBtn').classList.remove('hidden');
         document.getElementById('calculationProgress').value = 0;
         document.getElementById('progressText').textContent = '蒙特卡洛模拟计算中: 0%  用时: 0秒';
-        document.getElementById('progressContainer').classList.remove('hidden');
 
         // 创建用于蒙特卡洛模拟计算的 Worker
         const simulationWorker = new Worker(URL.createObjectURL(new Blob([`

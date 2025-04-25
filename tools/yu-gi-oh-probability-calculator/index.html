@@ -370,7 +370,7 @@ a + b >= 3  // A和B类卡合计至少3张
                         <button onclick="clearCalculationRecords()" class="btn btn--danger">删除记录</button>
                     </div>
                     <!-- 进度条 -->
-                    <div id="progressContainer" class="progress-container hidden">
+                    <div id="progressContainer" class="progress-container">
                         <div class="form-group">
                             <label>计算进度</label>
                             <progress id="calculationProgress" value="0" max="100"></progress>
@@ -386,7 +386,7 @@ a + b >= 3  // A和B类卡合计至少3张
                                 <input type="text" id="probability" class="form-control" readonly>
                             </div>
                             <div class="form-group">
-                                <label for="validCombinations">满足条件的组合数</label>
+                                <label for="validCombinations">满足条件组合数</label>
                                 <input type="text" id="validCombinations" class="form-control" readonly>
                             </div>
                             <div class="form-group">
