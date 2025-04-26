@@ -186,12 +186,13 @@ function updatePieChart() {
     if (chart) chart.destroy();
 
     chart = new Chart(ctx, {
-        type: 'pie',
+        type: 'doughnut',
         data: {
             labels: labels,
             datasets: [{
                 data: data,
-                backgroundColor: backgroundColors
+                backgroundColor: backgroundColors,
+                borderWidth: 0
             }]
         },
         options: {
@@ -199,10 +200,10 @@ function updatePieChart() {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'top',
+                    position: 'right',
                     labels: {
                         font: {
-                            size: 10
+                            size: 8
                         }
                     }
                 }

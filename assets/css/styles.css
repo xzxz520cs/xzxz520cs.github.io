@@ -830,3 +830,15 @@ textarea {
 .hidden {
   display: none;
 }
+
+/* 横向分隔线 */
+.separator-horizontal {
+    border: none;
+    border-top: 1px dashed var(--color-border);
+}
+
+/* 竖向分隔线 */
+.separator-vertical {
+    width: 0;
+    border-left: 1px dashed var(--color-border);
+}
