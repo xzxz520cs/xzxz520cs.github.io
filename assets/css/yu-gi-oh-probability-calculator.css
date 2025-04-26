@@ -50,20 +50,21 @@
     justify-content: space-between;
 }
 
+.Pie-composition {
+    height: 100%;
+}
+
 /* 饼图展示容器样式 */
 .chart-section {
-    position: relative;
-    width: 100%;
-    height: 110px;
+    height: 70%;
 }
 
 /* 饼图 canvas 自适应样式 */
 #deckPieChart {
-    width: 100% ;
-    height: 100% ;
+    width: auto;
+    height: 0px;
     max-width: 100%;
     max-height: 100%;
-    aspect-ratio: 1;
 }
 
 .draw-inputs {
@@ -215,6 +216,10 @@
         grid-column: 1;
         justify-content: space-between;
     }
+
+    .chart-section {
+        height: 80%;
+    }    
 
     .main-content {
         grid-template-columns: 1fr;
