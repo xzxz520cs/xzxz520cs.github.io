@@ -294,3 +294,16 @@
         display: none;
     }
 }
+
+.condition-results-container .condition-column {
+    display: flex;
+    flex-direction: column;
+}
+
+#manualConditionInput {
+    height: 100%;
+}
+
+#manualConditionInput textarea {
+    height: 100%;
+}
