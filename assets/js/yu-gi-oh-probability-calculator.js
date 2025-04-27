@@ -1165,9 +1165,9 @@ function switchConditionInputMode(mode, skipConfirm = false) {
     if (!skipConfirm) {
         let msg = "";
         if (mode === 'builder') {
-            msg = "切换到条件构建器后，不支持字符 */%，是否继续？";
+            msg = "将当前逻辑判断条件转化至条件构建器时优先级嵌套可能会混乱，不支持转化字符 */%，是否继续切换到条件构建器输入？";
         } else if (mode === 'manual') {
-            msg = "是否切换至手动输入？";
+            msg = "是否转化至手动输入？";
         }
         if (!confirm(msg)) return false;
     }
