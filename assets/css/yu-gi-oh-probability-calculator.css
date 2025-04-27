@@ -195,8 +195,7 @@
 }
 
 .source-info {
-    display: flex;
-    flex-direction: row-reverse;
+    text-align: right;
 }
 
 /* 响应式设计：移动设备样式适配 */
