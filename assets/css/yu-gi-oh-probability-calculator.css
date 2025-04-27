@@ -56,7 +56,7 @@
 
 /* 饼图展示容器样式 */
 .chart-section {
-    height: 70%;
+    height: calc(100% - 55px);
 }
 
 /* 饼图 canvas 自适应样式 */
