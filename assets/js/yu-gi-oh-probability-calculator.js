@@ -182,6 +182,13 @@ function updatePieChart() {
         }
     }
 
+    // 如果所有卡牌数量均为 0，则显示默认的“？？？”，数量为1
+    if (labels.length === 0) {
+        labels.push("？？？");
+        data.push(1);
+        backgroundColors.push(getColor(0));
+    }
+
     const ctx = document.getElementById('deckPieChart').getContext('2d');
     if (chart) chart.destroy();
 
