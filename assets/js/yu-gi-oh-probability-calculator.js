@@ -1247,6 +1247,7 @@ function setupCardNameInputListener() {
             if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
                 builderRender();
             }
+            updatePieChart();  // 新增：当卡名变化后更新饼图
         }
     });
     cardInputs.addEventListener('blur', function (e) {
@@ -1254,6 +1255,7 @@ function setupCardNameInputListener() {
             if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
                 builderRender();
             }
+            updatePieChart();  // 新增：当卡名变化后更新饼图
         }
     }, true);
 }
