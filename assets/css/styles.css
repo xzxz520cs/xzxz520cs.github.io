@@ -695,6 +695,10 @@ textarea {
   gap: var(--space-xs);
 }
 
+.flex-1 {
+  flex: 1;
+}
+
 .flex--column {
   flex-direction: column;
   gap: var(--space-sm);

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="文本转语音工具">
+  <meta name="keywords" content="文本转语音, 工具">
+  <title>文本转语音工具 - 天天发蛋糕的工具箱</title>
+  <link rel="stylesheet" href="../../assets/css/styles.css">
+</head>
+
+<body>
+  <!-- 模板页头 -->
+  <header class="site-header">
+    <div class="container">
+      <div class="site-title">
+        <a href="/" style="color: inherit; text-decoration: none;">
+          <span class="site-title">天天发蛋糕的工具箱</span>
+        </a>
+      </div>
+      <label for="menu-toggle-checkbox" class="menu-toggle" aria-label="打开菜单">☰</label>
+      <nav class="nav-menu">
+        <ul class="nav-list">
+          <li class="nav-item dropdown">
+            <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
+            <ul class="dropdown-menu">
+              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a></li>
+              <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+              <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                  class="dropdown-item">恢复关闭的标签页</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <input type="checkbox" id="menu-toggle-checkbox" hidden>
+    <div class="drawer">
+      <div class="container">
+        <label for="menu-toggle-checkbox" class="menu-toggle close-menu" aria-label="关闭菜单">×</label>
+      </div>
+      <nav class="drawer-menu">
+        <ul class="drawer-list">
+          <li class="drawer-item">
+            <a href="#" class="drawer-link">工具</a>
+            <ul class="drawer-submenu">
+              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a></li>
+              <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+              <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                  class="drawer-subitem">恢复关闭的标签页</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <label for="menu-toggle-checkbox" class="drawer-overlay"></label>
+  </header>
+
+  <!-- 主内容区域 -->
+  <main class="container">
+    <div class="card card--elevated">
+      <h1 class="mt-0">文本转语音</h1>
+      <div class="form-group mt-2">
+        <label for="apiKey">API Key</label>
+        <input type="text" id="apiKey" placeholder="请输入你的API Key" name="apiKey" autocomplete="on" class="form-control">
+      </div>
+      <div class="form-group mt-2">
+        <label for="apiUrl">API URL</label>
+        <input type="text" id="apiUrl" placeholder="请输入你的API URL" name="apiUrl" class="form-control">
+      </div>
+      <div class="flex mt-2">
+        <div class="form-group flex-1">
+          <label for="model">模型</label>
+          <select id="model" class="form-control">
+            <option value="tts-1">tts-1</option>
+            <option value="tts-1-hd">tts-1-hd</option>
+          </select>
+        </div>
+        <div class="form-group flex-1">
+          <label for="voice">声音</label>
+          <select id="voice" class="form-control">
+            <option value="alloy">alloy</option>
+            <option value="echo">echo</option>
+            <option value="fable">fable</option>
+            <option value="onyx">onyx</option>
+            <option value="nova">nova</option>
+            <option value="shimmer">shimmer</option>
+          </select>
+        </div>
+      </div>
+      <!-- 格式选择 -->
+      <div class="form-group mt-2">
+        <label for="responseFormat">格式</label>
+        <select id="responseFormat" class="form-control">
+          <option value="mp3" selected>mp3</option>
+          <option value="opus">opus</option>
+          <option value="aac">aac</option>
+          <option value="flac">flac</option>
+          <option value="wav">wav</option>
+          <option value="pcm">pcm</option>
+        </select>
+      </div>
+      <!-- 语速输入滑条 -->
+      <div class="form-group mt-2">
+        <label for="speed">语速 <span id="speedValue">1.0</span></label>
+        <input type="range" id="speed" value="1.0" class="form-control" step="0.01" min="0.25" max="4.0">
+      </div>
+      <div class="form-group mt-2">
+        <label for="inputText">文本</label>
+        <textarea id="inputText" placeholder="请输入要转换为语音的文本" class="form-control" maxlength="4096" rows="4"></textarea>
+      </div>
+      <div class="form-group mt-3">
+        <button id="convertBtn" class="btn btn--primary">转换</button>
+      </div>
+      <p id="status" class="mt-2"></p>
+      <!-- 新增试听与下载功能区域 -->
+      <div id="previewContainer" style="display:none; margin-top:1em;"></div>
+      <!-- 新增清空试听按钮 -->
+      <div class="form-group mt-2">
+        <button id="clearPreviewsBtn" class="btn btn--secondary">清空试听</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 模板页脚 -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-title">关于作者</h3>
+          <ul class="footer-links">
+            <li><a href="mailto:ttfdg520cs@gmail.com">ttfdg520cs@gmail.com</a></li>
+            <li><a href="https://space.bilibili.com/1446349" target="_blank">Bilibili主页</a></li>
+            <li><a href="https://github.com/xzxz520cs" target="_blank">GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="text-muted">© 2025 天天发蛋糕的工具箱</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 脚本部分 -->
+  <script>
+    // 新增：在页面加载时初始化并存储API Key和API URL
+    document.addEventListener('DOMContentLoaded', () => {
+      const apiKeyInput = document.getElementById("apiKey");
+      const apiUrlInput = document.getElementById("apiUrl");
+      if (localStorage.getItem("apiKey")) {
+        apiKeyInput.value = localStorage.getItem("apiKey");
+      }
+      if (localStorage.getItem("apiUrl")) {
+        apiUrlInput.value = localStorage.getItem("apiUrl");
+      }
+      // 新增：获取 select 元素并加载保存的值
+      const modelSelect = document.getElementById("model");
+      const voiceSelect = document.getElementById("voice");
+      const responseFormatSelect = document.getElementById("responseFormat");
+      if (localStorage.getItem("model")) {
+        modelSelect.value = localStorage.getItem("model");
+      }
+      if (localStorage.getItem("voice")) {
+        voiceSelect.value = localStorage.getItem("voice");
+      }
+      if (localStorage.getItem("responseFormat")) {
+        responseFormatSelect.value = localStorage.getItem("responseFormat");
+      }
+      apiKeyInput.addEventListener("input", () => {
+        localStorage.setItem("apiKey", apiKeyInput.value.trim());
+      });
+      apiUrlInput.addEventListener("input", () => {
+        localStorage.setItem("apiUrl", apiUrlInput.value.trim());
+      });
+      // 新增：监听 select 元素变化，保存到 localStorage
+      modelSelect.addEventListener("change", () => {
+        localStorage.setItem("model", modelSelect.value);
+      });
+      voiceSelect.addEventListener("change", () => {
+        localStorage.setItem("voice", voiceSelect.value);
+      });
+      responseFormatSelect.addEventListener("change", () => {
+        localStorage.setItem("responseFormat", responseFormatSelect.value);
+      });
+    });
+
+    // 更新语速显示
+    document.getElementById("speed").addEventListener("input", (e) => {
+      document.getElementById("speedValue").textContent = e.target.value;
+    });
+
+    // 在脚本开始处增加全局 AbortController 变量
+    let currentAbortController = null;
+
+    document.getElementById("convertBtn").addEventListener("click", async () => {
+      // 如果存在正在进行的请求，则取消该请求
+      if (currentAbortController) {
+        currentAbortController.abort();
+      }
+      currentAbortController = new AbortController();
+
+      const apiKey = document.getElementById("apiKey").value.trim();
+      const apiUrl = document.getElementById("apiUrl").value.trim();
+      const model = document.getElementById("model").value.trim();
+      const voice = document.getElementById("voice").value.trim();
+      const inputText = document.getElementById("inputText").value.trim();
+      const responseFormat = document.getElementById("responseFormat").value.trim();
+      const speed = parseFloat(document.getElementById("speed").value) || 1.0;
+
+      if (!apiKey || !apiUrl || !inputText) {
+        document.getElementById("status").textContent = "请输入API Key、API URL和文本！";
+        return;
+      }
+      document.getElementById("status").textContent = "处理中...";
+
+      const data = {
+        model: model,
+        input: inputText,
+        voice: voice,
+        response_format: responseFormat,
+        speed: speed
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + apiKey,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data),
+          signal: currentAbortController.signal   // 添加信号控制
+        });
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          // 修改文件名生成：日期-时间-音频文本（取前20个字符）
+          const dateObj = new Date();
+          const datePart = dateObj.toISOString().split('T')[0];
+          const timePart = dateObj.toTimeString().split(' ')[0].replace(/:/g, '-');
+          const textPart = inputText.substring(0, 20);
+          const fileName = `${datePart}-${timePart}-${textPart}.${responseFormat}`;
+
+          // 新增：为每次转换创建独立的试听和下载块，不覆盖旧的记录
+          const audioItem = document.createElement("div");
+          audioItem.className = "audio-item";
+          // 新增展示文件名标签，便于识别
+          const audioLabel = document.createElement("p");
+          audioLabel.textContent = fileName;
+          audioLabel.style.fontWeight = "bold";
+          const audio = document.createElement("audio");
+          audio.controls = true;
+          audio.style.width = "100%";
+          audio.src = url;
+          const downloadBtn = document.createElement("button");
+          downloadBtn.className = "btn btn--primary mt-2";
+          downloadBtn.textContent = "下载音频";
+          downloadBtn.onclick = () => {
+            const a = document.createElement("a");
+            a.style.display = "none";
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          };
+          audioItem.appendChild(audioLabel);
+          audioItem.appendChild(audio);
+          audioItem.appendChild(downloadBtn);
+
+          // 追加至预览区域（不清空旧记录）
+          const previewContainer = document.getElementById("previewContainer");
+          previewContainer.appendChild(audioItem);
+          previewContainer.style.display = "block";
+
+          document.getElementById("status").textContent = "音频已生成，请试听或下载。";
+        } else {
+          document.getElementById("status").textContent = "请求失败，状态码：" + response.status;
+        }
+      } catch (error) {
+        document.getElementById("status").textContent = "请求出现错误：" + error;
+      } finally {
+        currentAbortController = null;
+      }
+    });
+
+    // 新增：清空所有试听按钮的处理
+    document.getElementById("clearPreviewsBtn").addEventListener("click", () => {
+      const previewContainer = document.getElementById("previewContainer");
+      previewContainer.innerHTML = "";
+      previewContainer.style.display = "none";
+    });
+  </script>
+</body>
+
+</html>
