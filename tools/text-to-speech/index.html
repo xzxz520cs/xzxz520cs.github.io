@@ -269,9 +269,9 @@
           audioItem.appendChild(audio);
           audioItem.appendChild(downloadBtn);
 
-          // 追加至预览区域（不清空旧记录）
+          // 追加至预览区域（不清空旧记录），新生成的放在上面
           const previewContainer = document.getElementById("previewContainer");
-          previewContainer.appendChild(audioItem);
+          previewContainer.insertBefore(audioItem, previewContainer.firstChild);
           previewContainer.style.display = "block";
 
           document.getElementById("status").textContent = "音频已生成，请试听或下载。";
