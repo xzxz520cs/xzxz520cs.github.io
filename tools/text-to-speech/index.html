@@ -279,7 +279,12 @@
           document.getElementById("status").textContent = "请求失败，状态码：" + response.status;
         }
       } catch (error) {
-        document.getElementById("status").textContent = "请求出现错误：" + error;
+        console.error(error); // 新增：打印错误详情至控制台
+        if (error.message && error.message.includes("Failed to fetch")) {
+          document.getElementById("status").textContent = "请求出现错误：无法连接到服务器，请检查API URL是否正确。";
+        } else {
+          document.getElementById("status").textContent = "请求出现错误：" + error;
+        }
       } finally {
         currentAbortController = null;
       }
