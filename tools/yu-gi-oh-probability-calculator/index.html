@@ -9,6 +9,15 @@
     <meta name="keywords" content="游戏王, 概率计算, 卡组工具">
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/yu-gi-oh-probability-calculator.css">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYJXFSRHF5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-HYJXFSRHF5');
+    </script>
 </head>
 
 <body>
@@ -274,7 +283,7 @@
                 <!-- 右侧区域 -->
                 <div class="right-section">
                     <!-- 饼图容器 -->
-                    <div class="Pie-composition">                    
+                    <div class="Pie-composition">
                         <h2 class="mt-1 mb-2">卡组构成</h2>
                         <div class="chart-section">
                             <canvas id="deckPieChart"></canvas>
@@ -400,7 +409,10 @@ a + b >= 3  // A和B类卡合计至少3张
             <div class="operator-help-desktop">
                 <strong>输入说明：</strong><br>
                 <strong>运算符（优先级从高到低）:</strong><code>()</code> - 明确运算优先级；<code>!</code> - 逻辑非；<code>*</code> -
-                乘；<code>/</code> - 除；<code>%</code> - 取模；<code>+</code> - 加；<code>-</code> - 减；<strong>比较运算符：</strong><code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code> - 小于；<code>&lt;=</code> - 小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> - 逻辑与；<code>||</code> - 逻辑或；<br>
+                乘；<code>/</code> - 除；<code>%</code> - 取模；<code>+</code> - 加；<code>-</code> -
+                减；<strong>比较运算符：</strong><code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code> -
+                小于；<code>&lt;=</code> - 小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> -
+                逻辑与；<code>||</code> - 逻辑或；<br>
                 <strong>变量名:</strong><code>a</code>,<code>b</code>,<code>c</code>,...,<code>z</code>,<code>aa</code>,<code>ab</code>,...对应
                 A类卡, B类卡, ...,
                 Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
@@ -416,7 +428,8 @@ a + b >= 3  // A和B类卡合计至少3张
                         target="_blank">游戏王概率计算器</a>。条件构建器的实现参考了x6ud的<a href="https://gitee.com/x6ud/ygo-draw-simulator"
                         target="_blank">游戏王上手率测试器</a>。<br>
                 </div>
-                <div>下载使用本工具的<a href="tools/yu-gi-oh-probability-calculator/游戏王概率计算器 - 本地版 - 2025-04-27.zip">本地版</a>。</div>
+                <div>下载使用本工具的<a href="tools/yu-gi-oh-probability-calculator/游戏王概率计算器 - 本地版 - 2025-04-27.zip">本地版</a>。
+                </div>
             </div>
         </div>
     </main>
