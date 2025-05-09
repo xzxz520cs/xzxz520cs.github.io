@@ -273,6 +273,11 @@ img {
   text-decoration: none;
 }
 
+/* 鼠标悬停时依然不显示下划线 */
+.site-title-link:hover {
+  text-decoration: none;
+}
+
 /* 导航菜单布局 */
 .nav-menu {
   display: flex;
