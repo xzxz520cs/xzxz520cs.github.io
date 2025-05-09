@@ -267,6 +267,12 @@ img {
   color: var(--color-text-light);
 }
 
+/* 页头链接样式 */
+.site-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
 /* 导航菜单布局 */
 .nav-menu {
   display: flex;
