@@ -154,11 +154,11 @@
     document.addEventListener('DOMContentLoaded', () => {
       const apiKeyInput = document.getElementById("apiKey");
       const apiUrlInput = document.getElementById("apiUrl");
-      if (localStorage.getItem("apiKey")) {
-        apiKeyInput.value = localStorage.getItem("apiKey");
+      if (localStorage.getItem("tts_apiKey")) {
+        apiKeyInput.value = localStorage.getItem("tts_apiKey");
       }
-      if (localStorage.getItem("apiUrl")) {
-        apiUrlInput.value = localStorage.getItem("apiUrl");
+      if (localStorage.getItem("tts_apiUrl")) {
+        apiUrlInput.value = localStorage.getItem("tts_apiUrl");
       }
       // 新增：获取 select 元素并加载保存的值
       const modelSelect = document.getElementById("model");
@@ -174,10 +174,10 @@
         responseFormatSelect.value = localStorage.getItem("responseFormat");
       }
       apiKeyInput.addEventListener("input", () => {
-        localStorage.setItem("apiKey", apiKeyInput.value.trim());
+        localStorage.setItem("tts_apiKey", apiKeyInput.value.trim());
       });
       apiUrlInput.addEventListener("input", () => {
-        localStorage.setItem("apiUrl", apiUrlInput.value.trim());
+        localStorage.setItem("tts_apiUrl", apiUrlInput.value.trim());
       });
       // 新增：监听 select 元素变化，保存到 localStorage
       modelSelect.addEventListener("change", () => {
