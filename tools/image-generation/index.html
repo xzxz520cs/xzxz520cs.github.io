@@ -184,6 +184,7 @@
   <script>
     // 初始化：加载并保存 API Key 和 API URL 到 localStorage
     document.addEventListener('DOMContentLoaded', () => {
+      // 加载 API Key 和 API URL
       const apiKeyInput = document.getElementById("apiKey");
       const apiUrlInput = document.getElementById("apiUrl");
       if (localStorage.getItem("image_apiKey")) {
@@ -197,6 +198,63 @@
       });
       apiUrlInput.addEventListener("input", () => {
         localStorage.setItem("image_apiUrl", apiUrlInput.value.trim());
+      });
+
+      // 新增：加载并保存其它设置
+      const nInput = document.getElementById("n");
+      if (localStorage.getItem("image_n")) {
+        nInput.value = localStorage.getItem("image_n");
+      }
+      nInput.addEventListener("input", () => {
+        localStorage.setItem("image_n", nInput.value);
+      });
+
+      const sizeSelect = document.getElementById("size");
+      if (localStorage.getItem("image_size")) {
+        sizeSelect.value = localStorage.getItem("image_size");
+      }
+      sizeSelect.addEventListener("change", () => {
+        localStorage.setItem("image_size", sizeSelect.value);
+      });
+
+      const qualitySelect = document.getElementById("quality");
+      if (localStorage.getItem("image_quality")) {
+        qualitySelect.value = localStorage.getItem("image_quality");
+      }
+      qualitySelect.addEventListener("change", () => {
+        localStorage.setItem("image_quality", qualitySelect.value);
+      });
+
+      const formatSelect = document.getElementById("format");
+      if (localStorage.getItem("image_format")) {
+        formatSelect.value = localStorage.getItem("image_format");
+      }
+      formatSelect.addEventListener("change", () => {
+        localStorage.setItem("image_format", formatSelect.value);
+      });
+
+      const backgroundSelect = document.getElementById("background");
+      if (localStorage.getItem("image_background")) {
+        backgroundSelect.value = localStorage.getItem("image_background");
+      }
+      backgroundSelect.addEventListener("change", () => {
+        localStorage.setItem("image_background", backgroundSelect.value);
+      });
+
+      const compressionInput = document.getElementById("compression");
+      if (localStorage.getItem("image_compression")) {
+        compressionInput.value = localStorage.getItem("image_compression");
+      }
+      compressionInput.addEventListener("input", () => {
+        localStorage.setItem("image_compression", compressionInput.value);
+      });
+
+      const moderationSelect = document.getElementById("moderation");
+      if (localStorage.getItem("image_moderation")) {
+        moderationSelect.value = localStorage.getItem("image_moderation");
+      }
+      moderationSelect.addEventListener("change", () => {
+        localStorage.setItem("image_moderation", moderationSelect.value);
       });
     });
 
