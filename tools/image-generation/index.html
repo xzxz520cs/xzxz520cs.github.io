@@ -339,9 +339,9 @@
 
         if (response.ok) {
           const result = await response.json();
-          // 从返回数据中提取 data, created, usage 等
-          const { data, created, usage } = result;
-          console.log("API返回内容:", { created, usage });
+          // 提取除图片数据以外的信息并打印到控制台
+          const { data, ...otherInfo } = result;
+          console.log("API返回内容(除图片数据):", otherInfo);
           if (data && data.length > 0 && data[0].b64_json) {
             const imgData = data[0].b64_json;
             const mime = (formatVal === "jpeg" || formatVal === "webp") ? formatVal : "png";
@@ -445,9 +445,11 @@
         });
         if (response.ok) {
           const result = await response.json();
-          // 从返回数据中提取所需字段，并输出其他数据到控制台
-          const { data, created, usage } = result;
-          console.log("API返回内容:", { created, usage });
+          // 提取除图片数据以外的信息并打印到控制台
+          const { data, ...otherInfo } = result;
+          console.log("API返回内容(除图片数据):", otherInfo);
+          // 获取输出格式以确定 MIME 类型
+          const formatVal = document.getElementById("format").value;
           if (data && data.length > 0 && data[0].b64_json) {
             const imgData = data[0].b64_json;
             const mime = (formatVal === "jpeg" || formatVal === "webp") ? formatVal : "png";
