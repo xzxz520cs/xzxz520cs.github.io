@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="图像生成工具">
+  <meta name="keywords" content="图像生成, 工具">
+  <title>图像生成 - 天天发蛋糕的工具箱</title>
+  <link rel="stylesheet" href="../../assets/css/styles.css">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYJXFSRHF5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-HYJXFSRHF5');
+  </script>
+</head>
+
+<body>
+  <!-- 模板页头 -->
+  <header class="site-header">
+    <div class="container">
+      <div class="site-title">
+        <a href="/" class="site-title-link">
+          <span class="site-title">天天发蛋糕的工具箱</span>
+        </a>
+      </div>
+      <label for="menu-toggle-checkbox" class="menu-toggle" aria-label="打开菜单">☰</label>
+      <nav class="nav-menu">
+        <ul class="nav-list">
+          <li class="nav-item dropdown">
+            <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
+            <ul class="dropdown-menu">
+              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a></li>
+              <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+              <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                  class="dropdown-item">恢复关闭的标签页</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <input type="checkbox" id="menu-toggle-checkbox" hidden>
+    <div class="drawer">
+      <div class="container">
+        <label for="menu-toggle-checkbox" class="menu-toggle close-menu" aria-label="关闭菜单">×</label>
+      </div>
+      <nav class="drawer-menu">
+        <ul class="drawer-list">
+          <li class="drawer-item">
+            <a href="#" class="drawer-link">工具</a>
+            <ul class="drawer-submenu">
+              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a></li>
+              <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+              <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                  class="drawer-subitem">恢复关闭的标签页</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <label for="menu-toggle-checkbox" class="drawer-overlay"></label>
+  </header>
+
+  <!-- 主内容区域 -->
+  <main class="container">
+    <div class="card card--elevated">
+      <h1 class="mt-0">图像生成</h1>
+      <div class="form-group mt-2">
+        <label for="apiKey">API Key</label>
+        <input type="text" id="apiKey" placeholder="请输入你的 API Key" name="apiKey" autocomplete="on" class="form-control">
+      </div>
+      <div class="form-group mt-2">
+        <label for="apiUrl">API URL</label>
+        <input type="text" id="apiUrl" placeholder="请输入你的 API URL" name="apiUrl" class="form-control">
+      </div>
+      <!-- 固定模型为 gpt-image-1 -->
+      <div class="form-group mt-2">
+        <label>模型</label>
+        <input type="text" value="gpt-image-1" class="form-control" readonly>
+      </div>
+      <div class="form-group mt-2">
+        <label for="prompt">提示语</label>
+        <textarea id="prompt" placeholder="请输入生成图像的提示语" class="form-control" maxlength="1024" rows="3"></textarea>
+      </div>
+      <!-- 新增：生成数量 -->
+      <div class="form-group mt-2">
+        <label for="n">生成数量</label>
+        <input type="number" id="n" class="form-control" min="1" value="1">
+      </div>
+      <!-- 新增：上传输入图像（支持多选，用于生成或编辑） -->
+      <div class="form-group mt-2">
+        <label for="inputImage">上传输入图像</label>
+        <input type="file" id="inputImage" class="form-control" accept="image/*" multiple>
+      </div>
+      <!-- 新增：遮罩上传（用于编辑时局部修改） -->
+      <div class="form-group mt-2">
+        <label for="maskImage">上传遮罩图像（选填）</label>
+        <input type="file" id="maskImage" class="form-control" accept="image/*">
+      </div>
+      <!-- 可选：图像尺寸 -->
+      <div class="form-group mt-2">
+        <label for="size">图像尺寸</label>
+        <select id="size" class="form-control">
+          <option value="1024x1024" selected>1024x1024</option>
+          <option value="1024x1536">1024x1536</option>
+          <option value="1536x1024">1536x1024</option>
+          <option value="auto">auto</option>
+        </select>
+      </div>
+      <!-- 新增：图像质量设置 -->
+      <div class="form-group mt-2">
+        <label for="quality">图像质量</label>
+        <select id="quality" class="form-control">
+          <option value="low">低</option>
+          <option value="medium">中</option>
+          <option value="high">高</option>
+          <option value="auto" selected>auto</option>
+        </select>
+      </div>
+      <!-- 新增：输出格式 -->
+      <div class="form-group mt-2">
+        <label for="format">输出格式</label>
+        <select id="format" class="form-control">
+          <option value="png" selected>PNG</option>
+          <option value="jpeg">JPEG</option>
+          <option value="webp">WEBP</option>
+        </select>
+      </div>
+      <!-- 新增：背景设置 -->
+      <div class="form-group mt-2">
+        <label for="background">背景</label>
+        <select id="background" class="form-control">
+          <option value="opaque" selected>不透明</option>
+          <option value="transparent">透明</option>
+        </select>
+      </div>
+      <!-- 新增：压缩率 (仅在JPEG/WebP时生效) -->
+      <div class="form-group mt-2">
+        <label for="compression">压缩率 (0-100)</label>
+        <input type="number" id="compression" placeholder="请输入压缩率" class="form-control" min="0" max="100" value="0">
+      </div>
+      <!-- 新增：内容审核 -->
+      <div class="form-group mt-2">
+        <label for="moderation">内容审核</label>
+        <select id="moderation" class="form-control">
+          <option value="auto" selected>auto</option>
+          <option value="low">low</option>
+        </select>
+      </div>
+      <div class="form-group mt-3">
+        <button id="generateBtn" class="btn btn--primary">生成图像</button>
+        <button id="clearPreviewBtn" class="btn btn--secondary">清空预览</button>
+        <!-- 新增：编辑图像按钮，用于调用图片编辑接口 -->
+        <button id="editBtn" class="btn btn--tertiary">编辑图像</button>
+      </div>
+      <div id="previewContainer" class="hidden mt-2"></div>
+    </div>
+  </main>
+
+  <!-- 模板页脚 -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-title">关于作者</h3>
+          <ul class="footer-links">
+            <li><a href="mailto:ttfdg520cs@gmail.com">ttfdg520cs@gmail.com</a></li>
+            <li><a href="https://space.bilibili.com/1446349" target="_blank">Bilibili主页</a></li>
+            <li><a href="https://github.com/xzxz520cs" target="_blank">GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="text-muted">© 2025 天天发蛋糕的工具箱</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 脚本部分 -->
+  <script>
+    // 初始化：加载并保存 API Key 和 API URL 到 localStorage
+    document.addEventListener('DOMContentLoaded', () => {
+      const apiKeyInput = document.getElementById("apiKey");
+      const apiUrlInput = document.getElementById("apiUrl");
+      if (localStorage.getItem("image_apiKey")) {
+        apiKeyInput.value = localStorage.getItem("image_apiKey");
+      }
+      if (localStorage.getItem("image_apiUrl")) {
+        apiUrlInput.value = localStorage.getItem("image_apiUrl");
+      }
+      apiKeyInput.addEventListener("input", () => {
+        localStorage.setItem("image_apiKey", apiKeyInput.value.trim());
+      });
+      apiUrlInput.addEventListener("input", () => {
+        localStorage.setItem("image_apiUrl", apiUrlInput.value.trim());
+      });
+    });
+
+    // 新增：辅助函数，将文件转换为 DataURL（Base64）
+    function fileToDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("文件读取失败"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // 生成图像逻辑
+    document.getElementById("generateBtn").addEventListener("click", async () => {
+      const apiKey = document.getElementById("apiKey").value.trim();
+      const apiUrl = document.getElementById("apiUrl").value.trim();
+      const prompt = document.getElementById("prompt").value.trim();
+      const n = parseInt(document.getElementById("n").value) || 1;
+      const size = document.getElementById("size").value;
+      const quality = document.getElementById("quality").value;
+      const formatVal = document.getElementById("format").value;
+      const background = document.getElementById("background").value;
+      const compression = document.getElementById("compression").value;
+      const moderation = document.getElementById("moderation").value;
+      
+      if (!apiKey || !apiUrl || !prompt) {
+        alert("请输入 API Key、API URL 和提示语！");
+        return;
+      }
+      
+      const previewContainer = document.getElementById("previewContainer");
+      // 显示占位信息
+      const previewItem = document.createElement("div");
+      previewItem.className = "image-item mb-2 separator-horizontal";
+      previewItem.textContent = "处理中...";
+      previewContainer.insertBefore(previewItem, previewContainer.firstChild);
+      previewContainer.classList.remove("hidden");
+
+      const data = {
+        model: "gpt-image-1",
+        prompt: prompt,
+        n: n,
+        size: size,
+        quality: quality,
+        output_format: formatVal,
+        background: background,
+        moderation: moderation
+      };
+
+      if ((formatVal === "jpeg" || formatVal === "webp") && compression && parseInt(compression) > 0) {
+        data.output_compression = parseInt(compression);
+      }
+      
+      // 新增：处理上传的输入图像（如果存在）
+      const imageFileInput = document.getElementById("inputImage");
+      if (imageFileInput.files && imageFileInput.files.length > 0) {
+        // 若只传一张图，使用单张数据；若多张则只取第一张（或按需求全部处理）
+        try {
+          // 本例中仅处理第一张作为参考
+          const base64Image = await fileToDataURL(imageFileInput.files[0]);
+          data.input_image = base64Image;
+        } catch (e) {
+          console.error(e);
+          alert("读取上传的图像失败！");
+          return;
+        }
+      }
+      
+      const baseUrl = apiUrl.replace(/\/+$/, "");
+      const generationUrl = baseUrl + "/v1/images/generations";
+      
+      try {
+        const response = await fetch(generationUrl, {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + apiKey,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          // 从返回数据中提取 data, created, usage 等
+          const { data, created, usage } = result;
+          console.log("API返回内容:", { created, usage });
+          if (data && data.length > 0 && data[0].b64_json) {
+            const imgData = data[0].b64_json;
+            const mime = (formatVal === "jpeg" || formatVal === "webp") ? formatVal : "png";
+            const imageSrc = "data:image/" + mime + ";base64," + imgData;
+            previewItem.innerHTML = "";
+            const img = document.createElement("img");
+            img.className = "full-width";
+            img.src = imageSrc;
+            const caption = document.createElement("p");
+            caption.textContent = prompt;
+            previewItem.appendChild(caption);
+            previewItem.appendChild(img);
+          } else {
+            previewItem.textContent = "返回数据中无图片数据";
+          }
+        } else {
+          previewItem.textContent = "请求失败，状态码：" + response.status;
+        }
+      } catch (error) {
+        console.error("请求错误详情：", error);
+        previewItem.textContent = "请求出现错误：" + error;
+      }
+    });
+    
+    // 清空预览逻辑
+    document.getElementById("clearPreviewBtn").addEventListener("click", () => {
+      const previewContainer = document.getElementById("previewContainer");
+      previewContainer.innerHTML = "";
+      previewContainer.classList.add("hidden");
+    });
+    
+    // 编辑图像逻辑
+    document.getElementById("editBtn").addEventListener("click", async () => {
+      const apiKey = document.getElementById("apiKey").value.trim();
+      const apiUrl = document.getElementById("apiUrl").value.trim();
+      const prompt = document.getElementById("prompt").value.trim();
+      const quality = document.getElementById("quality").value;
+      const imageInput = document.getElementById("inputImage");
+      const maskInput = document.getElementById("maskImage");
+      
+      if (!apiKey || !apiUrl || !prompt) {
+        alert("请输入 API Key、API URL 和提示语！");
+        return;
+      }
+      if (!imageInput.files || imageInput.files.length === 0) {
+        alert("请上传要编辑的图像！");
+        return;
+      }
+      
+      // 转换所有上传的图像为 Base64 数组
+      const images = [];
+      for (let i = 0; i < imageInput.files.length; i++) {
+        try {
+          const imgBase64 = await fileToDataURL(imageInput.files[i]);
+          images.push(imgBase64);
+        } catch (e) {
+          console.error(e);
+          alert("读取上传的图像失败！");
+          return;
+        }
+      }
+      
+      const data = {
+        model: "gpt-image-1",
+        images: images,
+        prompt: prompt,
+        quality: quality
+      };
+
+      // 若上传了遮罩，则读取并添加
+      if (maskInput.files && maskInput.files.length > 0) {
+        try {
+          const maskBase64 = await fileToDataURL(maskInput.files[0]);
+          data.mask = maskBase64;
+        } catch (e) {
+          console.error(e);
+          alert("读取遮罩图像失败！");
+          return;
+        }
+      }
+      
+      const baseUrl = apiUrl.replace(/\/+$/, "");
+      const editUrl = baseUrl + "/v1/images/edits";
+      
+      const previewContainer = document.getElementById("previewContainer");
+      // 添加占位预览
+      const previewItem = document.createElement("div");
+      previewItem.className = "image-item mb-2 separator-horizontal";
+      previewItem.textContent = "处理中...";
+      previewContainer.insertBefore(previewItem, previewContainer.firstChild);
+      previewContainer.classList.remove("hidden");
+
+      try {
+        const response = await fetch(editUrl, {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + apiKey,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+        if (response.ok) {
+          const result = await response.json();
+          // 从返回数据中提取所需字段，并输出其他数据到控制台
+          const { data, created, usage } = result;
+          console.log("API返回内容:", { created, usage });
+          if (data && data.length > 0 && data[0].b64_json) {
+            const imgData = data[0].b64_json;
+            const mime = (formatVal === "jpeg" || formatVal === "webp") ? formatVal : "png";
+            const imageSrc = "data:image/" + mime + ";base64," + imgData;
+            previewItem.innerHTML = "";
+            const img = document.createElement("img");
+            img.className = "full-width";
+            img.src = imageSrc;
+            const caption = document.createElement("p");
+            caption.textContent = prompt;
+            previewItem.appendChild(caption);
+            previewItem.appendChild(img);
+          } else {
+            previewItem.textContent = "返回数据中无图片数据";
+          }
+        } else {
+          previewItem.textContent = "请求失败，状态码：" + response.status;
+        }
+      } catch (error) {
+        console.error("请求错误详情：", error);
+        previewItem.textContent = "请求出现错误：" + error;
+      }
+    });
+  </script>
+</body>
+
+</html>
