@@ -257,7 +257,7 @@
       });
     });
 
-    // 新增：辅助函数，将文件转换为 DataURL（Base64）
+    // 图片上传处理：使用 FileReader 将上传文件转换为 Base64 字符串
     function fileToDataURL(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -390,7 +390,7 @@
         return;
       }
 
-      // 转换所有上传的图像为 Base64 数组
+      // 将所有上传的图像转换为 Base64 数组
       const images = [];
       for (let i = 0; i < imageInput.files.length; i++) {
         try {
@@ -403,15 +403,15 @@
         }
       }
 
-      // 修改：使用官方示例的字段名称 "image" 而非 "images"
+      // 使用官方示例的字段名称 "image" 并上传图像数组
       const data = {
         model: "gpt-image-1",
-        image: images, // 修改后，将所有图像作为数组传递给 image 字段
+        image: images, // 传递 image 数组
         prompt: prompt,
         quality: quality
       };
 
-      // 若上传了遮罩，则读取并添加
+      // 如上传了遮罩，则读取后添加到请求体中
       if (maskInput.files && maskInput.files.length > 0) {
         try {
           const maskBase64 = await fileToDataURL(maskInput.files[0]);
@@ -427,7 +427,6 @@
       const editUrl = baseUrl + "/v1/images/edits";
 
       const previewContainer = document.getElementById("previewContainer");
-      // 添加占位预览
       const previewItem = document.createElement("div");
       previewItem.className = "image-item mb-2 separator-horizontal";
       previewItem.textContent = "处理中...";
@@ -445,13 +444,10 @@
         });
         if (response.ok) {
           const result = await response.json();
-          // 提取除图片数据以外的信息并打印到控制台
-          const { data, ...otherInfo } = result;
-          console.log("API返回内容(除图片数据):", otherInfo);
-          // 获取输出格式以确定 MIME 类型
+          console.log("API返回内容(除图片数据):", result);
           const formatVal = document.getElementById("format").value;
-          if (data && data.length > 0 && data[0].b64_json) {
-            const imgData = data[0].b64_json;
+          if (result.data && result.data.length > 0 && result.data[0].b64_json) {
+            const imgData = result.data[0].b64_json;
             const mime = (formatVal === "jpeg" || formatVal === "webp") ? formatVal : "png";
             const imageSrc = "data:image/" + mime + ";base64," + imgData;
             previewItem.innerHTML = "";
