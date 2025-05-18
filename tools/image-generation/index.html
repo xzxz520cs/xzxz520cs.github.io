@@ -390,12 +390,13 @@
         return;
       }
 
-      // 将所有上传的图像转换为 Base64 数组
+      // 将所有上传的图像转换为 Base64 数组，并移除 data URL 前缀
       const images = [];
       for (let i = 0; i < imageInput.files.length; i++) {
         try {
           const imgBase64 = await fileToDataURL(imageInput.files[i]);
-          images.push(imgBase64);
+          const base64Data = imgBase64.split(',')[1]; // 移除前缀
+          images.push(base64Data);
         } catch (e) {
           console.error(e);
           alert("读取上传的图像失败！");
@@ -411,11 +412,11 @@
         quality: quality
       };
 
-      // 如上传了遮罩，则读取后添加到请求体中
+      // 如上传了遮罩，则读取后添加到请求体中，并移除 data URL 前缀
       if (maskInput.files && maskInput.files.length > 0) {
         try {
           const maskBase64 = await fileToDataURL(maskInput.files[0]);
-          data.mask = maskBase64;
+          data.mask = maskBase64.split(',')[1]; // 移除前缀
         } catch (e) {
           console.error(e);
           alert("读取遮罩图像失败！");
