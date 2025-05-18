@@ -403,9 +403,10 @@
         }
       }
 
+      // 修改：使用官方示例的字段名称 "image" 而非 "images"
       const data = {
         model: "gpt-image-1",
-        images: images,
+        image: images, // 修改后，将所有图像作为数组传递给 image 字段
         prompt: prompt,
         quality: quality
       };
