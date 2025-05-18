@@ -153,9 +153,8 @@
       </div>
       <div class="form-group mt-3">
         <button id="generateBtn" class="btn btn--primary">生成图像</button>
-        <button id="clearPreviewBtn" class="btn btn--secondary">清空预览</button>
-        <!-- 新增：编辑图像按钮，用于调用图片编辑接口 -->
         <button id="editBtn" class="btn btn--tertiary">编辑图像</button>
+        <button id="clearPreviewBtn" class="btn btn--secondary">清空预览</button>
       </div>
       <div id="previewContainer" class="hidden mt-2"></div>
     </div>
@@ -280,12 +279,12 @@
       const background = document.getElementById("background").value;
       const compression = document.getElementById("compression").value;
       const moderation = document.getElementById("moderation").value;
-      
+
       if (!apiKey || !apiUrl || !prompt) {
         alert("请输入 API Key、API URL 和提示语！");
         return;
       }
-      
+
       const previewContainer = document.getElementById("previewContainer");
       // 显示占位信息
       const previewItem = document.createElement("div");
@@ -308,7 +307,7 @@
       if ((formatVal === "jpeg" || formatVal === "webp") && compression && parseInt(compression) > 0) {
         data.output_compression = parseInt(compression);
       }
-      
+
       // 新增：处理上传的输入图像（如果存在）
       const imageFileInput = document.getElementById("inputImage");
       if (imageFileInput.files && imageFileInput.files.length > 0) {
@@ -323,10 +322,10 @@
           return;
         }
       }
-      
+
       const baseUrl = apiUrl.replace(/\/+$/, "");
       const generationUrl = baseUrl + "/v1/images/generations";
-      
+
       try {
         const response = await fetch(generationUrl, {
           method: "POST",
@@ -365,14 +364,14 @@
         previewItem.textContent = "请求出现错误：" + error;
       }
     });
-    
+
     // 清空预览逻辑
     document.getElementById("clearPreviewBtn").addEventListener("click", () => {
       const previewContainer = document.getElementById("previewContainer");
       previewContainer.innerHTML = "";
       previewContainer.classList.add("hidden");
     });
-    
+
     // 编辑图像逻辑
     document.getElementById("editBtn").addEventListener("click", async () => {
       const apiKey = document.getElementById("apiKey").value.trim();
@@ -381,7 +380,7 @@
       const quality = document.getElementById("quality").value;
       const imageInput = document.getElementById("inputImage");
       const maskInput = document.getElementById("maskImage");
-      
+
       if (!apiKey || !apiUrl || !prompt) {
         alert("请输入 API Key、API URL 和提示语！");
         return;
@@ -390,7 +389,7 @@
         alert("请上传要编辑的图像！");
         return;
       }
-      
+
       // 转换所有上传的图像为 Base64 数组
       const images = [];
       for (let i = 0; i < imageInput.files.length; i++) {
@@ -403,7 +402,7 @@
           return;
         }
       }
-      
+
       const data = {
         model: "gpt-image-1",
         images: images,
@@ -422,10 +421,10 @@
           return;
         }
       }
-      
+
       const baseUrl = apiUrl.replace(/\/+$/, "");
       const editUrl = baseUrl + "/v1/images/edits";
-      
+
       const previewContainer = document.getElementById("previewContainer");
       // 添加占位预览
       const previewItem = document.createElement("div");
