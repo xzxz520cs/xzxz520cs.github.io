@@ -83,6 +83,7 @@
           <select id="model" class="form-control">
             <option value="tts-1">tts-1</option>
             <option value="tts-1-hd">tts-1-hd</option>
+            <option value="gpt-4o-mini-tts">gpt-4o-mini-tts (推荐)</option>
           </select>
         </div>
         <div class="form-group flex-1">
@@ -94,6 +95,11 @@
             <option value="onyx">onyx</option>
             <option value="nova">nova</option>
             <option value="shimmer">shimmer</option>
+            <!-- gpt-4o-mini-tts 新增的语音选项 -->
+            <option value="ash">ash</option>
+            <option value="ballad">ballad</option>
+            <option value="coral">coral</option>
+            <option value="sage">sage</option>
           </select>
         </div>
       </div>
@@ -109,12 +115,118 @@
           <option value="pcm">pcm</option>
         </select>
       </div>
-      <!-- 语速输入滑条 -->
-      <div class="form-group mt-2">
+      <!-- 语速输入滑条 (仅对传统模型显示) -->
+      <div class="form-group mt-2" id="speedControl">
         <label for="speed">语速</label>
         <input type="number" id="speedInput" value="1.0" class="form-control mt-2" step="0.01" min="0.25" max="4.0">
-
         <input type="range" id="speed" value="1.0" class="form-control full-width" step="0.01" min="0.25" max="4.0">
+      </div>
+      <!-- 语音指令 (仅对 gpt-4o-mini-tts 显示) -->
+      <div class="form-group mt-2 hidden" id="instructionsControl">
+        <label for="instructions">语音指令 (可选)</label>
+        <textarea id="instructions" placeholder="语音风格：温暖、友好、专业
+语调：平静、自信、略带关怀
+语速：中等偏慢，在重要信息处稍作停顿
+情感：真诚、耐心、乐于助人
+发音：清晰准确，重点词汇略加强调
+停顿：在关键信息前后适当停顿以便理解" class="form-control" rows="4"></textarea>
+        
+        <!-- 添加详细说明 -->
+        <div class="mt-2">
+          <details>
+            <summary style="cursor: pointer; color: #666; font-size: 14px;">📝 语音指令编写指南</summary>
+            <div style="margin-top: 10px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; font-size: 14px; line-height: 1.6;">
+              <h4 style="margin-top: 0; color: #333;">语音指令可以控制以下特性：</h4>
+              
+              <div style="margin-bottom: 15px;">
+                <strong>🎭 语音风格 (Voice Affect)：</strong>
+                <div style="margin-left: 15px; color: #666;">
+                  • 能量感：充满活力、平静安详、低沉神秘<br>
+                  • 质感：温暖柔和、粗犷豪迈、机械单调<br>
+                  • 示例：<em>"语音风格：温暖、充满活力、略带磁性"</em>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 15px;">
+                <strong>🎵 语调 (Tone)：</strong>
+                <div style="margin-left: 15px; color: #666;">
+                  • 情绪色彩：兴奋热情、平静专业、神秘悬疑<br>
+                  • 态度：友好亲切、严肃正式、幽默轻松<br>
+                  • 示例：<em>"语调：友好专业，带有鼓励和支持的感觉"</em>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 15px;">
+                <strong>⏱️ 语速节奏 (Pacing)：</strong>
+                <div style="margin-left: 15px; color: #666;">
+                  • 整体速度：快速、中等、缓慢<br>
+                  • 变化：重点处放慢、激动时加快<br>
+                  • 示例：<em>"语速：中等，在重要信息处放慢以便理解"</em>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 15px;">
+                <strong>💭 情感表达 (Emotion)：</strong>
+                <div style="margin-left: 15px; color: #666;">
+                  • 基础情感：快乐、平静、关怀、兴奋<br>
+                  • 强度：轻微、适中、强烈<br>
+                  • 示例：<em>"情感：真诚关怀，传达温暖和理解"</em>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 15px;">
+                <strong>🗣️ 发音特点 (Pronunciation)：</strong>
+                <div style="margin-left: 15px; color: #666;">
+                  • 清晰度：清晰准确、略微模糊、夸张清晰<br>
+                  • 重音：强调关键词、均匀发音<br>
+                  • 示例：<em>"发音：清晰准确，关键词汇适当强调"</em>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 15px;">
+                <strong>⏸️ 停顿控制 (Pauses)：</strong>
+                <div style="margin-left: 15px; color: #666;">
+                  • 位置：句子间、重点前后、段落间<br>
+                  • 长度：短暂、适中、较长<br>
+                  • 示例：<em>"停顿：在重要信息前后适当停顿，增强理解效果"</em>
+                </div>
+              </div>
+
+              <h4 style="color: #333; margin-top: 20px;">💡 常用场景模板：</h4>
+              
+              <div style="margin-bottom: 10px;">
+                <strong>📚 教育讲解：</strong><br>
+                <span style="color: #666; font-style: italic;">"语音风格：清晰专业，语调：耐心友好，语速：中等偏慢，情感：鼓励支持，停顿：在重点概念后适当停顿"</span>
+              </div>
+
+              <div style="margin-bottom: 10px;">
+                <strong>🎉 活力宣传：</strong><br>
+                <span style="color: #666; font-style: italic;">"语音风格：充满活力，语调：兴奋热情，语速：快速有节奏，情感：积极向上，发音：夸张清晰"</span>
+              </div>
+
+              <div style="margin-bottom: 10px;">
+                <strong>🧘 冥想引导：</strong><br>
+                <span style="color: #666; font-style: italic;">"语音风格：柔和安详，语调：平静舒缓，语速：缓慢，情感：深度放松，停顿：在指导间留出思考空间"</span>
+              </div>
+
+              <div style="margin-bottom: 10px;">
+                <strong>🎭 故事叙述：</strong><br>
+                <span style="color: #666; font-style: italic;">"语音风格：富有表现力，语调：神秘悬疑，语速：根据情节变化，情感：紧张刺激，停顿：在关键情节处制造悬念"</span>
+              </div>
+
+              <div style="margin-bottom: 10px;">
+                <strong>💼 商务客服：</strong><br>
+                <span style="color: #666; font-style: italic;">"语音风格：专业可信，语调：友好耐心，语速：适中清晰，情感：真诚关怀，发音：准确无误"</span>
+              </div>
+
+              <p style="margin-top: 15px; color: #888; font-size: 13px;">
+                💡 <strong>小贴士：</strong>可以组合多个特性，用自然语言描述。越具体的描述，效果越精准！
+              </p>
+            </div>
+          </details>
+        </div>
+        
+        <small class="text-muted">通过自然语言描述来控制语音的风格、语调、语速、情感、发音和停顿等特性</small>
       </div>
       <div class="form-group mt-2">
         <label for="inputText">文本</label>
@@ -150,6 +262,20 @@
 
   <!-- 脚本部分 -->
   <script>
+    // 根据模型切换控件显示
+    function toggleControlsByModel(model) {
+      const speedControl = document.getElementById("speedControl");
+      const instructionsControl = document.getElementById("instructionsControl");
+      
+      if (model === "gpt-4o-mini-tts") {
+        speedControl.classList.add("hidden");
+        instructionsControl.classList.remove("hidden");
+      } else {
+        speedControl.classList.remove("hidden");
+        instructionsControl.classList.add("hidden");
+      }
+    }
+
     // 新增：在页面加载时初始化并存储API Key和API URL
     document.addEventListener('DOMContentLoaded', () => {
       const apiKeyInput = document.getElementById("apiKey");
@@ -164,6 +290,8 @@
       const modelSelect = document.getElementById("model");
       const voiceSelect = document.getElementById("voice");
       const responseFormatSelect = document.getElementById("responseFormat");
+      const instructionsInput = document.getElementById("instructions");
+      
       if (localStorage.getItem("model")) {
         modelSelect.value = localStorage.getItem("model");
       }
@@ -173,6 +301,13 @@
       if (localStorage.getItem("responseFormat")) {
         responseFormatSelect.value = localStorage.getItem("responseFormat");
       }
+      if (localStorage.getItem("instructions")) {
+        instructionsInput.value = localStorage.getItem("instructions");
+      }
+      
+      // 初始化控件显示状态
+      toggleControlsByModel(modelSelect.value);
+      
       apiKeyInput.addEventListener("input", () => {
         localStorage.setItem("tts_apiKey", apiKeyInput.value.trim());
       });
@@ -182,12 +317,16 @@
       // 新增：监听 select 元素变化，保存到 localStorage
       modelSelect.addEventListener("change", () => {
         localStorage.setItem("model", modelSelect.value);
+        toggleControlsByModel(modelSelect.value);
       });
       voiceSelect.addEventListener("change", () => {
         localStorage.setItem("voice", voiceSelect.value);
       });
       responseFormatSelect.addEventListener("change", () => {
         localStorage.setItem("responseFormat", responseFormatSelect.value);
+      });
+      instructionsInput.addEventListener("input", () => {
+        localStorage.setItem("instructions", instructionsInput.value);
       });
     });
 
@@ -209,6 +348,7 @@
       const inputText = document.getElementById("inputText").value.trim();
       const responseFormat = document.getElementById("responseFormat").value.trim();
       const speed = parseFloat(document.getElementById("speed").value) || 1.0;
+      const instructions = document.getElementById("instructions").value.trim();
 
       if (!apiKey || !apiUrl || !inputText) {
         alert("请输入API Key、API URL和文本！");
@@ -227,9 +367,17 @@
         model: model,
         input: inputText,
         voice: voice,
-        response_format: responseFormat,
-        speed: speed
+        response_format: responseFormat
       };
+
+      // 根据模型添加不同的参数
+      if (model === "gpt-4o-mini-tts") {
+        if (instructions) {
+          data.instructions = instructions;
+        }
+      } else {
+        data.speed = speed;
+      }
 
       try {
         const response = await fetch(apiUrl, {
@@ -275,7 +423,8 @@
           previewItem.appendChild(audio);
           previewItem.appendChild(downloadBtn);
         } else {
-          previewItem.textContent = "请求失败，状态码：" + response.status;
+          const errorText = await response.text();
+          previewItem.textContent = "请求失败，状态码：" + response.status + "，错误信息：" + errorText;
         }
       } catch (error) {
         console.error(error);
