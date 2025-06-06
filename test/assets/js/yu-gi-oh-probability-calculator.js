@@ -436,84 +436,106 @@ function calculate() {
             function combination(n, k) {
                 if (k < 0 || k > n) return 0n;
                 if (k === 0n || k === n) return 1n;
-                
                 const key = \`\${n},\${k}\`;
                 if (combinationCache.has(key)) return combinationCache.get(key);
-                
                 let result = 1n;
                 for (let i = 1n; i <= BigInt(k); i++) {
                     result = result * (BigInt(n) - BigInt(k) + i) / i;
                 }
-                
                 combinationCache.set(key, result);
                 return result;
             }
-
-            // 辅助函数：将变量名转换为卡牌索引
+            // 将变量名转换为卡牌索引
             function varToIndex(varName) {
                 const lc = varName.toLowerCase();
-                if (lc.length === 1) {
-                    const code = lc.charCodeAt(0) - 97;
-                    if (code >= 0 && code < 26) return code;
-                }
-                if (lc.length === 2 && lc[0] === 'a') {
-                    const code = lc.charCodeAt(1) - 97;
-                    if (code >= 0 && code < 4) return 26 + code;
-                }
+                if (lc === 'true' || lc === 'false') return lc;  // 不作替换
+                if (lc.length === 1) { let code = lc.charCodeAt(0) - 97; if (code >= 0 && code < 26) return code; }
+                if (lc.length === 2 && lc[0] === 'a') { let code = lc.charCodeAt(1) - 97; if (code >= 0 && code < 4) return 26 + code; }
                 throw new Error(\`无效的卡名称: \${varName}\`);
             }
-
-            // 主计算函数：递归计算满足条件的排列组合数
-            function calculateProbability(cardCounts, draws, condition) {
-                const totalCards = cardCounts.reduce((a, b) => a + b, 0);
-                let valid = 0n, total = 0n;
-                let lastReportedProgress = 0;
-
-                // 将条件表达式编译为函数
-                const conditionFunc = new Function('counts', \`return \${condition.replace(/([a-zA-Z]+)/g, (m) => \`counts[\${varToIndex(m)}]\`)}\`);
-
-                function recurse(index, counts, remaining) {
-                    if (index === cardCounts.length) {
-                        if (remaining !== 0) return;
-                        
-                        let prob = 1n;
-                        for (let i = 0; i < counts.length; i++) {
-                            prob *= combination(cardCounts[i], counts[i]);
-                        }
-                        
-                        total += prob;
-                        if (conditionFunc(counts)) valid += prob;
-                        return;
-                    }
-
-                    // 根据当前递归深度更新计算进度
-                    const progress = Math.min(100, Math.floor((index / cardCounts.length) * 100));
-                    if (progress > lastReportedProgress) {
-                        lastReportedProgress = progress;
-                        postMessage({ type: 'progress', progress });
-                    }
-
-                    const max = Math.min(cardCounts[index], remaining);
-                    for (let k = 0; k <= max; k++) {
-                        counts[index] = k;
-                        recurse(index + 1, [...counts], remaining - k);
-                    }
-                }
-
-                recurse(0, [], draws);
-                return { valid, total };
+            // 最大公约数函数
+            function gcd(a, b) { return b ? gcd(b, a % b) : a; }
+            // 处理PROB(n)表达式
+            function processCondition(cond) {
+                let probMappings = [];
+                let probIndex = 0;
+                let processed = cond.replace(/PROB\\((\\d+)\\)/g, function(match, nStr) {
+                    let n = parseInt(nStr);
+                    if (n <= 0) return '(false)';
+                    if (n >= 100) return '(true)';
+                    let d = gcd(n, 100);
+                    let num = n / d;
+                    let denom = 100 / d;
+                    probMappings.push({num, denom});
+                    return \`(__prob\${probIndex++}__)\`;
+                });
+                return {processed, probMappings};
             }
-
             onmessage = function(e) {
                 const { cardCounts, draws, condition } = e.data;
+                const { processed: condProcessed, probMappings } = processCondition(condition);
+                const argNames = ['counts'];
+                for (let i = 0; i < probMappings.length; i++) {
+                    argNames.push(\`__prob\${i}__\`);
+                }
+                const conditionFunc = new Function(...argNames,
+                    \`return \${condProcessed.replace(/\\b([a-zA-Z]+)\\b(?!__)/g, (m) => {
+                        return (m === 'true' || m === 'false') ? m : "counts[" + varToIndex(m) + "]";
+                    })}\`);
+                function calculateProbability(cardCounts, draws) {
+                    let valid = 0n, total = 0n, lastReportedProgress = 0;
+                    function evaluateCondition(counts) {
+                        if (probMappings.length === 0)
+                            return { valid: (conditionFunc(counts) ? 1n : 0n), multiplier: 1n };
+                        let validCount = 0n;
+                        function recurseProb(i, args) {
+                            if(i === probMappings.length) {
+                                if (conditionFunc(counts, ...args)) validCount += 1n;
+                                return;
+                            }
+                            let {num, denom} = probMappings[i];
+                            for (let j = 0; j < denom; j++) {
+                                args.push(j < num);
+                                recurseProb(i+1, args);
+                                args.pop();
+                            }
+                        }
+                        recurseProb(0, []);
+                        let multiplier = probMappings.reduce((acc, {denom}) => acc * BigInt(denom), 1n);
+                        return { valid: validCount, multiplier };
+                    }
+                    function recurse(index, counts, remaining) {
+                        if (index === cardCounts.length) {
+                            if (remaining !== 0) return;
+                            let prob = 1n;
+                            for (let i = 0; i < counts.length; i++) {
+                                prob *= combination(cardCounts[i], counts[i]);
+                            }
+                            const evalRes = evaluateCondition(counts);
+                            total += prob * evalRes.multiplier;
+                            valid += prob * evalRes.valid;
+                            return;
+                        }
+                        const progress = Math.min(100, Math.floor((index / cardCounts.length) * 100));
+                        if (progress > lastReportedProgress) { lastReportedProgress = progress; postMessage({ type: 'progress', progress }); }
+                        const max = Math.min(cardCounts[index], remaining);
+                        for (let k = 0; k <= max; k++) {
+                            counts[index] = k;
+                            recurse(index + 1, [...counts], remaining - k);
+                        }
+                    }
+                    recurse(0, [], draws);
+                    return { valid, total };
+                }
                 try {
-                    const result = calculateProbability(cardCounts, draws, condition);
+                    const result = calculateProbability(cardCounts, draws);
                     postMessage({ type: 'result', ...result });
                 } catch (error) {
                     postMessage({ type: 'error', message: error.message });
                 }
             };
         `], { type: 'text/javascript' })));
+
 
         // 设置 Worker 消息处理
         calculationWorker.onmessage = function (e) {
@@ -692,27 +714,19 @@ function monteCarloCalculate() {
 
         // 创建用于蒙特卡洛模拟计算的 Worker
         const simulationWorker = new Worker(URL.createObjectURL(new Blob([`
-            // 蒙特卡洛模拟 Worker：采用分块和优化的抽牌算法
             function varToIndex(varName) {
                 const lc = varName.toLowerCase();
-                if (lc.length === 1) {
-                    const code = lc.charCodeAt(0) - 97;
-                    if (code >= 0 && code < 26) return code;
-                }
-                if (lc.length === 2 && lc[0] === 'a') {
-                    const code = lc.charCodeAt(1) - 97;
-                    if (code >= 0 && code < 4) return 26 + code;
-                }
+                if (lc === 'true' || lc === 'false') return lc;
+                if (lc.length === 1) { let code = lc.charCodeAt(0) - 97; if (code >= 0 && code < 26) return code; }
+                if (lc.length === 2 && lc[0] === 'a') { let code = lc.charCodeAt(1) - 97; if (code >= 0 && code < 4) return 26 + code; }
                 throw new Error("无效的卡名称: " + varName);
             }
-            // 优化抽牌函数：通过不修改原数组统计抽牌分布
             function drawCards(shuffledDeck, draws) {
                 let counts = Array(30).fill(0);
                 const drawn = shuffledDeck.slice(0, draws);
                 drawn.forEach(idx => { counts[idx]++; });
                 return counts;
             }
-            // 使用 Fisher–Yates 算法进行数组洗牌
             function shuffleArray(arr) {
                 let array = arr.slice();
                 for (let i = array.length - 1; i > 0; i--) {
@@ -721,9 +735,16 @@ function monteCarloCalculate() {
                 }
                 return array;
             }
+            function processConditionMonte(cond) {
+                return cond.replace(/PROB\\((\\d+)\\)/g, function(match, nStr) {
+                    let n = parseInt(nStr);
+                    if(n <= 0) return 'false';
+                    if(n >= 100) return 'true';
+                    return (Math.random() < n/100) ? 'true' : 'false';
+                });
+            }
             onmessage = function(e) {
                 const { cardCounts, draws, condition } = e.data;
-                // 生成牌堆数组
                 let deck = [];
                 for (let i = 0; i < cardCounts.length; i++) {
                     for (let j = 0; j < cardCounts[i]; j++) {
@@ -736,9 +757,8 @@ function monteCarloCalculate() {
                 }
                 const totalSimulations = 500000;
                 let valid = 0;
-                // 将条件表达式中卡名转换为 counts 数组索引
-                const replacedCondition = condition.replace(/([a-zA-Z]+)/g, function(m) {
-                    return "counts[" + varToIndex(m) + "]";
+                const replacedCondition = processConditionMonte(condition).replace(/([a-zA-Z]+)/g, function(m) {
+                    return (m === 'true' || m === 'false') ? m : "counts[" + varToIndex(m) + "]";
                 });
                 const conditionFunc = new Function("counts", "return " + replacedCondition);
                 let iter = 0;
@@ -764,6 +784,7 @@ function monteCarloCalculate() {
                 runChunk();
             };
         `], { type: 'text/javascript' })));
+
 
         simulationWorker.onmessage = function (e) {
             if (e.data.type === 'progress') {
