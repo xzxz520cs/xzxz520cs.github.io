@@ -735,14 +735,7 @@ function monteCarloCalculate() {
                 }
                 return array;
             }
-            function processConditionMonte(cond) {
-                return cond.replace(/PROB\\((\\d+)\\)/g, function(match, nStr) {
-                    let n = parseInt(nStr);
-                    if(n <= 0) return 'false';
-                    if(n >= 100) return 'true';
-                    return (Math.random() < n/100) ? 'true' : 'false';
-                });
-            }
+            // 这里不再预先处理 PROB(n)，而是直接替换为动态表达式
             onmessage = function(e) {
                 const { cardCounts, draws, condition } = e.data;
                 let deck = [];
@@ -757,9 +750,12 @@ function monteCarloCalculate() {
                 }
                 const totalSimulations = 500000;
                 let valid = 0;
-                const replacedCondition = processConditionMonte(condition).replace(/([a-zA-Z]+)/g, function(m) {
-                    return (m === 'true' || m === 'false') ? m : "counts[" + varToIndex(m) + "]";
-                });
+                // 替换 PROB(n) 为动态表达式，再仅替换1或2个字母的变量名
+                const replacedCondition = condition
+                    .replace(/PROB\\((\\d+)\\)/g, "(Math.random() < ($1/100))")
+                    .replace(/\\b([a-z]{1,2})\\b/g, function(m) {
+                        return (m === 'true' || m === 'false') ? m : "counts[" + varToIndex(m) + "]";
+                    });
                 const conditionFunc = new Function("counts", "return " + replacedCondition);
                 let iter = 0;
                 let lastReported = 0;
