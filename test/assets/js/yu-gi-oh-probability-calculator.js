@@ -1,46 +1,43 @@
-// 定义全局变量
+// 全局变量初始化
 let calculationWorker = null;
 let isCalculating = false;
 let calculationStartTime = 0;
 let progressUpdateInterval = null;
 
-// 定义全局常量，浏览器 localStorage 限制为 5MB
+// 工具常量：localStorage存储上限设置为5MB
 const MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
-// 辅助函数：转义正则表达式中需要转义的特殊字符
+// 工具函数：转义正则表达式中的特殊字符
 function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// 辅助函数：生成变量名（例如 a, b, …, aa, ab）
+// 工具函数：生成变量标识符（例如 a, b, …, aa, ab）
 function getVarName(index) {
     if (index < 26) return String.fromCharCode(97 + index);
     return 'a' + String.fromCharCode(97 + index - 26);
 }
 
-// 辅助函数：生成卡牌标签（例如 A, B, …, AA, AB）
+// 工具函数：生成卡牌标签（例如 A, B, …, AA, AB）
 function getCardLabel(index) {
     if (index < 26) return String.fromCharCode(65 + index);
     return `A${String.fromCharCode(65 + index - 26)}`;
 }
 
-// 保存卡组数据到 localStorage
+// 保存卡组数据至localStorage中
 function saveDeck() {
     const deckName = document.getElementById('deckName').value.trim();
     if (!deckName) {
         alert("请输入卡组名称");
         return;
     }
-
-    // 检测重复卡名并提示重复项
+    // 检查卡牌名称是否重复，并予以提示
     let cardNames = [];
     let duplicateNames = new Set();
     for (let i = 0; i < 30; i++) {
         const name = document.getElementById(`cardName${i}`).value.trim();
         if (name) {
-            if (cardNames.includes(name)) {
-                duplicateNames.add(name);
-            }
+            if (cardNames.includes(name)) { duplicateNames.add(name); }
             cardNames.push(name);
         }
     }
@@ -48,14 +45,12 @@ function saveDeck() {
         alert(`保存失败: 卡名重复：${Array.from(duplicateNames).join(', ')}`);
         return;
     }
-
-    // 新增：保存条件输入模式和构建器数据
+    // 新增：记录当前条件输入模式及构建器相关数据
     let conditionInputMode = window.getConditionInputMode ? window.getConditionInputMode() : 'manual';
     let builderConditionData = '';
     if (conditionInputMode === 'builder' && window.getBuilderConditionData) {
         builderConditionData = window.getBuilderConditionData();
     }
-
     const deck = {
         id: Date.now(),
         name: deckName,
@@ -64,31 +59,27 @@ function saveDeck() {
         conditionInputMode,
         builderConditionData
     };
-
     for (let i = 0; i < 30; i++) {
         deck.cards.push({
             count: document.getElementById(`card${i}`).value,
             name: document.getElementById(`cardName${i}`).value
         });
     }
-
     const decks = JSON.parse(localStorage.getItem('decks') || '[]');
     const existingIndex = decks.findIndex(d => d.name === deckName);
-
     if (existingIndex !== -1) {
         if (!confirm(`已存在同名卡组，确认覆盖 "${deckName}" 吗？`)) return;
         decks[existingIndex] = deck;
     } else {
         decks.push(deck);
     }
-
     localStorage.setItem('decks', JSON.stringify(decks));
     updateDeckList();
     document.getElementById('deckName').value = '';
     alert("卡组保存成功！");
 }
 
-// 从 localStorage 加载卡组数据
+// 从localStorage中加载指定卡组数据
 function loadDeck() {
     const deckId = parseInt(document.getElementById('deckList').value);
     if (!deckId) return;
@@ -103,7 +94,7 @@ function loadDeck() {
     });
     document.getElementById('condition').value = deck.condition || '';
 
-    // 新增：恢复条件输入模式和构建器数据
+    // 新增：根据存储的模式恢复条件构建器数据或手动模式输入
     if (deck.conditionInputMode === 'builder') {
         document.querySelector('input[name="conditionInputMode"][value="builder"]').checked = true;
         if (window.setBuilderConditionData && deck.builderConditionData) {
@@ -127,7 +118,7 @@ function loadDeck() {
     alert("卡组加载成功！");
 }
 
-// 删除选定卡组
+// 删除选定的卡组
 function deleteDeck() {
     const deckId = parseInt(document.getElementById('deckList').value);
     if (!deckId) return;
@@ -141,7 +132,7 @@ function deleteDeck() {
     alert("卡组删除成功！");
 }
 
-// 更新卡组下拉列表显示
+// 更新下拉列表中的卡组信息
 function updateDeckList() {
     const select = document.getElementById('deckList');
     select.innerHTML = '<option value="">-- 选择卡组 --</option>';
@@ -155,7 +146,7 @@ function updateDeckList() {
     });
 }
 
-// 计算卡组中所有卡牌的总数
+// 计算卡组内所有卡牌总数，更新显示
 function updateTotalDeck() {
     let total = 0;
     document.querySelectorAll('.card-count').forEach(input => {
@@ -165,7 +156,7 @@ function updateTotalDeck() {
     updatePieChart();
 }
 
-// 更新卡牌分布饼图显示
+// 更新饼状图显示卡牌分布
 let chart = null;
 function updatePieChart() {
     const labels = [];
@@ -219,7 +210,7 @@ function updatePieChart() {
     });
 }
 
-// 根据索引返回循环使用的颜色值
+// 根据给定的索引返回循环使用的颜色
 function getColor(index) {
     const colors = [
         '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
@@ -232,12 +223,12 @@ function getColor(index) {
     return colors[index % colors.length];
 }
 
-// 获取当前计算时间（秒）
+// 计算已用秒数
 function getElapsedSeconds() {
     return Math.floor((Date.now() - calculationStartTime) / 1000);
 }
 
-// 保存计算结果记录到 localStorage
+// 将计算结果记录保存到localStorage中
 function saveCalculationRecord(result, condition, errorMessage = null) {
     const records = JSON.parse(localStorage.getItem('calculationRecords') || '[]');
 
@@ -271,7 +262,7 @@ function saveCalculationRecord(result, condition, errorMessage = null) {
     localStorage.setItem('calculationRecords', JSON.stringify(records));
 }
 
-// 导出计算记录为 CSV 文件
+// 导出计算记录为CSV文件
 function exportCalculationRecords() {
     const records = JSON.parse(localStorage.getItem('calculationRecords') || '[]');
     if (records.length === 0) {
@@ -339,40 +330,31 @@ function clearCalculationRecords() {
     }
 }
 
-// 启动计算任务
+// 开始执行精确计算任务
 function calculate() {
     if (isCalculating) {
         alert("计算正在进行中，请稍后...");
         return;
     }
-
     try {
         // 记录计算开始时间
         calculationStartTime = Date.now();
-
-        // 检查重复卡名并报错
+        // 验证卡名无重复
         let cardNames = [];
         let duplicateNames = new Set();
         for (let i = 0; i < 30; i++) {
             const name = document.getElementById(`cardName${i}`).value.trim();
-            if (name) {
-                if (cardNames.includes(name)) {
-                    duplicateNames.add(name);
-                }
-                cardNames.push(name);
-            }
+            if (name) { if (cardNames.includes(name)) { duplicateNames.add(name); } cardNames.push(name); }
         }
         if (duplicateNames.size > 0) {
             throw new Error(`卡名重复：${Array.from(duplicateNames).join(', ')}`);
         }
-
-        // 新增：如果处于构建器模式，同步条件表达式
+        // 新增：在构建器模式下同步条件表达式
         if (window.getConditionInputMode && window.getConditionInputMode() === 'builder') {
             if (window.getBuilderConditionData && window.setBuilderConditionData) {
                 // builderUpdateOutput 自动同步 #condition
             }
         }
-
         // 启动定时器更新计算用时显示
         progressUpdateInterval = setInterval(() => {
             const elapsedSeconds = getElapsedSeconds();
@@ -380,41 +362,32 @@ function calculate() {
             document.getElementById('progressText').textContent =
                 `计算中: ${progress}%  计算用时: ${elapsedSeconds}秒`;
         }, 1000);
-
-        // 显示进度条和重置结果区域
+        // 重置并显示进度条与结果区域
         document.getElementById('calculationProgress').value = 0;
         document.getElementById('progressText').textContent = '计算中: 0%  计算用时: 0秒';
-
         document.getElementById('probability').value = '计算中...';
         document.getElementById('validCombinations').value = '计算中...';
         document.getElementById('totalCombinations').value = '计算中...';
-
-        // 读取用户输入的卡牌数量数据
+        // 读取用户输入的卡牌数量
         const cardCounts = [];
         for (let i = 0; i < 30; i++) {
             cardCounts.push(parseInt(document.getElementById(`card${i}`).value) || 0);
         }
         const draws = parseInt(document.getElementById('draws').value);
         const deckSize = parseInt(document.getElementById('total').value);
-
-        // 校验输入数据合法性
+        // 验证输入数据有效性
         if (draws <= 0) throw new Error("抽卡数必须大于0");
         if (deckSize <= 0) throw new Error("卡组中至少要有1张卡");
         if (draws > deckSize) throw new Error("抽卡数不能超过卡组总数");
-
-        // 转换用户输入的条件表达式
+        // 取得并转换用户输入的条件表达式
         let condition = document.getElementById('condition').value.trim();
         if (!condition) throw new Error("请输入逻辑判断条件");
-
-        // 将条件表达式中的卡名替换为对应的变量名
+        // 将条件表达式中的用户卡名映射至变量名
         const cardNameMap = {};
         const sortedNames = [];
         for (let i = 0; i < 30; i++) {
             const name = document.getElementById(`cardName${i}`).value.trim();
-            if (name) {
-                cardNameMap[name] = getVarName(i);
-                sortedNames.push(name);
-            }
+            if (name) { cardNameMap[name] = getVarName(i); sortedNames.push(name); }
         }
         sortedNames.sort((a, b) => b.length - a.length);
         for (const name of sortedNames) {
@@ -422,16 +395,14 @@ function calculate() {
             condition = condition.replace(regex, cardNameMap[name]);
         }
         console.log("转换后的条件表达式:", condition);
-
-        // 提醒用户检查是否正确使用比较运算符
+        // 检测条件中是否错误使用赋值运算符
         const conditionWithoutOperators = condition.replace(/==|<=|>=|!=/g, '');
         if (conditionWithoutOperators.includes('=')) {
             alert("提示：条件表达式中建议使用 '==' 或 '===' 判断相等，请检查是否正确。");
         }
-
-        // 创建 Web Worker 执行计算
+        // 创建Web Worker来执行计算任务
         calculationWorker = new Worker(URL.createObjectURL(new Blob([`
-            // 组合数计算函数（带缓存机制）
+            // Worker内部：组合数计算（带缓存）
             const combinationCache = new Map();
             function combination(n, k) {
                 if (k < 0 || k > n) return 0n;
@@ -445,15 +416,15 @@ function calculate() {
                 combinationCache.set(key, result);
                 return result;
             }
-            // 将变量名转换为卡牌索引
+            // 将变量名映射为卡牌索引
             function varToIndex(varName) {
                 const lc = varName.toLowerCase();
-                if (lc === 'true' || lc === 'false') return lc;  // 不作替换
+                if (lc === 'true' || lc === 'false') return lc;
                 if (lc.length === 1) { let code = lc.charCodeAt(0) - 97; if (code >= 0 && code < 26) return code; }
                 if (lc.length === 2 && lc[0] === 'a') { let code = lc.charCodeAt(1) - 97; if (code >= 0 && code < 4) return 26 + code; }
                 throw new Error(\`无效的卡名称: \${varName}\`);
             }
-            // 最大公约数函数
+            // 工具函数：计算最大公约数
             function gcd(a, b) { return b ? gcd(b, a % b) : a; }
             // 处理PROB(n)表达式
             function processCondition(cond) {
@@ -535,9 +506,7 @@ function calculate() {
                 }
             };
         `], { type: 'text/javascript' })));
-
-
-        // 设置 Worker 消息处理
+        // 设置Worker的消息回调函数
         calculationWorker.onmessage = function (e) {
             if (e.data.type === 'progress') {
                 updateProgress(e.data.progress);
@@ -547,15 +516,13 @@ function calculate() {
                 showError(e.data.message);
             }
         };
-
-        // 传递计算任务数据到 Worker
+        // 将计算任务数据传递给Worker
         calculationWorker.postMessage({
             cardCounts,
             draws,
             condition
         });
-
-        // 更新 UI 标识计算已经开始
+        // 更新界面，标记计算任务已启动
         isCalculating = true;
         document.getElementById('cancelBtn').classList.remove('hidden');
     } catch (error) {
@@ -563,7 +530,7 @@ function calculate() {
     }
 }
 
-// 更新进度条显示
+// 更新进度条显示信息
 function updateProgress(progress) {
     document.getElementById('calculationProgress').value = progress;
     const elapsedSeconds = getElapsedSeconds();
@@ -571,54 +538,44 @@ function updateProgress(progress) {
         `计算中: ${progress}%  计算用时: ${elapsedSeconds}秒`;
 }
 
-// 计算结束后的处理
+// 处理计算任务结束后的界面更新和结果展示
 function finalizeCalculation(result) {
-    // 清除定时器
+    // 清除用于更新计算用时的定时器
     clearInterval(progressUpdateInterval);
     progressUpdateInterval = null;
-
-    // 清理计算状态以隐藏取消按钮
+    // 重置计算状态并隐藏取消按钮
     cleanupCalculation();
-
     const probability = (Number(result.valid) / Number(result.total)) * 100;
     const elapsedSeconds = getElapsedSeconds();
-
     document.getElementById('probability').value = `${probability.toFixed(20)}%`;
     document.getElementById('validCombinations').value = result.valid.toString();
     document.getElementById('totalCombinations').value = result.total.toString();
-
-    // 立即更新为 100% 进度显示
+    // 立即将进度更新至100%
     document.getElementById('calculationProgress').value = 100;
     document.getElementById('progressText').textContent =
         `计算完成: 100%  计算用时: ${elapsedSeconds}秒`;
-
     saveCalculationRecord(result, document.getElementById('condition').value);
-    
-    // 新增：若复选框勾选，则将抽卡数加1
+    // 新增：若启用复选框则自动将抽卡数加1
     if (document.getElementById('autoIncrementDraws')?.checked) {
         const drawsInput = document.getElementById('draws');
         drawsInput.value = parseInt(drawsInput.value) + 1;
     }
 }
 
-// 显示错误信息并处理异常
+// 显示错误信息，并进行错误处理
 function showError(message) {
     clearInterval(progressUpdateInterval);
     progressUpdateInterval = null;
-
-    // 清理计算状态，隐藏取消按钮
+    // 重置计算状态，隐藏取消按钮
     cleanupCalculation();
-
-    // 将结果区域更新为错误提示
+    // 将结果区域显示错误提示
     document.getElementById('probability').value = '计算错误';
     document.getElementById('validCombinations').value = '计算错误';
     document.getElementById('totalCombinations').value = '计算错误';
-
     const elapsedSeconds = getElapsedSeconds();
     document.getElementById('calculationProgress').value = 0;
     document.getElementById('progressText').textContent =
         `计算错误  计算用时: ${elapsedSeconds}秒`;
-
     alert(`计算错误: ${message}`);
     saveCalculationRecord({}, document.getElementById('condition').value, message);
 }
@@ -627,23 +584,19 @@ function showError(message) {
 function cancelCalculation() {
     clearInterval(progressUpdateInterval);
     progressUpdateInterval = null;
-
     const elapsedSeconds = getElapsedSeconds();
-
     if (calculationWorker) {
         calculationWorker.terminate();
         calculationWorker = null;
     }
-
     document.getElementById('calculationProgress').value = 0;
     document.getElementById('progressText').textContent =
         `计算已取消  计算用时: ${elapsedSeconds}秒`;
-
     cleanupCalculation();
     alert("计算已取消");
 }
 
-// 清除计算状态标识
+// 清除计算状态标志
 function cleanupCalculation() {
     isCalculating = false;
     document.getElementById('cancelBtn').classList.add('hidden');
@@ -658,23 +611,16 @@ function monteCarloCalculate() {
     }
     try {
         calculationStartTime = Date.now();
-
-        // 检查重复卡名
+        // 验证卡名不重复
         let cardNames = [];
         let duplicateNames = new Set();
         for (let i = 0; i < 30; i++) {
             const name = document.getElementById(`cardName${i}`).value.trim();
-            if (name) {
-                if (cardNames.includes(name)) {
-                    duplicateNames.add(name);
-                }
-                cardNames.push(name);
-            }
+            if (name) { if (cardNames.includes(name)) { duplicateNames.add(name); } cardNames.push(name); }
         }
         if (duplicateNames.size > 0) {
             throw new Error(`卡名重复：${Array.from(duplicateNames).join(', ')}`);
         }
-
         // 读取输入数据
         const cardCounts = [];
         for (let i = 0; i < 30; i++) {
@@ -685,19 +631,14 @@ function monteCarloCalculate() {
         if (draws <= 0) throw new Error("抽卡数必须大于0");
         if (deckSize <= 0) throw new Error("卡组中至少要有1张卡");
         if (draws > deckSize) throw new Error("抽卡数不能超过卡组总数");
-
         let condition = document.getElementById('condition').value.trim();
         if (!condition) throw new Error("请输入逻辑判断条件");
-
-        // 将条件表达式中的卡名替换为对应的变量名（与 calculate() 保持一致）
+        // 同calculate()，将卡名替换为对应变量名
         const cardNameMap = {};
         const sortedNames = [];
         for (let i = 0; i < 30; i++) {
             const name = document.getElementById(`cardName${i}`).value.trim();
-            if (name) {
-                cardNameMap[name] = getVarName(i);
-                sortedNames.push(name);
-            }
+            if (name) { cardNameMap[name] = getVarName(i); sortedNames.push(name); }
         }
         sortedNames.sort((a, b) => b.length - a.length);
         for (const name of sortedNames) {
@@ -705,14 +646,12 @@ function monteCarloCalculate() {
             condition = condition.replace(regex, cardNameMap[name]);
         }
         console.log("转换后的条件表达式（蒙特卡洛）:", condition);
-
-        // 更新 UI，开始蒙特卡洛计算
+        // 更新界面，启动蒙特卡洛模拟计算
         isCalculating = true;
         document.getElementById('cancelBtn').classList.remove('hidden');
         document.getElementById('calculationProgress').value = 0;
         document.getElementById('progressText').textContent = '蒙特卡洛模拟计算中: 0%  用时: 0秒';
-
-        // 创建用于蒙特卡洛模拟计算的 Worker
+        // 创建用于蒙特卡洛模拟计算的Worker
         const simulationWorker = new Worker(URL.createObjectURL(new Blob([`
             function varToIndex(varName) {
                 const lc = varName.toLowerCase();
@@ -735,14 +674,12 @@ function monteCarloCalculate() {
                 }
                 return array;
             }
-            // 这里不再预先处理 PROB(n)，而是直接替换为动态表达式
+            // 直接将PROB(n)表达式替换为动态生成的随机判断
             onmessage = function(e) {
                 const { cardCounts, draws, condition } = e.data;
                 let deck = [];
                 for (let i = 0; i < cardCounts.length; i++) {
-                    for (let j = 0; j < cardCounts[i]; j++) {
-                        deck.push(i);
-                    }
+                    for (let j = 0; j < cardCounts[i]; j++) { deck.push(i); }
                 }
                 if (deck.length === 0) {
                     postMessage({ type: 'result', valid: 0, total: 500000, calculationMethod: "蒙特卡洛模拟" });
@@ -750,7 +687,6 @@ function monteCarloCalculate() {
                 }
                 const totalSimulations = 500000;
                 let valid = 0;
-                // 替换 PROB(n) 为动态表达式，再仅替换1或2个字母的变量名
                 const replacedCondition = condition
                     .replace(/PROB\\((\\d+)\\)/g, "(Math.random() < ($1/100))")
                     .replace(/\\b([a-z]{1,2})\\b/g, function(m) {
@@ -780,8 +716,6 @@ function monteCarloCalculate() {
                 runChunk();
             };
         `], { type: 'text/javascript' })));
-
-
         simulationWorker.onmessage = function (e) {
             if (e.data.type === 'progress') {
                 updateProgress(e.data.progress);
@@ -798,15 +732,13 @@ function monteCarloCalculate() {
                 document.getElementById('progressText').textContent =
                     `蒙特卡洛模拟完成: 100% 用时: ${elapsedSeconds}秒`;
                 saveCalculationRecord(e.data, document.getElementById('condition').value);
-                
-                // 新增：若复选框勾选，则将抽卡数加1
+                // 新增：若启用复选框则自动将抽卡数加1
                 if (document.getElementById('autoIncrementDraws')?.checked) {
                     const drawsInput = document.getElementById('draws');
                     drawsInput.value = parseInt(drawsInput.value) + 1;
                 }
             }
         };
-
         simulationWorker.postMessage({ cardCounts, draws, condition });
         progressUpdateInterval = setInterval(() => {
             const elapsedSeconds = getElapsedSeconds();
@@ -814,7 +746,6 @@ function monteCarloCalculate() {
             document.getElementById('progressText').textContent =
                 `蒙特卡洛模拟计算中: ${progress}% 用时: ${elapsedSeconds}秒`;
         }, 1000);
-
     } catch (error) {
         showError(error.message);
     }
@@ -824,7 +755,6 @@ function monteCarloCalculate() {
 window.onload = function () {
     updateDeckList();
     updateTotalDeck();
-
     // 为所有卡牌数量输入框绑定变更事件
     document.querySelectorAll('.card-count').forEach(input => {
         input.addEventListener('change', updateTotalDeck);
@@ -833,7 +763,7 @@ window.onload = function () {
 
 // 条件构建器核心逻辑：获取所有可用卡牌变量名
 function getAllCardNames() {
-    // 生成默认变量名（最多30个，如 a, b, ..., aa, ab, …）
+    // 生成默认变量名（最多30个：a, b, ..., aa, ab, …）
     const varNames = [];
     for (let i = 0; i < 30; i++) {
         if (i < 26) {
@@ -850,7 +780,8 @@ function getAllCardNames() {
     }
     return [...varNames, ...customNames];
 }
-// 映射运算符符号
+
+// 映射运算符的标识符
 const builderOperators = {
     gt: '>',
     eq: '==',
@@ -859,11 +790,11 @@ const builderOperators = {
     gte: '>=',
     lte: '<='
 };
-// 定义条件构建器根节点
+// 定义条件构建器的根节点
 let builderRootCondition = null;
-// 缓存构建器条件文本
+// 缓存构建器生成的条件文本
 let builderConditionText = '';
-// 初始化构建器条件
+// 初始化条件构建器条件
 function builderCreateCondition(type, children) {
     return type === 'single' ? {
         type: 'single',
@@ -901,7 +832,7 @@ function builderRenderSingleCondition(condition, container, isRoot) {
                 e => { card.operator = e.target.value; builderUpdateOutput(); });
             cardRow.appendChild(opSelect);
         }
-        // 切换卡牌名称输入方式（下拉选择或手动输入）
+        // 切换卡牌名称输入方式：下拉选择或手动输入
         const cardNameContainer = document.createElement('span');
         let cardNameControl = builderCreateSelect(
             getAllCardNames().map(name => ({ display: name, value: name })),
@@ -994,9 +925,9 @@ function builderRenderGroupCondition(condition, container, isRoot) {
 }
 function builderUpdateOutput() {
     builderConditionText = builderRootCondition ? builderGenerateConditionText(builderRootCondition) : '';
-    // 同步条件文本到隐藏的 textarea 供计算使用
+    // 同步构建器生成的条件文本到隐藏textarea供计算使用
     document.getElementById('condition').value = builderConditionText;
-    // 同步预览显示区域
+    // 更新预览区域显示生成条件
     const preview = document.getElementById('builderConditionPreview');
     if (preview) preview.value = builderConditionText;
 }
@@ -1057,24 +988,20 @@ function tokenize(expr) {
     }
     return tokens;
 }
-// 解析器构造函数，负责逐步解析表达式
+// 解析器构造函数，用于逐步解析表达式
 function Parser(tokens) {
     this.tokens = tokens;
     this.pos = 0;
 }
-Parser.prototype.peek = function () {
-    return this.tokens[this.pos];
-};
+Parser.prototype.peek = function () { return this.tokens[this.pos]; };
 Parser.prototype.consume = function (token) {
     if (token && this.tokens[this.pos] !== token) {
         throw new Error("预期 " + token + "，但得到 " + this.tokens[this.pos]);
     }
     return this.tokens[this.pos++];
 };
-Parser.prototype.eof = function () {
-    return this.pos >= this.tokens.length;
-};
-// 解析完整表达式（支持逻辑 && 与 || 运算）
+Parser.prototype.eof = function () { return this.pos >= this.tokens.length; };
+// 解析完整表达式（支持逻辑与与或运算）
 function parseExpression(parser) {
     return parseLogicalOr(parser);
 }
@@ -1096,7 +1023,7 @@ function parseLogicalAnd(parser) {
     }
     return node;
 }
-// 解析关系运算表达式，如 num > 0
+// 解析关系运算表达式，例如 num > 0
 function parseRelational(parser) {
     let left = parseSum(parser);
     if (!parser.eof() && /^(>=|<=|==|!=|>|<)$/.test(parser.peek())) {
@@ -1137,7 +1064,7 @@ function parseSum(parser) {
     }
     return items.length === 1 ? items[0] : items;
 }
-// 将运算符转换为构建器中使用的标识
+// 将运算符转换为条件构建器中使用的标识符
 function mapOperator(op) {
     const opMap = {
         ">": "gt",
@@ -1151,10 +1078,10 @@ function mapOperator(op) {
         "大于": "gt",
         "小于": "lt"
     };
-    if (!opMap[op]) throw new Error("不支持的运算符：" + op);//修改这里会出错
-    return opMap[op];//修改这里会出错
+    if (!opMap[op]) throw new Error("不支持的运算符：" + op);
+    return opMap[op];
 }
-// 主解析函数，将手动输入的条件转换为构建器数据
+// 主解析函数，将手动输入的条件转换为构建器数据结构
 function parseManualCondition(manualStr) {
     manualStr = manualStr.trim();
     if (!manualStr) throw new Error("空的条件");
@@ -1170,15 +1097,13 @@ function parseManualCondition(manualStr) {
     return tree;
 }
 
-// 全局记录当前条件输入模式（手动或构建器）
+// 全局变量：当前条件输入模式（手动或构建器）
 let currentConditionInputMode = 'manual';
 
-// 切换条件输入模式，并根据当前条件状态提示确认
+// 切换条件输入模式，采用确认提示确保转换正确
 function switchConditionInputMode(mode, skipConfirm = false) {
     const currentCondition = document.getElementById('condition').value.trim();
-    if (!currentCondition) {
-        skipConfirm = true;
-    }
+    if (!currentCondition) { skipConfirm = true; }
     if (!skipConfirm) {
         let msg = "";
         if (mode === 'builder') {
