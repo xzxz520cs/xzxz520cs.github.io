@@ -7,126 +7,38 @@ let progressUpdateInterval = null;
 // 工具常量：localStorage存储上限设置为5MB
 const MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
+// 数据管理相关函数已迁移到 data-manager.js
+// 通过 window.DataManager 提供接口
+
 // 保存卡组数据至localStorage中
 function saveDeck() {
-    const deckName = document.getElementById('deckName').value.trim();
-    if (!deckName) {
-        alert("请输入卡组名称");
-        return;
-    }
-    // 检查卡牌名称是否重复，并予以提示
-    let cardNames = [];
-    let duplicateNames = new Set();
-    for (let i = 0; i < 30; i++) {
-        const name = document.getElementById(`cardName${i}`).value.trim();
-        if (name) {
-            if (cardNames.includes(name)) { duplicateNames.add(name); }
-            cardNames.push(name);
-        }
-    }
-    if (duplicateNames.size > 0) {
-        alert(`保存失败: 卡名重复：${Array.from(duplicateNames).join(', ')}`);
-        return;
-    }
-    // 新增：记录当前条件输入模式及构建器相关数据
-    let conditionInputMode = window.getConditionInputMode ? window.getConditionInputMode() : 'manual';
-    let builderConditionData = '';
-    if (conditionInputMode === 'builder' && window.getBuilderConditionData) {
-        builderConditionData = window.getBuilderConditionData();
-    }
-    const deck = {
-        id: Date.now(),
-        name: deckName,
-        cards: [],
-        condition: document.getElementById('condition').value,
-        conditionInputMode,
-        builderConditionData
-    };
-    for (let i = 0; i < 30; i++) {
-        deck.cards.push({
-            count: document.getElementById(`card${i}`).value,
-            name: document.getElementById(`cardName${i}`).value
-        });
-    }
-    const decks = JSON.parse(localStorage.getItem('decks') || '[]');
-    const existingIndex = decks.findIndex(d => d.name === deckName);
-    if (existingIndex !== -1) {
-        if (!confirm(`已存在同名卡组，确认覆盖 "${deckName}" 吗？`)) return;
-        decks[existingIndex] = deck;
-    } else {
-        decks.push(deck);
-    }
-    localStorage.setItem('decks', JSON.stringify(decks));
-    updateDeckList();
-    document.getElementById('deckName').value = '';
-    alert("卡组保存成功！");
+    window.DataManager.saveDeck();
 }
 
 // 从localStorage中加载指定卡组数据
 function loadDeck() {
-    const deckId = parseInt(document.getElementById('deckList').value);
-    if (!deckId) return;
-
-    const decks = JSON.parse(localStorage.getItem('decks') || '[]');
-    const deck = decks.find(d => d.id === deckId);
-    if (!deck) return;
-
-    deck.cards.forEach((card, i) => {
-        document.getElementById(`card${i}`).value = card.count;
-        document.getElementById(`cardName${i}`).value = card.name;
-    });
-    document.getElementById('condition').value = deck.condition || '';
-
-    // 新增：根据存储的模式恢复条件构建器数据或手动模式输入
-    if (deck.conditionInputMode === 'builder') {
-        document.querySelector('input[name="conditionInputMode"][value="builder"]').checked = true;
-        if (window.setBuilderConditionData && deck.builderConditionData) {
-            window.setBuilderConditionData(deck.builderConditionData);
-        }
-        const manualDiv = document.getElementById('manualConditionInput');
-        const builderDiv = document.getElementById('builderConditionInput');
-        manualDiv.classList.add('hidden');
-        builderDiv.classList.remove('hidden');
-        currentConditionInputMode = 'builder';  // 更新为构建器模式
-    } else {
-        document.querySelector('input[name="conditionInputMode"][value="manual"]').checked = true;
-        const manualDiv = document.getElementById('manualConditionInput');
-        const builderDiv = document.getElementById('builderConditionInput');
-        manualDiv.classList.remove('hidden');
-        builderDiv.classList.add('hidden');
-        currentConditionInputMode = 'manual';  // 更新为手动模式
-    }
-
-    updateTotalDeck();
-    alert("卡组加载成功！");
+    window.DataManager.loadDeck();
 }
 
 // 删除选定的卡组
 function deleteDeck() {
-    const deckId = parseInt(document.getElementById('deckList').value);
-    if (!deckId) return;
-
-    if (!confirm("确认删除选中的卡组吗？")) return;
-
-    const decks = JSON.parse(localStorage.getItem('decks') || '[]');
-    const newDecks = decks.filter(d => d.id !== deckId);
-    localStorage.setItem('decks', JSON.stringify(newDecks));
-    updateDeckList();
-    alert("卡组删除成功！");
+    window.DataManager.deleteDeck();
 }
 
 // 更新下拉列表中的卡组信息
 function updateDeckList() {
-    const select = document.getElementById('deckList');
-    select.innerHTML = '<option value="">-- 选择卡组 --</option>';
-    const decks = JSON.parse(localStorage.getItem('decks') || '[]');
+    window.DataManager.updateDeckList();
+}
 
-    decks.forEach(deck => {
-        const option = document.createElement('option');
-        option.value = deck.id;
-        option.textContent = deck.name;
-        select.appendChild(option);
-    });
+// 计算记录相关
+function saveCalculationRecord(result, condition, errorMessage = null) {
+    window.DataManager.saveCalculationRecord(result, condition, errorMessage);
+}
+function exportCalculationRecords() {
+    window.DataManager.exportCalculationRecords();
+}
+function clearCalculationRecords() {
+    window.DataManager.clearCalculationRecords();
 }
 
 // 计算卡组内所有卡牌总数，更新显示
@@ -142,108 +54,6 @@ function updatePieChart() {
 // 计算已用秒数
 function getElapsedSeconds() {
     return Math.floor((Date.now() - calculationStartTime) / 1000);
-}
-
-// 将计算结果记录保存到localStorage中
-function saveCalculationRecord(result, condition, errorMessage = null) {
-    const records = JSON.parse(localStorage.getItem('calculationRecords') || '[]');
-
-    // 构建新的计算记录对象
-    const record = {
-        date: new Date().toLocaleString(),
-        probability: errorMessage ? '计算错误' : `${((Number(result.valid) / Number(result.total)) * 100).toFixed(20)}%`,
-        total: document.getElementById('total').value,
-        draws: document.getElementById('draws').value,
-        validCombinations: errorMessage ? '计算错误' : (result.valid !== undefined ? result.valid.toString() : '0'),
-        totalCombinations: errorMessage ? '计算错误' : (result.total !== undefined ? result.total.toString() : '0'),
-        condition,
-        calculationMethod: result.calculationMethod || "精确计算",
-        cards: Array.from({ length: 30 }).map((_, i) => {
-            const inputName = document.getElementById(`cardName${i}`).value.trim();
-            return {
-                name: inputName || (window.UIUtils.getCardLabel(i) + '类卡'),
-                count: document.getElementById(`card${i}`).value
-            };
-        })
-    };
-
-    // 判断存储空间是否超限
-    const newSize = JSON.stringify([...records, record]).length * 2;
-    if (newSize > MAX_STORAGE_SIZE) {
-        alert('存储空间不足，无法保存计算记录。请考虑导出并删除部分记录后重试。');
-        return;
-    }
-
-    records.push(record);
-    localStorage.setItem('calculationRecords', JSON.stringify(records));
-}
-
-// 导出计算记录为CSV文件
-function exportCalculationRecords() {
-    const records = JSON.parse(localStorage.getItem('calculationRecords') || '[]');
-    if (records.length === 0) {
-        alert('没有可导出的计算记录。');
-        return;
-    }
-
-    // 生成有序卡牌标签（例如 A, B, …, AA, AB, AC, AD）
-    function getExportCardLabel(index) {
-        if (index < 26) return String.fromCharCode(65 + index);
-        return 'A' + String.fromCharCode(65 + index - 26);
-    }
-    const headers = [
-        '日期', '概率', '卡组总数', '抽卡数', '满足条件的组合数', '总组合数', '逻辑判断条件', '计算方式',
-        ...Array.from({ length: 30 }).flatMap((_, i) => [
-            `${getExportCardLabel(i)}卡名`,
-            `${getExportCardLabel(i)}数量`
-        ])
-    ];
-
-    // CSV 字符串转义辅助函数
-    function csvEscape(str) {
-        if (str == null) return '';
-        str = String(str);
-        str = str.replace(/"/g, '""');
-        if (/[",\r\n]/.test(str)) {
-            str = `"${str}"`;
-        }
-        return str;
-    }
-
-    const rows = records.map(record => [
-        csvEscape(record.date),
-        csvEscape(record.probability),
-        csvEscape(record.total),
-        csvEscape(record.draws),
-        csvEscape(record.validCombinations),
-        csvEscape(record.totalCombinations),
-        csvEscape(record.condition),
-        csvEscape(record.calculationMethod),
-        ...Array.from({ length: 30 }).flatMap((_, i) => {
-            const card = record.cards && record.cards[i] ? record.cards[i] : { name: '', count: '' };
-            return [csvEscape(card.name), csvEscape(card.count)];
-        })
-    ]);
-    const BOM = '\uFEFF';
-    const csvContent = BOM + [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', '计算记录.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-}
-
-// 删除所有已保存的计算记录
-function clearCalculationRecords() {
-    if (confirm('确定删除所有计算记录吗？')) {
-        localStorage.removeItem('calculationRecords');
-        alert('计算记录已删除。');
-    }
 }
 
 // 开始执行精确计算任务
@@ -1006,7 +816,196 @@ function parseManualCondition(manualStr) {
     const tree = parseExpression(parser);
     if (!parser.eof()) {
         throw new Error("无法解析条件：" + manualStr);
+    if (tree && tree.type === 'single') {
+        return { type: 'and', children: [tree] };
     }
+    return tree;
+}
+
+// 全局变量：当前条件输入模式（手动或构建器）
+/* 已在前面声明 let currentConditionInputMode = 'manual';，此处移除重复声明 */
+
+// 切换条件输入模式，采用确认提示确保转换正确
+function switchConditionInputMode(mode, skipConfirm = false) {
+    const currentCondition = document.getElementById('condition').value.trim();
+    if (!currentCondition) { skipConfirm = true; }
+    if (!skipConfirm) {
+        let msg = "";
+        if (mode === 'builder') {
+            msg = "将当前逻辑判断条件转化至条件构建器时优先级嵌套可能会混乱，不支持转化字符 */%，是否继续切换到条件构建器输入？";
+        } else if (mode === 'manual') {
+            msg = "是否转化至手动输入？";
+        }
+        if (!confirm(msg)) return false;
+    }
+    const manualDiv = document.getElementById('manualConditionInput');
+    const builderDiv = document.getElementById('builderConditionInput');
+    if (mode === 'manual') {
+        if (builderRootCondition) {
+            const raw = builderGenerateConditionText(builderRootCondition);
+            document.getElementById('condition').value = raw;
+        }
+        builderDiv.classList.add('hidden');
+        manualDiv.classList.remove('hidden');
+    } else {
+        let manualStr = document.getElementById('condition').value.trim();
+        if (manualStr) {
+            try {
+                builderRootCondition = parseManualCondition(manualStr);
+                builderRender();
+            } catch (err) {
+                alert("手动条件转换失败：" + err.message);
+                document.querySelector('input[name="conditionInputMode"][value="manual"]').checked = true;
+                return false;
+            }
+        } else {
+            builderRootCondition = builderCreateCondition('and', []);
+            builderRender();
+        }
+        manualDiv.classList.add('hidden');
+        builderDiv.classList.remove('hidden');
+    }
+    currentConditionInputMode = mode;
+    return true;
+}
+
+// 单选按钮切换条件模式时，如取消则恢复原状态
+document.querySelectorAll('input[name="conditionInputMode"]').forEach(radio => {
+    radio.addEventListener('change', function (e) {
+        const newMode = e.target.value;
+        if (!switchConditionInputMode(newMode)) {
+            document.querySelector(`input[name="conditionInputMode"][value="${currentConditionInputMode}"]`).checked = true;
+        }
+    });
+});
+
+// 初始加载时跳过确认提示，初始化构建器
+document.addEventListener('DOMContentLoaded', function () {
+    builderRootCondition = builderCreateCondition('and', []);
+    builderRender();
+    switchConditionInputMode('manual', true);
+    // 监听卡牌名称输入变化
+    setupCardNameInputListener();
+});
+
+// 对外接口：获取和设置条件输入模式及构建器数据
+window.getConditionInputMode = function () {
+    return document.querySelector('input[name="conditionInputMode"]:checked')?.value || 'manual';
+};
+window.getBuilderConditionData = function () {
+    return builderRootCondition ? JSON.stringify(builderRootCondition) : '';
+};
+window.setBuilderConditionData = function (json) {
+    try {
+        builderRootCondition = JSON.parse(json);
+        builderRender();
+    } catch (e) {
+        builderRootCondition = builderCreateCondition('and', []);
+        builderRender();
+    }
+};
+
+// 监听卡牌名称输入变化，并实时更新条件构建器下拉选项
+// 已移至 ui-utils.js 并由 window.UIUtils.setupCardNameInputListener() 提供
+
+// 初始加载时跳过确认提示，初始化构建器
+document.addEventListener('DOMContentLoaded', function () {
+    builderRootCondition = builderCreateCondition('and', []);
+    builderRender();
+    switchConditionInputMode('manual', true);
+    // 监听卡牌名称输入变化
+    setupCardNameInputListener();
+});
+
+// 对外接口：获取和设置条件输入模式及构建器数据
+window.getConditionInputMode = function () {
+    return document.querySelector('input[name="conditionInputMode"]:checked')?.value || 'manual';
+};
+window.getBuilderConditionData = function () {
+    return builderRootCondition ? JSON.stringify(builderRootCondition) : '';
+};
+window.setBuilderConditionData = function (json) {
+    try {
+        builderRootCondition = JSON.parse(json);
+        builderRender();
+    } catch (e) {
+        builderRootCondition = builderCreateCondition('and', []);
+        builderRender();
+    }
+};
+
+// 监听卡牌名称输入变化，并实时更新条件构建器下拉选项
+function setupCardNameInputListener() {
+    const cardInputs = document.getElementById('cardInputs');
+    if (!cardInputs) return;
+    cardInputs.addEventListener('input', function (e) {
+        if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
+            if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
+                builderRender();
+            }
+            updatePieChart();  // 新增：当卡名变化后更新饼图
+        }
+    });
+    cardInputs.addEventListener('blur', function (e) {
+        if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
+            if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
+                builderRender();
+            }
+            updatePieChart();  // 新增：当卡名变化后更新饼图
+        }
+    }, true);
+}
+
+// 监听卡牌名称输入变化，并实时更新条件构建器下拉选项
+// 已移至 ui-utils.js 并由 window.UIUtils.setupCardNameInputListener() 提供
+
+// 初始加载时跳过确认提示，初始化构建器
+document.addEventListener('DOMContentLoaded', function () {
+    builderRootCondition = builderCreateCondition('and', []);
+    builderRender();
+    switchConditionInputMode('manual', true);
+    // 监听卡牌名称输入变化
+    setupCardNameInputListener();
+});
+
+// 对外接口：获取和设置条件输入模式及构建器数据
+window.getConditionInputMode = function () {
+    return document.querySelector('input[name="conditionInputMode"]:checked')?.value || 'manual';
+};
+window.getBuilderConditionData = function () {
+    return builderRootCondition ? JSON.stringify(builderRootCondition) : '';
+};
+window.setBuilderConditionData = function (json) {
+    try {
+        builderRootCondition = JSON.parse(json);
+        builderRender();
+    } catch (e) {
+        builderRootCondition = builderCreateCondition('and', []);
+        builderRender();
+    }
+};
+
+// 监听卡牌名称输入变化，并实时更新条件构建器下拉选项
+function setupCardNameInputListener() {
+    const cardInputs = document.getElementById('cardInputs');
+    if (!cardInputs) return;
+    cardInputs.addEventListener('input', function (e) {
+        if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
+            if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
+                builderRender();
+            }
+            updatePieChart();  // 新增：当卡名变化后更新饼图
+        }
+    });
+    cardInputs.addEventListener('blur', function (e) {
+        if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
+            if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
+                builderRender();
+            }
+            updatePieChart();  // 新增：当卡名变化后更新饼图
+        }
+    }, true);
+}
     if (tree && tree.type === 'single') {
         return { type: 'and', children: [tree] };
     }
