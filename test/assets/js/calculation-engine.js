@@ -1,14 +1,17 @@
-// 核心计算模块：精确计算与蒙特卡洛模拟
+// 精确概率与蒙特卡洛模拟计算引擎
 (function(global) {
-    let calculationWorker = null;
-    let isCalculating = false;
-    let calculationStartTime = 0;
-    let progressUpdateInterval = null;
+    // 计算相关状态变量
+    let calculationWorker = null; // 当前精确计算的Web Worker实例
+    let isCalculating = false;    // 是否正在计算
+    let calculationStartTime = 0; // 计算开始时间戳
+    let progressUpdateInterval = null; // 进度刷新定时器
 
+    // 获取当前计算已用秒数
     function getElapsedSeconds() {
         return Math.floor((Date.now() - calculationStartTime) / 1000);
     }
 
+    // 精确组合概率计算主入口，负责参数校验、进度显示、worker启动
     function calculate() {
         if (isCalculating) {
             alert("计算正在进行中，请稍后...");
@@ -16,7 +19,7 @@
         }
         try {
             calculationStartTime = Date.now();
-            // 验证卡名无重复
+            // 检查卡名是否有重复
             let cardNames = [];
             let duplicateNames = new Set();
             for (let i = 0; i < 30; i++) {
@@ -26,40 +29,40 @@
             if (duplicateNames.size > 0) {
                 throw new Error(`卡名重复：${Array.from(duplicateNames).join(', ')}`);
             }
-            // 新增：在构建器模式下同步条件表达式
+            // 构建器模式下同步条件表达式（如有）
             if (global.getConditionInputMode && global.getConditionInputMode() === 'builder') {
                 if (global.getBuilderConditionData && global.setBuilderConditionData) {
                     // builderUpdateOutput 自动同步 #condition
                 }
             }
-            // 启动定时器更新计算用时显示
+            // 启动进度刷新定时器
             progressUpdateInterval = setInterval(() => {
                 const elapsedSeconds = getElapsedSeconds();
                 const progress = document.getElementById('calculationProgress').value;
                 document.getElementById('progressText').textContent =
                     `计算中: ${progress}%  计算用时: ${elapsedSeconds}秒`;
             }, 1000);
-            // 重置并显示进度条与结果区域
+            // 重置进度条和结果显示
             document.getElementById('calculationProgress').value = 0;
             document.getElementById('progressText').textContent = '计算中: 0%  计算用时: 0秒';
             document.getElementById('probability').value = '计算中...';
             document.getElementById('validCombinations').value = '计算中...';
             document.getElementById('totalCombinations').value = '计算中...';
-            // 读取用户输入的卡牌数量
+            // 读取卡牌数量
             const cardCounts = [];
             for (let i = 0; i < 30; i++) {
                 cardCounts.push(parseInt(document.getElementById(`card${i}`).value) || 0);
             }
             const draws = parseInt(document.getElementById('draws').value);
             const deckSize = parseInt(document.getElementById('total').value);
-            // 验证输入数据有效性
+            // 输入有效性检查
             if (draws <= 0) throw new Error("抽卡数必须大于0");
             if (deckSize <= 0) throw new Error("卡组中至少要有1张卡");
             if (draws > deckSize) throw new Error("抽卡数不能超过卡组总数");
-            // 取得并转换用户输入的条件表达式
+            // 获取并转换条件表达式
             let condition = document.getElementById('condition').value.trim();
             if (!condition) throw new Error("请输入逻辑判断条件");
-            // 将条件表达式中的用户卡名映射至变量名
+            // 卡名映射为变量名
             const cardNameMap = {};
             const sortedNames = [];
             for (let i = 0; i < 30; i++) {
@@ -71,15 +74,14 @@
                 const regex = new RegExp(global.UIUtils.escapeRegExp(name), 'g');
                 condition = condition.replace(regex, cardNameMap[name]);
             }
-            // 检测条件中是否错误使用赋值运算符
+            // 检查条件表达式是否误用赋值运算符
             const conditionWithoutOperators = condition.replace(/==|<=|>=|!=/g, '');
             if (conditionWithoutOperators.includes('=')) {
                 alert("提示：条件表达式中建议使用 '==' 或 '===' 判断相等，请检查是否正确。");
             }
-            // 创建Web Worker来执行计算任务
+            // 创建Web Worker执行精确组合枚举计算
             calculationWorker = new Worker(URL.createObjectURL(new Blob([`
-                // ...existing worker code from calculate()...
-                // Worker内部：组合数计算（带缓存）
+                // Worker内部：组合数计算（带缓存）与条件判定
                 const combinationCache = new Map();
                 function combination(n, k) {
                     if (k < 0 || k > n) return 0n;
@@ -201,6 +203,7 @@
         }
     }
 
+    // 刷新进度条和用时显示
     function updateProgress(progress) {
         document.getElementById('calculationProgress').value = progress;
         const elapsedSeconds = getElapsedSeconds();
@@ -208,6 +211,7 @@
             `计算中: ${progress}%  计算用时: ${elapsedSeconds}秒`;
     }
 
+    // 精确计算完成后处理结果，显示概率、组合数等
     function finalizeCalculation(result) {
         clearInterval(progressUpdateInterval);
         progressUpdateInterval = null;
@@ -227,6 +231,7 @@
         }
     }
 
+    // 显示错误信息并重置界面
     function showError(message) {
         clearInterval(progressUpdateInterval);
         progressUpdateInterval = null;
@@ -242,6 +247,7 @@
         global.DataManager.saveCalculationRecord({}, document.getElementById('condition').value, message);
     }
 
+    // 取消当前计算，终止worker并重置界面
     function cancelCalculation() {
         clearInterval(progressUpdateInterval);
         progressUpdateInterval = null;
@@ -257,12 +263,14 @@
         alert("计算已取消");
     }
 
+    // 清理计算相关状态
     function cleanupCalculation() {
         isCalculating = false;
         document.getElementById('cancelBtn').classList.add('hidden');
         calculationWorker = null;
     }
 
+    // 蒙特卡洛模拟主入口，负责参数校验、进度显示、worker启动
     function monteCarloCalculate() {
         if (isCalculating) {
             if (!confirm("当前计算正在进行，是否取消并使用蒙特卡洛模拟计算？")) return;
@@ -270,6 +278,7 @@
         }
         try {
             calculationStartTime = Date.now();
+            // 检查卡名重复
             let cardNames = [];
             let duplicateNames = new Set();
             for (let i = 0; i < 30; i++) {
@@ -279,6 +288,7 @@
             if (duplicateNames.size > 0) {
                 throw new Error(`卡名重复：${Array.from(duplicateNames).join(', ')}`);
             }
+            // 读取卡牌数量
             const cardCounts = [];
             for (let i = 0; i < 30; i++) {
                 cardCounts.push(parseInt(document.getElementById(`card${i}`).value) || 0);
@@ -290,6 +300,7 @@
             if (draws > deckSize) throw new Error("抽卡数不能超过卡组总数");
             let condition = document.getElementById('condition').value.trim();
             if (!condition) throw new Error("请输入逻辑判断条件");
+            // 卡名映射为变量名
             const cardNameMap = {};
             const sortedNames = [];
             for (let i = 0; i < 30; i++) {
@@ -305,7 +316,9 @@
             document.getElementById('cancelBtn').classList.remove('hidden');
             document.getElementById('calculationProgress').value = 0;
             document.getElementById('progressText').textContent = '蒙特卡洛模拟计算中: 0%  用时: 0秒';
+            // 创建Web Worker执行蒙特卡洛模拟
             const simulationWorker = new Worker(URL.createObjectURL(new Blob([`
+                // Worker内部：蒙特卡洛抽卡模拟与条件判定
                 function varToIndex(varName) {
                     const lc = varName.toLowerCase();
                     if (lc === 'true' || lc === 'false') return lc;
@@ -402,10 +415,11 @@
         }
     }
 
+    // 导出接口
     global.CalculationEngine = {
-        calculate,
-        monteCarloCalculate,
-        cancelCalculation,
-        getElapsedSeconds
+        calculate,              // 精确组合概率计算
+        monteCarloCalculate,    // 蒙特卡洛模拟计算
+        cancelCalculation,      // 取消计算
+        getElapsedSeconds       // 获取已用秒数
     };
 })(window);

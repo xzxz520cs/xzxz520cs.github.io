@@ -1,7 +1,12 @@
 (function(global) {
-    // 工具常量：localStorage存储上限设置为5MB
-    const MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB
+    // localStorage最大存储空间（约5MB，防止超限）
+    const MAX_STORAGE_SIZE = 5 * 1024 * 1024;
 
+    /**
+     * 保存当前输入的卡组信息到localStorage。
+     * 检查卡组名和卡名重复，支持条件输入模式和构建器数据。
+     * 若同名卡组存在则询问是否覆盖。
+     */
     function saveDeck() {
         const deckName = document.getElementById('deckName').value.trim();
         if (!deckName) {
@@ -54,6 +59,10 @@
         alert("卡组保存成功！");
     }
 
+    /**
+     * 从localStorage加载选中的卡组到输入框。
+     * 根据卡组的条件输入模式切换界面显示。
+     */
     function loadDeck() {
         const deckId = parseInt(document.getElementById('deckList').value);
         if (!deckId) return;
@@ -91,6 +100,10 @@
         alert("卡组加载成功！");
     }
 
+    /**
+     * 删除localStorage中选中的卡组。
+     * 删除后刷新卡组下拉列表。
+     */
     function deleteDeck() {
         const deckId = parseInt(document.getElementById('deckList').value);
         if (!deckId) return;
@@ -104,6 +117,9 @@
         alert("卡组删除成功！");
     }
 
+    /**
+     * 刷新卡组下拉列表，显示所有已保存的卡组。
+     */
     function updateDeckList() {
         const select = document.getElementById('deckList');
         if (!select) return;
@@ -117,6 +133,14 @@
         });
     }
 
+    /**
+     * 保存一次概率计算结果到localStorage。
+     * 包含计算条件、卡组、概率、组合数等信息。
+     * 若超出最大存储空间则提示用户。
+     * @param {Object} result - 计算结果对象，需包含valid、total等字段
+     * @param {string} condition - 计算条件
+     * @param {string|null} errorMessage - 错误信息（如有）
+     */
     function saveCalculationRecord(result, condition, errorMessage = null) {
         const records = JSON.parse(localStorage.getItem('calculationRecords') || '[]');
         const record = {
@@ -145,6 +169,10 @@
         localStorage.setItem('calculationRecords', JSON.stringify(records));
     }
 
+    /**
+     * 导出所有计算记录为CSV文件，自动生成表头和内容。
+     * 文件名为“计算记录.csv”。
+     */
     function exportCalculationRecords() {
         const records = JSON.parse(localStorage.getItem('calculationRecords') || '[]');
         if (records.length === 0) {
@@ -198,6 +226,9 @@
         URL.revokeObjectURL(url);
     }
 
+    /**
+     * 清空所有概率计算记录，需用户确认。
+     */
     function clearCalculationRecords() {
         if (confirm('确定删除所有计算记录吗？')) {
             localStorage.removeItem('calculationRecords');
@@ -205,6 +236,7 @@
         }
     }
 
+    // 挂载DataManager到全局，供外部调用
     global.DataManager = {
         saveDeck,
         loadDeck,

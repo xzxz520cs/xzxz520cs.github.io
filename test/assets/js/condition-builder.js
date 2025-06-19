@@ -1,10 +1,14 @@
 // 条件构建器模块
 (function(global) {
     // ====== 数据结构与工具 ======
+    // 构建器的根条件对象
     let builderRootCondition = null;
+    // 构建器生成的条件表达式文本
     let builderConditionText = '';
+    // 当前输入模式（manual/builder）
     let currentConditionInputMode = 'manual';
 
+    // 运算符映射表
     const builderOperators = {
         gt: '>',
         eq: '==',
@@ -14,6 +18,7 @@
         lte: '<='
     };
 
+    // 获取所有卡名（变量名和自定义名）
     function getAllCardNames() {
         const varNames = [];
         for (let i = 0; i < 30; i++) {
@@ -31,6 +36,7 @@
         return [...varNames, ...customNames];
     }
 
+    // 创建条件节点对象（单条件或条件组）
     function builderCreateCondition(type, children) {
         return type === 'single' ? {
             type: 'single',
@@ -41,6 +47,7 @@
     }
 
     // ====== 渲染逻辑 ======
+    // 渲染整个条件构建器界面
     function builderRender() {
         const builder = document.getElementById('conditionBuilder');
         if (!builder) return;
@@ -48,6 +55,7 @@
         builderRootCondition && builder.appendChild(builderRenderCondition(builderRootCondition, true));
         builderUpdateOutput();
     }
+    // 渲染单个条件节点（递归）
     function builderRenderCondition(condition, isRoot = false) {
         const container = document.createElement('div');
         container.className = `condition-builder condition-${condition.type}`;
@@ -58,6 +66,7 @@
         }
         return container;
     }
+    // 渲染单条件节点（如“抽到X的数量 > N”）
     function builderRenderSingleCondition(condition, container, isRoot) {
         container.appendChild(document.createTextNode('抽到'));
         const cardsWrapper = document.createElement('div');
@@ -122,6 +131,7 @@
             container.dispatchEvent(new CustomEvent('delete', { bubbles: true }));
         }));
     }
+    // 渲染条件组节点（如“全部满足/任一满足”）
     function builderRenderGroupCondition(condition, container, isRoot) {
         const header = document.createElement('div');
         header.className = 'builder-group-header';
@@ -160,12 +170,14 @@
         childrenContainer.appendChild(buttons);
         container.appendChild(childrenContainer);
     }
+    // 更新条件表达式文本框和预览
     function builderUpdateOutput() {
         builderConditionText = builderRootCondition ? builderGenerateConditionText(builderRootCondition) : '';
         document.getElementById('condition').value = builderConditionText;
         const preview = document.getElementById('builderConditionPreview');
         if (preview) preview.value = builderConditionText;
     }
+    // 生成条件表达式字符串
     function builderGenerateConditionText(condition) {
         if (condition.type === 'single') {
             const cardsText = condition.cards.map((c, i) =>
@@ -178,6 +190,7 @@
             ? `(${childrenText.join(condition.type === 'and' ? ' && ' : ' || ')})`
             : childrenText[0] || '';
     }
+    // 创建下拉框控件
     function builderCreateSelect(options, value, onChange) {
         const select = document.createElement('select');
         options.forEach(opt => {
@@ -190,6 +203,7 @@
         select.addEventListener('change', onChange);
         return select;
     }
+    // 创建输入框控件
     function builderCreateInput(value, onChange, width) {
         const input = document.createElement('input');
         input.type = 'text';
@@ -199,6 +213,7 @@
         input.addEventListener('input', onChange);
         return input;
     }
+    // 创建按钮控件
     function builderCreateButton(text, onClick) {
         const button = document.createElement('button');
         button.type = 'button';
@@ -216,6 +231,7 @@
     }
 
     // ====== 手动条件解析器 ======
+    // 将表达式字符串分割为词法单元
     function tokenize(expr) {
         const regex = /\s*([A-Za-z0-9\u4e00-\u9fa5]+|>=|<=|==|!=|&&|\|\||[-+*/()<>])\s*/g;
         let tokens = [];
@@ -225,21 +241,27 @@
         }
         return tokens;
     }
+    // 简单表达式解析器构造函数
     function Parser(tokens) {
         this.tokens = tokens;
         this.pos = 0;
     }
+    // 查看下一个token
     Parser.prototype.peek = function () { return this.tokens[this.pos]; };
+    // 消耗一个token
     Parser.prototype.consume = function (token) {
         if (token && this.tokens[this.pos] !== token) {
             throw new Error("预期 " + token + "，但得到 " + this.tokens[this.pos]);
         }
         return this.tokens[this.pos++];
     };
+    // 判断是否到达末尾
     Parser.prototype.eof = function () { return this.pos >= this.tokens.length; };
+    // 解析表达式入口
     function parseExpression(parser) {
         return parseLogicalOr(parser);
     }
+    // 解析或表达式
     function parseLogicalOr(parser) {
         let node = parseLogicalAnd(parser);
         while (!parser.eof() && parser.peek() === '||') {
@@ -249,6 +271,7 @@
         }
         return node;
     }
+    // 解析与表达式
     function parseLogicalAnd(parser) {
         let node = parseRelational(parser);
         while (!parser.eof() && parser.peek() === '&&') {
@@ -258,6 +281,7 @@
         }
         return node;
     }
+    // 解析关系表达式
     function parseRelational(parser) {
         let left = parseSum(parser);
         if (!parser.eof() && /^(>=|<=|==|!=|>|<)$/.test(parser.peek())) {
@@ -281,6 +305,7 @@
         }
         return left;
     }
+    // 解析加减表达式
     function parseSum(parser) {
         if (parser.peek() === '(') {
             parser.consume('(');
@@ -297,6 +322,7 @@
         }
         return items.length === 1 ? items[0] : items;
     }
+    // 运算符映射（字符串转内部标识）
     function mapOperator(op) {
         const opMap = {
             ">": "gt",
@@ -313,6 +339,7 @@
         if (!opMap[op]) throw new Error("不支持的运算符：" + op);
         return opMap[op];
     }
+    // 解析手动输入条件为构建器结构
     function parseManualCondition(manualStr) {
         manualStr = manualStr.trim();
         if (!manualStr) throw new Error("空的条件");
@@ -329,6 +356,7 @@
     }
 
     // ====== 输入模式切换 ======
+    // 切换条件输入模式（手动/构建器）
     function switchConditionInputMode(mode, skipConfirm = false) {
         const currentCondition = document.getElementById('condition').value.trim();
         if (!currentCondition) { skipConfirm = true; }
@@ -373,6 +401,7 @@
     }
 
     // ====== 事件绑定与初始化 ======
+    // 绑定输入模式切换事件
     function bindModeSwitch() {
         document.querySelectorAll('input[name="conditionInputMode"]').forEach(radio => {
             radio.addEventListener('change', function (e) {
@@ -383,11 +412,22 @@
             });
         });
     }
+    // 绑定卡名输入监听，卡名变化时刷新下拉
     function bindCardNameListener() {
         if (window.UIUtils && window.UIUtils.setupCardNameInputListener) {
             window.UIUtils.setupCardNameInputListener();
         }
+        // 监听卡名输入变化，实时刷新条件构建器下拉
+        const cardInputs = document.getElementById('cardInputs');
+        if (cardInputs) {
+            cardInputs.addEventListener('input', function (e) {
+                if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
+                    builderRender();
+                }
+            });
+        }
     }
+    // 初始化条件构建器
     function init() {
         builderRootCondition = builderCreateCondition('and', []);
         builderRender();
@@ -397,6 +437,7 @@
     }
 
     // ====== 对外接口 ======
+    // 提供初始化、获取/设置条件等接口
     global.ConditionBuilder = {
         init,
         getConditionInputMode: function() {

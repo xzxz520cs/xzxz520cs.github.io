@@ -1,88 +1,82 @@
-// 全局变量初始化
-
-// 工具常量：localStorage存储上限设置为5MB
+// 工具常量：localStorage最大存储空间（字节）
 const MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
-// 数据管理相关函数已迁移到 data-manager.js
-// 通过 window.DataManager 提供接口
-
-// 保存卡组数据至localStorage中
+// 调用 DataManager 保存当前卡组到本地存储
 function saveDeck() {
     window.DataManager.saveDeck();
 }
 
-// 从localStorage中加载指定卡组数据
+// 调用 DataManager 从本地存储加载卡组
 function loadDeck() {
     window.DataManager.loadDeck();
 }
 
-// 删除选定的卡组
+// 调用 DataManager 删除当前选中的卡组
 function deleteDeck() {
     window.DataManager.deleteDeck();
 }
 
-// 更新下拉列表中的卡组信息
+// 调用 DataManager 刷新卡组下拉列表
 function updateDeckList() {
     window.DataManager.updateDeckList();
 }
 
-// 计算记录相关
+// 保存一次概率计算记录，包含结果、条件和可选错误信息
 function saveCalculationRecord(result, condition, errorMessage = null) {
     window.DataManager.saveCalculationRecord(result, condition, errorMessage);
 }
+// 导出所有概率计算记录
 function exportCalculationRecords() {
     window.DataManager.exportCalculationRecords();
 }
+// 清空所有概率计算记录
 function clearCalculationRecords() {
     window.DataManager.clearCalculationRecords();
 }
 
-// 计算卡组内所有卡牌总数，更新显示
+// 刷新卡组总数显示
 function updateTotalDeck() {
     window.UIUtils.updateTotalDeck();
 }
 
-// 更新饼状图显示卡牌分布
+// 刷新概率分布饼图
 function updatePieChart() {
     window.UIUtils.updatePieChart();
 }
 
-// 计算已用秒数
+// 获取当前计算已用秒数（由 CalculationEngine 维护）
 function getElapsedSeconds() {
-    // 由 CalculationEngine 维护
     return window.CalculationEngine.getElapsedSeconds();
 }
 
-// 精确计算入口（调用核心计算模块）
+// 精确概率计算入口，调用 CalculationEngine
 function calculate() {
     window.CalculationEngine.calculate();
 }
 
-// 蒙特卡洛模拟入口（调用核心计算模块）
+// 蒙特卡洛模拟入口，调用 CalculationEngine
 function monteCarloCalculate() {
     window.CalculationEngine.monteCarloCalculate();
 }
 
-// 取消计算
+// 取消当前概率计算
 function cancelCalculation() {
     window.CalculationEngine.cancelCalculation();
 }
 
-// 页面初始化：创建卡牌输入组件并绑定相关事件
+// 页面加载时初始化：刷新卡组、绑定输入事件、初始化条件构建器
 window.onload = function () {
     updateDeckList();
     window.UIUtils.updateTotalDeck();
-    // 为所有卡牌数量输入框绑定变更事件
     document.querySelectorAll('.card-count').forEach(input => {
         input.addEventListener('change', window.UIUtils.updateTotalDeck);
     });
-    // 初始化条件构建器（调用新模块接口）
     if (window.ConditionBuilder && window.ConditionBuilder.init) {
         window.ConditionBuilder.init();
     }
 };
 
-// 代理条件构建器相关接口
+// 条件构建器相关接口代理，便于外部调用
 window.getConditionInputMode = function () {
     return window.ConditionBuilder.getConditionInputMode();
 };

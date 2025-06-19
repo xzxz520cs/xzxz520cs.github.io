@@ -1,22 +1,30 @@
 (function(global) {
-    // 工具函数：转义正则表达式中的特殊字符
+    /**
+     * 对字符串进行正则转义，防止特殊字符影响正则表达式
+     */
     function escapeRegExp(string) {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // 工具函数：生成变量标识符（例如 a, b, …, aa, ab）
+    /**
+     * 根据索引获取变量名（如a, b, ..., aa, ab）
+     */
     function getVarName(index) {
         if (index < 26) return String.fromCharCode(97 + index);
         return 'a' + String.fromCharCode(97 + index - 26);
     }
 
-    // 工具函数：生成卡牌标签（例如 A, B, …, AA, AB）
+    /**
+     * 根据索引获取卡牌标签（如A, B, ..., AA, AB）
+     */
     function getCardLabel(index) {
         if (index < 26) return String.fromCharCode(65 + index);
         return `A${String.fromCharCode(65 + index - 26)}`;
     }
 
-    // 根据给定的索引返回循环使用的颜色
+    /**
+     * 根据索引循环获取预设颜色
+     */
     function getColor(index) {
         const colors = [
             '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
@@ -29,12 +37,16 @@
         return colors[index % colors.length];
     }
 
-    // 计算已用秒数
+    /**
+     * 计算从startTime到现在经过的秒数
+     */
     function getElapsedSeconds(startTime) {
         return Math.floor((Date.now() - startTime) / 1000);
     }
 
-    // 计算卡组内所有卡牌总数，更新显示
+    /**
+     * 统计所有卡牌数量并刷新总数显示，同时刷新饼图
+     */
     function updateTotalDeck() {
         let total = 0;
         document.querySelectorAll('.card-count').forEach(input => {
@@ -44,7 +56,10 @@
         updatePieChart();
     }
 
-    // 更新饼状图显示卡牌分布
+    /**
+     * 根据当前卡牌输入刷新饼图显示卡牌分布
+     * 若所有卡牌数量为0，则显示默认占位
+     */
     let chart = null;
     function updatePieChart() {
         const labels = [];
@@ -98,7 +113,10 @@
         });
     }
 
-    // 监听卡牌名称输入变化，并实时更新条件构建器下拉选项
+    /**
+     * 监听卡名输入变化，实时刷新饼图和条件构建器
+     * 支持input和blur事件
+     */
     function setupCardNameInputListener() {
         const cardInputs = document.getElementById('cardInputs');
         if (!cardInputs) return;
@@ -120,7 +138,7 @@
         }, true);
     }
 
-    // 导出接口
+    // 对外暴露的工具方法集合
     global.UIUtils = {
         escapeRegExp,
         getVarName,
