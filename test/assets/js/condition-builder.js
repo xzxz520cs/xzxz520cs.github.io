@@ -305,17 +305,6 @@
     Parser.prototype.eof = function () { return this.pos >= this.tokens.length; };
     // 解析表达式入口
     function parseExpression(parser) {
-        // 检查是否是概率函数
-        if (parser.peek() === 'PROB') {
-            parser.consume('PROB');
-            parser.consume('(');
-            const value = parser.consume();
-            if (!/^\d+$/.test(value) || parseInt(value) < 1 || parseInt(value) > 99) {
-                throw new Error("PROB函数参数必须是1-99的整数");
-            }
-            parser.consume(')');
-            return { type: "prob", value: parseInt(value) };
-        }
         return parseLogicalOr(parser);
     }
     // 解析或表达式
@@ -370,9 +359,16 @@
             parser.consume(')');
             return node;
         }
-        // 新增：支持PROB函数型表达式递归解析
+        // 支持PROB函数型表达式递归解析
         if (parser.peek() === 'PROB') {
-            return parseExpression(parser);
+            parser.consume('PROB');
+            parser.consume('(');
+            const value = parser.consume();
+            if (!/^\d+$/.test(value) || parseInt(value) < 1 || parseInt(value) > 99) {
+                throw new Error("PROB函数参数必须是1-99的整数");
+            }
+            parser.consume(')');
+            return { type: "prob", value: parseInt(value) };
         }
         let items = [];
         items.push(parser.consume());
