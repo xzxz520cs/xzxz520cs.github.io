@@ -66,13 +66,17 @@
     // 渲染单个条件节点（递归）
     function builderRenderCondition(condition, isRoot = false) {
         const container = document.createElement('div');
-        container.className = `condition-builder condition-${condition.type}`;
-        if (condition.type === 'single') {
-            builderRenderSingleCondition(condition, container, isRoot);
-        } else if (condition.type === 'prob') {
+        // 概率函数也统一用condition-single样式
+        if (condition.type === 'prob') {
+            container.className = 'condition-builder condition-single';
             builderRenderProbCondition(condition, container, isRoot);
         } else {
-            builderRenderGroupCondition(condition, container, isRoot);
+            container.className = `condition-builder condition-${condition.type}`;
+            if (condition.type === 'single') {
+                builderRenderSingleCondition(condition, container, isRoot);
+            } else {
+                builderRenderGroupCondition(condition, container, isRoot);
+            }
         }
         return container;
     }
@@ -157,7 +161,6 @@
             e.target.value = value;
             builderUpdateOutput();
         });
-        valueInput.style.width = '50px';
         container.appendChild(valueInput);
         container.appendChild(document.createTextNode('% 的概率满足此条件'));
         if (!isRoot) {
@@ -367,6 +370,10 @@
             parser.consume(')');
             return node;
         }
+        // 新增：支持PROB函数型表达式递归解析
+        if (parser.peek() === 'PROB') {
+            return parseExpression(parser);
+        }
         let items = [];
         items.push(parser.consume());
         while (!parser.eof() && (parser.peek() === '+' || parser.peek() === '-')) {
@@ -403,10 +410,12 @@
         if (!parser.eof()) {
             throw new Error("无法解析条件：" + manualStr);
         }
-        if (tree && tree.type === 'single') {
+        // 修改：无论何种类型都包裹在and条件组下，保证有母节点
+        if (tree && tree.type === 'and') {
+            return tree;
+        } else {
             return { type: 'and', children: [tree] };
         }
-        return tree;
     }
 
     // ====== 输入模式切换 ======
