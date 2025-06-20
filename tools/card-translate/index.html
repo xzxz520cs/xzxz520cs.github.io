@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡牌日中对照生成工具</title>
+    <link rel="stylesheet" href="../../assets/css/styles.css">
+</head>
+<body>
+<!-- 页头 -->
+<header class="site-header">
+    <div class="container">
+        <div class="site-title">
+            <a href="/" class="site-title-link">
+                <span class="site-title">天天发蛋糕的工具箱</span>
+            </a>
+        </div>
+        <label for="menu-toggle-checkbox" class="menu-toggle" aria-label="打开菜单">☰</label>
+        <nav class="nav-menu">
+            <ul class="nav-list">
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a></li>
+                        <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+                        <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" class="dropdown-item">恢复关闭的标签页</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <input type="checkbox" id="menu-toggle-checkbox" hidden>
+    <div class="drawer">
+        <div class="container">
+            <label for="menu-toggle-checkbox" class="menu-toggle close-menu" aria-label="关闭菜单">×</label>
+        </div>
+        <nav class="drawer-menu">
+            <ul class="drawer-list">
+                <li class="drawer-item">
+                    <a href="#" class="drawer-link">工具</a>
+                    <ul class="drawer-submenu">
+                        <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a></li>
+                        <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+                        <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" class="drawer-subitem">恢复关闭的标签页</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <label for="menu-toggle-checkbox" class="drawer-overlay"></label>
+</header>
+
+<main class="container">
+    <div class="card card--elevated">
+        <h1 class="mt-0">卡牌日中对照生成工具</h1>
+        <p>输入文本或上传文件，自动提取卡牌编号，生成日中对照。</p>
+        <input type="file" id="fileInput" class="file-input" accept=".txt">
+        <textarea id="inputArea" placeholder="粘贴或输入卡组文本，每行一个编号"></textarea>
+        <button id="searchBtn" class="btn btn--primary">生成</button>
+        <div id="output" class="output"></div>
+    </div>
+</main>
+
+<!-- 页脚 -->
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <h3 class="footer-title">关于作者</h3>
+                <ul class="footer-links">
+                    <li><a href="mailto:ttfdg520cs@gmail.com">ttfdg520cs@gmail.com</a></li>
+                    <li><a href="https://space.bilibili.com/1446349" target="_blank">Bilibili主页</a></li>
+                    <li><a href="https://github.com/xzxz520cs" target="_blank">GitHub</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="text-muted">© 2025 天天发蛋糕的工具箱</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+function extractNumbers(text) {
+    return text.split(/\r?\n/).map(line => line.trim()).filter(line => /^\d+$/.test(line));
+}
+
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        document.getElementById('inputArea').value = evt.target.result;
+    };
+    reader.readAsText(file, 'utf-8');
+});
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+document.getElementById('searchBtn').addEventListener('click', async function() {
+    const output = document.getElementById('output');
+    output.textContent = '';
+    let text = document.getElementById('inputArea').value;
+    // 只保留唯一编号
+    let numbers = Array.from(new Set(extractNumbers(text)));
+    if (numbers.length === 0) {
+        output.textContent = '未检测到卡牌编号。';
+        return;
+    }
+    // 创建进度条
+    output.innerHTML = '<div id="progress-bar-container" style="width:100%;background:#eee;height:20px;border-radius:10px;overflow:hidden;margin-bottom:10px;">'
+        + '<div id="progress-bar" style="height:100%;width:0%;background:#4caf50;transition:width 0.2s;"></div></div>'
+        + '<span id="progress-text">0/' + numbers.length + '</span>'
+        + '<div id="result-area" style="white-space:pre-line;margin-top:10px;"></div>';
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const resultArea = document.getElementById('result-area');
+    let cardList = [];
+    for (let i = 0; i < numbers.length; i++) {
+        const num = numbers[i];
+        try {
+            const res = await fetch(`https://ygocdb.com/api/v0/?search=${num}`);
+            const data = await res.json();
+            if (data.result && data.result.length > 0) {
+                const card = data.result[0];
+                card._inputNum = num;
+                cardList.push(card);
+            } else {
+                cardList.push({ _inputNum: num, notFound: true });
+            }
+        } catch (e) {
+            cardList.push({ _inputNum: num, fetchError: true });
+        }
+        // 更新进度条
+        const percent = Math.round(((i + 1) / numbers.length) * 100);
+        progressBar.style.width = percent + '%';
+        progressText.textContent = (i + 1) + '/' + numbers.length;
+        await sleep(50); // 100ms延迟
+    }
+    // 按cid排序，未找到/出错的排在最后
+    cardList.sort((a, b) => {
+        if (a.notFound || a.fetchError) return 1;
+        if (b.notFound || b.fetchError) return -1;
+        return (a.cid || 0) - (b.cid || 0);
+    });
+    let results = [];
+    for (const card of cardList) {
+        if (card.notFound) {
+            results.push(`${card._inputNum}->未找到卡片`);
+        } else if (card.fetchError) {
+            results.push(`${card._inputNum}->查询失败`);
+        } else {
+            const md_name = card.md_name || card.cn_name || '';
+            const jp_ruby = card.jp_ruby || '';
+            const jp_name = card.jp_name || '';
+            if (jp_name === jp_ruby) {
+                results.push(`${jp_ruby}->${md_name}`);
+            } else {
+                results.push(`${jp_name}->${jp_ruby}->${md_name}`);
+            }
+        }
+    }
+    resultArea.textContent = results.join('\n');
+});
+</script>
+</body>
+</html>
