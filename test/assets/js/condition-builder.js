@@ -46,6 +46,14 @@
         } : { type, children: children || [] };
     }
 
+    // 创建概率函数节点
+    function builderCreateProbCondition(value = 50) {
+        return {
+            type: 'prob',
+            value: value
+        };
+    }
+
     // ====== 渲染逻辑 ======
     // 渲染整个条件构建器界面
     function builderRender() {
@@ -61,6 +69,8 @@
         container.className = `condition-builder condition-${condition.type}`;
         if (condition.type === 'single') {
             builderRenderSingleCondition(condition, container, isRoot);
+        } else if (condition.type === 'prob') {
+            builderRenderProbCondition(condition, container, isRoot);
         } else {
             builderRenderGroupCondition(condition, container, isRoot);
         }
@@ -131,6 +141,31 @@
             container.dispatchEvent(new CustomEvent('delete', { bubbles: true }));
         }));
     }
+    // 渲染概率函数节点
+    function builderRenderProbCondition(condition, container, isRoot) {
+        container.appendChild(document.createTextNode('有 '));
+        const valueInput = document.createElement('input');
+        valueInput.type = 'number';
+        valueInput.value = condition.value;
+        valueInput.min = 1;
+        valueInput.max = 99;
+        valueInput.addEventListener('input', e => {
+            let value = parseInt(e.target.value);
+            if (isNaN(value) || value < 1) value = 1;
+            if (value > 99) value = 99;
+            condition.value = value;
+            e.target.value = value;
+            builderUpdateOutput();
+        });
+        valueInput.style.width = '50px';
+        container.appendChild(valueInput);
+        container.appendChild(document.createTextNode('% 的概率满足此条件'));
+        if (!isRoot) {
+            container.appendChild(builderCreateButton('删除', () => {
+                container.dispatchEvent(new CustomEvent('delete', { bubbles: true }));
+            }));
+        }
+    }
     // 渲染条件组节点（如“全部满足/任一满足”）
     function builderRenderGroupCondition(condition, container, isRoot) {
         const header = document.createElement('div');
@@ -142,7 +177,7 @@
             e => { condition.type = e.target.value; builderUpdateOutput(); }
         ));
         header.appendChild(document.createTextNode('条件'));
-        !isRoot && header.appendChild(builderCreateButton('删除', () => {
+        if (!isRoot) header.appendChild(builderCreateButton('删除', () => {
             container.dispatchEvent(new CustomEvent('delete', { bubbles: true }));
         }));
         container.appendChild(header);
@@ -167,6 +202,12 @@
             condition.children.push(builderCreateCondition('single'));
             builderRender();
         }));
+        const probBtn = builderCreateButton('添加概率函数', () => {
+            condition.children.push(builderCreateProbCondition());
+            builderRender();
+        });
+        probBtn.className += ' btn--auto-width';
+        buttons.appendChild(probBtn);
         childrenContainer.appendChild(buttons);
         container.appendChild(childrenContainer);
     }
@@ -177,13 +218,15 @@
         const preview = document.getElementById('builderConditionPreview');
         if (preview) preview.value = builderConditionText;
     }
-    // 生成条件表达式字符串
+    // 生成条件表达式字符串，支持prob类型
     function builderGenerateConditionText(condition) {
         if (condition.type === 'single') {
             const cardsText = condition.cards.map((c, i) =>
                 i === 0 ? c.name : `${c.operator || '+'} ${c.name}`).join(' ');
             const operator = builderOperators[condition.symbol] || condition.symbol || '';
             return `(${cardsText}) ${operator} ${condition.num}`;
+        } else if (condition.type === 'prob') {
+            return `PROB(${condition.value})`;
         }
         const childrenText = condition.children.map(builderGenerateConditionText).filter(Boolean);
         return childrenText.length > 1
@@ -259,6 +302,17 @@
     Parser.prototype.eof = function () { return this.pos >= this.tokens.length; };
     // 解析表达式入口
     function parseExpression(parser) {
+        // 检查是否是概率函数
+        if (parser.peek() === 'PROB') {
+            parser.consume('PROB');
+            parser.consume('(');
+            const value = parser.consume();
+            if (!/^\d+$/.test(value) || parseInt(value) < 1 || parseInt(value) > 99) {
+                throw new Error("PROB函数参数必须是1-99的整数");
+            }
+            parser.consume(')');
+            return { type: "prob", value: parseInt(value) };
+        }
         return parseLogicalOr(parser);
     }
     // 解析或表达式
