@@ -53,8 +53,8 @@
 <main class="container">
     <div class="card card--elevated">
         <h1 class="mt-0">卡牌日中对照生成工具</h1>
-        <p>输入文本或上传文件，自动提取卡牌编号，生成日中对照。</p>
-        <input type="file" id="fileInput" class="file-input" accept=".txt">
+        <p>输入文本或上传文本文件，自动提取卡牌编号，生成日中对照。</p>
+        <input type="file" id="fileInput" class="file-input">
         <textarea id="inputArea" placeholder="粘贴或输入卡组文本，每行一个编号"></textarea>
         <button id="searchBtn" class="btn btn--primary">生成</button>
         <div id="output" class="output"></div>
@@ -152,13 +152,23 @@ document.getElementById('searchBtn').addEventListener('click', async function() 
         } else if (card.fetchError) {
             results.push(`${card._inputNum}->查询失败`);
         } else {
-            const md_name = card.md_name || card.cn_name || '';
-            const jp_ruby = card.jp_ruby || '';
-            const jp_name = card.jp_name || '';
-            if (jp_name === jp_ruby) {
-                results.push(`${jp_ruby}->${md_name}`);
+            // 优先 sc_name > md_name > nwbbs_n
+            const cn_name = card.sc_name || card.md_name || card.nwbbs_n || card.cn_name || '';
+            let jp_ruby = card.jp_ruby || '';
+            let jp_name = card.jp_name || '';
+            // 日文名和假名都没有时，优先md_jp_n，再没有用en_name
+            if (!jp_name && !jp_ruby) {
+                const fallback = card.md_jp_n || card.en_name || '';
+                results.push(`${fallback}->${cn_name}`);
+            } else if (jp_name === jp_ruby || !jp_name) {
+                // 只输出假名（或只有假名）
+                results.push(`${jp_ruby || jp_name}->${cn_name}`);
+            } else if (!jp_ruby) {
+                // 只输出日文名
+                results.push(`${jp_name}->${cn_name}`);
             } else {
-                results.push(`${jp_name}->${jp_ruby}->${md_name}`);
+                // 两者都存在且不同
+                results.push(`${jp_name}->${jp_ruby}->${cn_name}`);
             }
         }
     }
