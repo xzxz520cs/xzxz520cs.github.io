@@ -56,6 +56,10 @@
         <p>输入文本或上传文本文件，自动提取卡牌编号，生成日中对照。</p>
         <input type="file" id="fileInput" class="file-input" multiple>
         <textarea id="inputArea" placeholder="粘贴或输入卡组文本，每行一个编号"></textarea>
+        <div style="margin:8px 0 4px 0;font-size:0.95em;color:#666;">
+            可用字段：{_inputNum}、{cid}、{id}、{cn_name}、{sc_name}、{md_name}、{nwbbs_n}、{cnocg_n}、{jp_ruby}、{jp_name}、{en_name}
+        </div>
+        <textarea id="customTemplate" placeholder="自定义输出模板（如：{jp_name}->{cn_name}，留空则使用默认格式）" style="width:100%;min-height:40px;margin-bottom:8px;"></textarea>
         <button id="searchBtn" class="btn btn--primary">生成</button>
         <div id="output" class="output"></div>
     </div>
@@ -161,23 +165,27 @@ document.getElementById('searchBtn').addEventListener('click', async function() 
         } else if (card.fetchError) {
             results.push(`${card._inputNum}->查询失败`);
         } else {
-            // 优先 sc_name > md_name > nwbbs_n
-            const cn_name = card.sc_name || card.md_name || card.nwbbs_n || card.cn_name || '';
-            let jp_ruby = card.jp_ruby || '';
-            let jp_name = card.jp_name || '';
-            // 日文名和假名都没有时，优先md_jp_n，再没有用en_name
-            if (!jp_name && !jp_ruby) {
-                const fallback = card.md_jp_n || card.en_name || '';
-                results.push(`${fallback}->${cn_name}`);
-            } else if (jp_name === jp_ruby || !jp_name) {
-                // 只输出假名（或只有假名）
-                results.push(`${jp_ruby || jp_name}->${cn_name}`);
-            } else if (!jp_ruby) {
-                // 只输出日文名
-                results.push(`${jp_name}->${cn_name}`);
+            // 检查自定义模板
+            const template = document.getElementById('customTemplate').value.trim();
+            if (template) {
+                // 用正则替换所有 {字段名}
+                let line = template.replace(/\{(\w+)\}/g, (m, key) => (card[key] !== undefined ? card[key] : ''));
+                results.push(line);
             } else {
-                // 两者都存在且不同
-                results.push(`${jp_name}->${jp_ruby}->${cn_name}`);
+                // 默认输出逻辑
+                const cn_name = card.sc_name || card.md_name || card.nwbbs_n || card.cn_name || '';
+                let jp_ruby = card.jp_ruby || '';
+                let jp_name = card.jp_name || '';
+                if (!jp_name && !jp_ruby) {
+                    const fallback = card.md_jp_n || card.en_name || '';
+                    results.push(`${fallback}->${cn_name}`);
+                } else if (jp_name === jp_ruby || !jp_name) {
+                    results.push(`${jp_ruby || jp_name}->${cn_name}`);
+                } else if (!jp_ruby) {
+                    results.push(`${jp_name}->${cn_name}`);
+                } else {
+                    results.push(`${jp_name}->${jp_ruby}->${cn_name}`);
+                }
             }
         }
     }
