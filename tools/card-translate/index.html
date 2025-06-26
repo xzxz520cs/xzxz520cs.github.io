@@ -56,8 +56,30 @@
         <p>输入文本或上传文本文件，自动提取卡牌编号，生成日中对照。</p>
         <input type="file" id="fileInput" class="file-input" multiple>
         <textarea id="inputArea" placeholder="粘贴或输入卡组文本，每行一个编号"></textarea>
-        <div style="margin:8px 0 4px 0;font-size:0.95em;color:#666;">
-            可用字段：{_inputNum}、{cid}、{id}、{cn_name}、{sc_name}、{md_name}、{nwbbs_n}、{cnocg_n}、{jp_ruby}、{jp_name}、{en_name}
+        <div class="mb-2 text-muted">
+            可用字段：{_inputNum}、{cid}、{id}、{cn_name}、{sc_name}、{md_name}、{nwbbs_n}、{cnocg_n}、{jp_ruby}、{jp_name}、{en_name}、{jp_and_ruby_or_en}、{cn_official}
+        </div>
+        <div class="mb-4" style="overflow-x:auto;">
+            <table class="full-width" style="min-width:420px;">
+                <thead>
+                    <tr><th class="text-left" style="padding:2px 8px;">字段</th><th class="text-left" style="padding:2px 8px;">说明/示例</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>{_inputNum}</code></td><td>输入的卡密编号</td></tr>
+                    <tr><td><code>{id}</code></td><td>非正式卡片密码</td></tr>
+                    <tr><td><code>{cid}</code></td><td>卡片数据库编号</td></tr>
+                    <tr><td><code>{jp_name}</code></td><td>日文名<br><span lang='ja-Jpan'>ラーの翼神竜</span></td></tr>
+                    <tr><td><code>{jp_ruby}</code></td><td>日文假名<br><span lang='ja-Jpan'>らーのよくしんりゅう</span></td></tr>
+                    <tr><td><code>{en_name}</code></td><td>英文名<br><span lang='en'>The Winged Dragon of Ra</span></td></tr>
+                    <tr><td><code>{sc_name}</code></td><td>简中官方译名<br><span lang='zh-Hans'>拉之翼神龙</span></td></tr>
+                    <tr><td><code>{md_name}</code></td><td>Master Duel译名<br><span lang='zh-Hans'>拉之翼神龙</span></td></tr>
+                    <tr><td><code>{nwbbs_n}</code></td><td>NWBBS译名<br><span lang='zh-Hans'>太阳神之翼神龙</span></td></tr>
+                    <tr><td><code>{cnocg_n}</code></td><td>CNOCG译名<br><span lang='zh-Hans'>拉之翼神龙</span></td></tr>
+                    <tr><td><code>{cn_name}</code></td><td>YGOPro译名<br><span lang='zh-Hans'>太阳神之翼神龙</span></td></tr>
+                    <tr><td><code>{jp_and_ruby_or_en}</code></td><td>日文名和假名（不重复），都没有时用英文<br>如：ラーの翼神竜-&gt;らーのよくしんりゅう 或 The Winged Dragon of Ra</td></tr>
+                    <tr><td><code>{cn_official}</code></td><td>中文官方译名优先，优先级依次为简中官方、MD译名、NWBBS译名、YGOPro译名</td></tr>
+                </tbody>
+            </table>
         </div>
         <textarea id="customTemplate" placeholder="自定义输出模板（如：{jp_name}->{cn_name}，留空则使用默认格式）" style="width:100%;min-height:40px;margin-bottom:8px;"></textarea>
         <button id="searchBtn" class="btn btn--primary">生成</button>
@@ -169,28 +191,46 @@ document.getElementById('searchBtn').addEventListener('click', async function() 
             const template = document.getElementById('customTemplate').value.trim();
             if (template) {
                 // 用正则替换所有 {字段名}
-                let line = template.replace(/\{(\w+)\}/g, (m, key) => (card[key] !== undefined ? card[key] : ''));
+                let line = template.replace(/\{(\w+)\}/g, (m, key) => {
+                    if (key === 'jp_and_ruby_or_en') return getJpBest(card);
+                    if (key === 'cn_official') return getCnBest(card);
+                    return card[key] !== undefined ? card[key] : '';
+                });
                 results.push(line);
             } else {
                 // 默认输出逻辑
-                const cn_name = card.sc_name || card.md_name || card.nwbbs_n || card.cn_name || '';
-                let jp_ruby = card.jp_ruby || '';
-                let jp_name = card.jp_name || '';
-                if (!jp_name && !jp_ruby) {
-                    const fallback = card.md_jp_n || card.en_name || '';
-                    results.push(`${fallback}->${cn_name}`);
-                } else if (jp_name === jp_ruby || !jp_name) {
-                    results.push(`${jp_ruby || jp_name}->${cn_name}`);
-                } else if (!jp_ruby) {
-                    results.push(`${jp_name}->${cn_name}`);
+                const cn_name = getCnBest(card);
+                let jp_best = getJpBest(card);
+                if (!jp_best) {
+                    results.push(`${cn_name}`);
+                } else if (jp_best.indexOf('->') === -1) {
+                    results.push(`${jp_best}->${cn_name}`);
                 } else {
-                    results.push(`${jp_name}->${jp_ruby}->${cn_name}`);
+                    results.push(`${jp_best}->${cn_name}`);
                 }
             }
         }
     }
     resultArea.textContent = results.join('\n');
 });
+
+// 保持函数名不变，兼容内部调用
+function getJpBest(card) {
+    let jp_ruby = card.jp_ruby || '';
+    let jp_name = card.jp_name || '';
+    if (!jp_name && !jp_ruby) {
+        return card.md_jp_n || card.en_name || '';
+    } else if (jp_name === jp_ruby || !jp_name) {
+        return jp_ruby || jp_name;
+    } else if (!jp_ruby) {
+        return jp_name;
+    } else {
+        return jp_name + '->' + jp_ruby;
+    }
+}
+function getCnBest(card) {
+    return card.sc_name || card.md_name || card.nwbbs_n || card.cn_name || '';
+}
 </script>
 </body>
 </html>
