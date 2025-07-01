@@ -596,6 +596,72 @@ textarea {
   min-height: 200px;
 }
 
+/* 表格基础样式（紧凑版） */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 0.5em;
+  box-shadow: var(--shadow-sm);
+  font-size: 0.95em;
+}
+
+thead {
+  background: var(--color-primary);
+  color: var(--color-text-light);
+}
+
+thead th {
+  padding: 0.45em 0.5em;
+  font-weight: 700;
+  font-size: 0.98em;
+  border-bottom: 2px solid var(--color-secondary);
+}
+
+tbody td {
+  padding: 0.38em 0.5em;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.95em;
+  line-height: 1.4;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: middle;
+}
+
+tr:nth-child(even) td {
+  background: var(--color-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  table {
+    background: var(--color-bg);
+    box-shadow: var(--shadow-md);
+  }
+  thead {
+    background: var(--color-secondary);
+    color: var(--color-text-light);
+  }
+  tr:nth-child(even) td {
+    background: var(--color-bg-alt);
+  }
+}
+
+/* 表格响应式：小屏幕下横向滚动 */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 0.5em;
+}
+
 /* 移动端侧边抽屉样式及动画效果 */
 .drawer {
   display: none;

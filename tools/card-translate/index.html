@@ -1,236 +1,372 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>卡牌日中对照生成工具</title>
     <link rel="stylesheet" href="../../assets/css/styles.css">
 </head>
+
 <body>
-<!-- 页头 -->
-<header class="site-header">
-    <div class="container">
-        <div class="site-title">
-            <a href="/" class="site-title-link">
-                <span class="site-title">天天发蛋糕的工具箱</span>
-            </a>
-        </div>
-        <label for="menu-toggle-checkbox" class="menu-toggle" aria-label="打开菜单">☰</label>
-        <nav class="nav-menu">
-            <ul class="nav-list">
-                <li class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a></li>
-                        <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
-                        <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" class="dropdown-item">恢复关闭的标签页</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-    </div>
-    <input type="checkbox" id="menu-toggle-checkbox" hidden>
-    <div class="drawer">
+    <!-- 页头 -->
+    <header class="site-header">
         <div class="container">
-            <label for="menu-toggle-checkbox" class="menu-toggle close-menu" aria-label="关闭菜单">×</label>
-        </div>
-        <nav class="drawer-menu">
-            <ul class="drawer-list">
-                <li class="drawer-item">
-                    <a href="#" class="drawer-link">工具</a>
-                    <ul class="drawer-submenu">
-                        <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a></li>
-                        <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
-                        <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed" class="drawer-subitem">恢复关闭的标签页</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-    </div>
-    <label for="menu-toggle-checkbox" class="drawer-overlay"></label>
-</header>
-
-<main class="container">
-    <div class="card card--elevated">
-        <h1 class="mt-0">卡牌日中对照生成工具</h1>
-        <p>输入文本或上传文本文件，自动提取卡牌编号，生成日中对照。</p>
-        <input type="file" id="fileInput" class="file-input" multiple>
-        <textarea id="inputArea" placeholder="粘贴或输入卡组文本，每行一个编号"></textarea>
-        <div class="mb-2 text-muted">
-            可用字段：{_inputNum}、{cid}、{id}、{cn_name}、{sc_name}、{md_name}、{nwbbs_n}、{cnocg_n}、{jp_ruby}、{jp_name}、{en_name}、{jp_and_ruby_or_en}、{cn_official}
-        </div>
-        <div class="mb-4" style="overflow-x:auto;">
-            <table class="full-width" style="min-width:420px;">
-                <thead>
-                    <tr><th class="text-left" style="padding:2px 8px;">字段</th><th class="text-left" style="padding:2px 8px;">说明/示例</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td><code>{_inputNum}</code></td><td>输入的卡密编号</td></tr>
-                    <tr><td><code>{id}</code></td><td>非正式卡片密码</td></tr>
-                    <tr><td><code>{cid}</code></td><td>卡片数据库编号</td></tr>
-                    <tr><td><code>{jp_name}</code></td><td>日文名<br><span lang='ja-Jpan'>ラーの翼神竜</span></td></tr>
-                    <tr><td><code>{jp_ruby}</code></td><td>日文假名<br><span lang='ja-Jpan'>らーのよくしんりゅう</span></td></tr>
-                    <tr><td><code>{en_name}</code></td><td>英文名<br><span lang='en'>The Winged Dragon of Ra</span></td></tr>
-                    <tr><td><code>{sc_name}</code></td><td>简中官方译名<br><span lang='zh-Hans'>拉之翼神龙</span></td></tr>
-                    <tr><td><code>{md_name}</code></td><td>Master Duel译名<br><span lang='zh-Hans'>拉之翼神龙</span></td></tr>
-                    <tr><td><code>{nwbbs_n}</code></td><td>NWBBS译名<br><span lang='zh-Hans'>太阳神之翼神龙</span></td></tr>
-                    <tr><td><code>{cnocg_n}</code></td><td>CNOCG译名<br><span lang='zh-Hans'>拉之翼神龙</span></td></tr>
-                    <tr><td><code>{cn_name}</code></td><td>YGOPro译名<br><span lang='zh-Hans'>太阳神之翼神龙</span></td></tr>
-                    <tr><td><code>{jp_and_ruby_or_en}</code></td><td>日文名和假名（不重复），都没有时用英文<br>如：ラーの翼神竜-&gt;らーのよくしんりゅう 或 The Winged Dragon of Ra</td></tr>
-                    <tr><td><code>{cn_official}</code></td><td>中文官方译名优先，优先级依次为简中官方、MD译名、NWBBS译名、YGOPro译名</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <textarea id="customTemplate" placeholder="自定义输出模板（如：{jp_name}->{cn_name}，留空则使用默认格式）" style="width:100%;min-height:40px;margin-bottom:8px;"></textarea>
-        <button id="searchBtn" class="btn btn--primary">生成</button>
-        <div id="output" class="output"></div>
-    </div>
-</main>
-
-<!-- 页脚 -->
-<footer class="site-footer">
-    <div class="container">
-        <div class="footer-grid">
-            <div>
-                <h3 class="footer-title">关于作者</h3>
-                <ul class="footer-links">
-                    <li><a href="mailto:ttfdg520cs@gmail.com">ttfdg520cs@gmail.com</a></li>
-                    <li><a href="https://space.bilibili.com/1446349" target="_blank">Bilibili主页</a></li>
-                    <li><a href="https://github.com/xzxz520cs" target="_blank">GitHub</a></li>
+            <div class="site-title">
+                <a href="/" class="site-title-link">
+                    <span class="site-title">天天发蛋糕的工具箱</span>
+                </a>
+            </div>
+            <label for="menu-toggle-checkbox" class="menu-toggle" aria-label="打开菜单">☰</label>
+            <nav class="nav-menu">
+                <ul class="nav-list">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a>
+                            </li>
+                            <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                                    class="dropdown-item">恢复关闭的标签页</a></li>
+                        </ul>
+                    </li>
                 </ul>
+            </nav>
+        </div>
+        <input type="checkbox" id="menu-toggle-checkbox" hidden>
+        <div class="drawer">
+            <div class="container">
+                <label for="menu-toggle-checkbox" class="menu-toggle close-menu" aria-label="关闭菜单">×</label>
+            </div>
+            <nav class="drawer-menu">
+                <ul class="drawer-list">
+                    <li class="drawer-item">
+                        <a href="#" class="drawer-link">工具</a>
+                        <ul class="drawer-submenu">
+                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a>
+                            </li>
+                            <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                                    class="drawer-subitem">恢复关闭的标签页</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <label for="menu-toggle-checkbox" class="drawer-overlay"></label>
+    </header>
+
+    <main class="container">
+        <div class="card card--elevated">
+            <h1 class="mt-0 mb-3">卡牌日中对照生成工具</h1>
+            <p class="mb-3 text-center">输入卡牌编号文本或上传卡组文件，自动提取卡牌编号，生成日中对照。</p>
+            <div class="mb-3">
+                <label for="fileInput" class="mb-1">上传卡组文件</label>
+                <input type="file" id="fileInput" class="file-input mb-2" multiple>
+            </div>
+            <div class="grid mb-3">
+                <div>
+                    <label for="inputArea" class="mb-1">卡牌编号输入区</label>
+                    <textarea id="inputArea" class="mb-3" placeholder="每行输入一个卡牌编号（只能是数字），或粘贴包含编号的文本。
+
+有效输入示例：
+89631139
+12345678
+
+无效输入示例（不会被识别）：
+89631139 青眼白龙   ← 行内有除数字外内容
+12345678 其他内容   ← 行内有除数字外内容
+青眼白龙           ← 不是数字
+12345678abc        ← 含有非数字字符
+
+说明：
+- 只有整行仅为数字的内容会被识别为卡牌编号。
+- 粘贴YGOPro/文本卡组导出内容时，只有纯数字行会被提取。
+- 可混合输入，自动提取所有有效编号，忽略无效行。
+
+输出说明：
+- 自动查询卡牌信息，支持批量输入。
+- 默认输出：日文名→中文官方名（若无日文名则显示英文名）。
+- 可配合下方自定义模板灵活输出。
+
+示例输入：
+89631139
+12345678
+无效行
+89631139 青眼白龙
+
+示例输入输出（默认格式）：
+青眼の白龍->ブルーアイズ・ホワイト・ドラゴン->青眼白龙
+12345678->未找到卡片
+"></textarea>
+                </div>
+                <div>
+                    <label for="customTemplate" class="mb-1">自定义输出模板</label>
+                    <textarea id="customTemplate" class="mb-2" placeholder="可自定义每行输出内容，使用 {字段名} 占位符。
+
+示例模板：
+{_inputNum} | {jp_name} | {cn_official}
+
+示例输出：
+89631139 | 青眼の白龍 | 青眼白龙
+
+说明：
+- 每行输出会根据模板自动替换字段。
+- 留空则使用默认格式。
+- 仅对有效卡牌编号生效，未找到卡片时输出“编号→未找到卡片”。
+"></textarea>
+                </div>
+            </div>
+            <button id="searchBtn" class="btn btn--primary btn--block mb-3">生成</button>
+            <div class="card output mb-3 position-relative" id="output-container">
+                <button id="copyOutputBtn" class="btn btn--secondary btn--sm position-absolute top-0 end-0 mt-2 me-2">复制</button>
+                <div id="output" class="output"></div>
+            </div>
+            <div class="table-responsive">
+                <table class="full-width table-compact">
+                    <thead>
+                        <tr>
+                            <th class="text-left">字段</th>
+                            <th class="text-left">说明/示例</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>{_inputNum}</code></td>
+                            <td>输入的卡密编号</td>
+                        </tr>
+                        <tr>
+                            <td><code>{id}</code></td>
+                            <td>非正式卡片密码</td>
+                        </tr>
+                        <tr>
+                            <td><code>{cid}</code></td>
+                            <td>卡片数据库编号</td>
+                        </tr>
+                        <tr>
+                            <td><code>{jp_name}</code></td>
+                            <td>日文名<br><span lang='ja-Jpan'>ラーの翼神竜</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>{jp_ruby}</code></td>
+                            <td>日文假名<br><span lang='ja-Jpan'>らーのよくしんりゅう</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>{en_name}</code></td>
+                            <td>英文名<br><span lang='en'>The Winged Dragon of Ra</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>{sc_name}</code></td>
+                            <td>简中官方译名<br><span lang='zh-Hans'>拉之翼神龙</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>{md_name}</code></td>
+                            <td>Master Duel译名<br><span lang='zh-Hans'>拉之翼神龙</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>{nwbbs_n}</code></td>
+                            <td>NWBBS译名<br><span lang='zh-Hans'>太阳神之翼神龙</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>{cnocg_n}</code></td>
+                            <td>CNOCG译名<br><span lang='zh-Hans'>拉之翼神龙</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>{cn_name}</code></td>
+                            <td>YGOPro译名<br><span lang='zh-Hans'>太阳神之翼神龙</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>{jp_and_ruby_or_en}</code></td>
+                            <td>日文名和假名（不重复），都没有时用英文<br>如：ラーの翼神竜-&gt;らーのよくしんりゅう 或 The Winged Dragon of Ra</td>
+                        </tr>
+                        <tr>
+                            <td><code>{cn_official}</code></td>
+                            <td>中文官方译名优先，优先级依次为简中官方、MD译名、NWBBS译名、YGOPro译名</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p class="text-muted">© 2025 天天发蛋糕的工具箱</p>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h3 class="footer-title">关于作者</h3>
+                    <ul class="footer-links">
+                        <li><a href="mailto:ttfdg520cs@gmail.com">ttfdg520cs@gmail.com</a></li>
+                        <li><a href="https://space.bilibili.com/1446349" target="_blank">Bilibili主页</a></li>
+                        <li><a href="https://github.com/xzxz520cs" target="_blank">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="text-muted">© 2025 天天发蛋糕的工具箱</p>
+            </div>
         </div>
-    </div>
-</footer>
+    </footer>
 
-<script>
-function extractNumbers(text) {
-    return text.split(/\r?\n/).map(line => line.trim()).filter(line => /^\d+$/.test(line));
-}
-
-document.getElementById('fileInput').addEventListener('change', function(e) {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    let fileReadPromises = [];
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        fileReadPromises.push(new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                resolve(evt.target.result);
-            };
-            reader.readAsText(file, 'utf-8');
-        }));
-    }
-    Promise.all(fileReadPromises).then(results => {
-        document.getElementById('inputArea').value = results.join('\n');
-    });
-});
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-document.getElementById('searchBtn').addEventListener('click', async function() {
-    const output = document.getElementById('output');
-    output.textContent = '';
-    let text = document.getElementById('inputArea').value;
-    // 只保留唯一编号
-    let numbers = Array.from(new Set(extractNumbers(text)));
-    if (numbers.length === 0) {
-        output.textContent = '未检测到卡牌编号。';
-        return;
-    }
-    // 创建进度条
-    output.innerHTML = '<div id="progress-bar-container" style="width:100%;background:#eee;height:20px;border-radius:10px;overflow:hidden;margin-bottom:10px;">'
-        + '<div id="progress-bar" style="height:100%;width:0%;background:#4caf50;transition:width 0.2s;"></div></div>'
-        + '<span id="progress-text">0/' + numbers.length + '</span>'
-        + '<div id="result-area" style="white-space:pre-line;margin-top:10px;"></div>';
-    const progressBar = document.getElementById('progress-bar');
-    const progressText = document.getElementById('progress-text');
-    const resultArea = document.getElementById('result-area');
-    let cardList = [];
-    for (let i = 0; i < numbers.length; i++) {
-        const num = numbers[i];
-        try {
-            const res = await fetch(`https://ygocdb.com/api/v0/?search=${num}`);
-            const data = await res.json();
-            if (data.result && data.result.length > 0) {
-                const card = data.result[0];
-                card._inputNum = num;
-                cardList.push(card);
-            } else {
-                cardList.push({ _inputNum: num, notFound: true });
-            }
-        } catch (e) {
-            cardList.push({ _inputNum: num, fetchError: true });
+    <script>
+        function extractNumbers(text) {
+            return text.split(/\r?\n/).map(line => line.trim()).filter(line => /^\d+$/.test(line));
         }
-        // 更新进度条
-        const percent = Math.round(((i + 1) / numbers.length) * 100);
-        progressBar.style.width = percent + '%';
-        progressText.textContent = (i + 1) + '/' + numbers.length;
-        await sleep(50); // 100ms延迟
-    }
-    // 按cid排序，未找到/出错的排在最后
-    cardList.sort((a, b) => {
-        if (a.notFound || a.fetchError) return 1;
-        if (b.notFound || b.fetchError) return -1;
-        return (a.cid || 0) - (b.cid || 0);
-    });
-    let results = [];
-    for (const card of cardList) {
-        if (card.notFound) {
-            results.push(`${card._inputNum}->未找到卡片`);
-        } else if (card.fetchError) {
-            results.push(`${card._inputNum}->查询失败`);
-        } else {
-            // 检查自定义模板
-            const template = document.getElementById('customTemplate').value.trim();
-            if (template) {
-                // 用正则替换所有 {字段名}
-                let line = template.replace(/\{(\w+)\}/g, (m, key) => {
-                    if (key === 'jp_and_ruby_or_en') return getJpBest(card);
-                    if (key === 'cn_official') return getCnBest(card);
-                    return card[key] !== undefined ? card[key] : '';
-                });
-                results.push(line);
-            } else {
-                // 默认输出逻辑
-                const cn_name = getCnBest(card);
-                let jp_best = getJpBest(card);
-                if (!jp_best) {
-                    results.push(`${cn_name}`);
-                } else if (jp_best.indexOf('->') === -1) {
-                    results.push(`${jp_best}->${cn_name}`);
+
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            let fileReadPromises = [];
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                fileReadPromises.push(new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = function (evt) {
+                        resolve(evt.target.result);
+                    };
+                    reader.readAsText(file, 'utf-8');
+                }));
+            }
+            Promise.all(fileReadPromises).then(results => {
+                document.getElementById('inputArea').value = results.join('\n');
+            });
+        });
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        document.getElementById('searchBtn').addEventListener('click', async function () {
+            const output = document.getElementById('output');
+            output.textContent = '';
+            let text = document.getElementById('inputArea').value;
+            // 只保留唯一编号
+            let numbers = Array.from(new Set(extractNumbers(text)));
+            if (numbers.length === 0) {
+                output.textContent = '未检测到卡牌编号。';
+                return;
+            }
+            // 创建进度条
+            output.innerHTML = `
+                <div class="progress-bar-container mb-2">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <span id="progress-text" class="text-muted">0/${numbers.length}</span>
+                <div id="result-area" class="mt-2"></div>
+            `;
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const resultArea = document.getElementById('result-area');
+            let cardList = [];
+            for (let i = 0; i < numbers.length; i++) {
+                const num = numbers[i];
+                try {
+                    const res = await fetch(`https://ygocdb.com/api/v0/?search=${num}`);
+                    const data = await res.json();
+                    if (data.result && data.result.length > 0) {
+                        const card = data.result[0];
+                        card._inputNum = num;
+                        cardList.push(card);
+                    } else {
+                        cardList.push({ _inputNum: num, notFound: true });
+                    }
+                } catch (e) {
+                    cardList.push({ _inputNum: num, fetchError: true });
+                }
+                // 更新进度条
+                const percent = Math.round(((i + 1) / numbers.length) * 100);
+                progressBar.style.width = percent + '%';
+                progressText.textContent = (i + 1) + '/' + numbers.length;
+                await sleep(50); // 100ms延迟
+            }
+            // 按cid排序，未找到/出错的排在最后
+            cardList.sort((a, b) => {
+                if (a.notFound || a.fetchError) return 1;
+                if (b.notFound || b.fetchError) return -1;
+                return (a.cid || 0) - (b.cid || 0);
+            });
+            let results = [];
+            for (const card of cardList) {
+                if (card.notFound) {
+                    results.push(`${card._inputNum}->未找到卡片`);
+                } else if (card.fetchError) {
+                    results.push(`${card._inputNum}->查询失败`);
                 } else {
-                    results.push(`${jp_best}->${cn_name}`);
+                    // 检查自定义模板
+                    const template = document.getElementById('customTemplate').value.trim();
+                    if (template) {
+                        // 用正则替换所有 {字段名}
+                        let line = template.replace(/\{(\w+)\}/g, (m, key) => {
+                            if (key === 'jp_and_ruby_or_en') return getJpBest(card);
+                            if (key === 'cn_official') return getCnBest(card);
+                            return card[key] !== undefined ? card[key] : '';
+                        });
+                        results.push(line);
+                    } else {
+                        // 默认输出逻辑
+                        const cn_name = getCnBest(card);
+                        let jp_best = getJpBest(card);
+                        if (!jp_best) {
+                            results.push(`${cn_name}`);
+                        } else if (jp_best.indexOf('->') === -1) {
+                            results.push(`${jp_best}->${cn_name}`);
+                        } else {
+                            results.push(`${jp_best}->${cn_name}`);
+                        }
+                    }
                 }
             }
-        }
-    }
-    resultArea.textContent = results.join('\n');
-});
+            resultArea.innerText = results.join('\n');
+        });
 
-// 保持函数名不变，兼容内部调用
-function getJpBest(card) {
-    let jp_ruby = card.jp_ruby || '';
-    let jp_name = card.jp_name || '';
-    if (!jp_name && !jp_ruby) {
-        return card.md_jp_n || card.en_name || '';
-    } else if (jp_name === jp_ruby || !jp_name) {
-        return jp_ruby || jp_name;
-    } else if (!jp_ruby) {
-        return jp_name;
-    } else {
-        return jp_name + '->' + jp_ruby;
+        // 保持函数名不变，兼容内部调用
+        function getJpBest(card) {
+            let jp_ruby = card.jp_ruby || '';
+            let jp_name = card.jp_name || '';
+            if (!jp_name && !jp_ruby) {
+                return card.md_jp_n || card.en_name || '';
+            } else if (jp_name === jp_ruby || !jp_name) {
+                return jp_ruby || jp_name;
+            } else if (!jp_ruby) {
+                return jp_name;
+            } else {
+                return jp_name + '->' + jp_ruby;
+            }
+        }
+        function getCnBest(card) {
+            return card.sc_name || card.md_name || card.nwbbs_n || card.cn_name || '';
+        }
+
+        // 复制按钮逻辑
+        document.getElementById('copyOutputBtn').addEventListener('click', function () {
+            const resultArea = document.getElementById('result-area');
+            const text = resultArea ? resultArea.innerText : '';
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copyOutputBtn');
+                const old = btn.textContent;
+                btn.textContent = '已复制';
+                setTimeout(() => { btn.textContent = old; }, 1200);
+            });
+        });
+    </script>
+    <style>
+    /* 进度条样式，全部用类，不用style属性 */
+    .progress-bar-container {
+        width: 100%;
+        height: 12px;
+        background: var(--color-bg-alt);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+        margin-bottom: 0.5em;
     }
-}
-function getCnBest(card) {
-    return card.sc_name || card.md_name || card.nwbbs_n || card.cn_name || '';
-}
-</script>
+    .progress-bar {
+        height: 100%;
+        background: var(--color-secondary);
+        width: 0;
+        transition: width 0.3s;
+    }
+    </style>
 </body>
+
 </html>
