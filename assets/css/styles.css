@@ -334,7 +334,7 @@ img {
   list-style: none;
   padding: var(--space-sm) 0;
   z-index: 1000;
-  min-width: 200px;
+  min-width: 260px;
 }
 
 @media (prefers-color-scheme: dark) {

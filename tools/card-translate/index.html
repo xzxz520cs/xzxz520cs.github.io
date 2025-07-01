@@ -4,7 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>卡牌日中对照生成工具</title>
+    <title>游戏王卡牌日中对照文本生成工具</title>
+    <meta name="description" content="游戏王卡牌日中对照文本生成工具 - 天天发蛋糕的工具箱，支持批量卡牌编号输入，自动生成日文与中文官方名称对照，方便卡组整理与翻译。">
+    <meta name="keywords" content="游戏王, 卡牌, 日中对照, 卡牌翻译, 工具, 天天发蛋糕">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYJXFSRHF5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-HYJXFSRHF5');
+    </script>
     <link rel="stylesheet" href="../../assets/css/styles.css">
 </head>
 
@@ -26,6 +36,7 @@
                             <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a>
                             </li>
                             <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="/tools/card-translate/" class="dropdown-item">游戏王卡牌日中对照文本生成器</a></li>
                             <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                                     class="dropdown-item">恢复关闭的标签页</a></li>
                         </ul>
@@ -46,6 +57,7 @@
                             <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a>
                             </li>
                             <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="/tools/card-translate/" class="drawer-subitem">游戏王卡牌日中对照文本生成器</a></li>
                             <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                                     class="drawer-subitem">恢复关闭的标签页</a></li>
                         </ul>
@@ -57,7 +69,7 @@
     </header>
 
     <main class="container">
-        <h1 class="mt-0 mb-3">卡牌日中对照生成工具</h1>
+        <h1 class="mt-0 mb-3">游戏王卡牌日中对照文本生成器</h1>
         <div class="card card--elevated">
             <p class="mb-3 text-center">输入卡牌编号文本或上传卡组文件，自动提取卡牌编号，生成日中对照。</p>
             <div class="mb-3">
@@ -119,9 +131,9 @@
             </div>
             <button id="searchBtn" class="btn btn--primary btn--block mb-3">生成</button>
             <div class="card output mb-3 position-relative" id="output-container">
-                <button id="copyOutputBtn" class="btn btn--secondary btn--sm position-absolute top-0 end-0 mt-2 me-2">复制</button>
                 <div id="output" class="output"></div>
             </div>
+            <button id="copyOutputBtn" class="btn btn--outline mb-3 hidden">复制输出</button>
             <div class="table-responsive">
                 <table class="full-width table-compact">
                     <thead>
@@ -238,12 +250,15 @@
 
         document.getElementById('searchBtn').addEventListener('click', async function () {
             const output = document.getElementById('output');
+            const copyBtn = document.getElementById('copyOutputBtn');
             output.textContent = '';
+            copyBtn.classList.add('hidden');
             let text = document.getElementById('inputArea').value;
             // 只保留唯一编号
             let numbers = Array.from(new Set(extractNumbers(text)));
             if (numbers.length === 0) {
                 output.textContent = '未检测到卡牌编号。';
+                copyBtn.classList.add('hidden');
                 return;
             }
             // 创建进度条
@@ -254,6 +269,7 @@
                 <span id="progress-text" class="text-muted">0/${numbers.length}</span>
                 <div id="result-area" class="mt-2"></div>
             `;
+            copyBtn.classList.add('hidden');
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
             const resultArea = document.getElementById('result-area');
@@ -317,6 +333,12 @@
                 }
             }
             resultArea.innerText = results.join('\n');
+            // 有输出时显示复制按钮，无输出时隐藏
+            if (results.length > 0 && results.some(r => r && r.trim() !== '')) {
+                copyBtn.classList.remove('hidden');
+            } else {
+                copyBtn.classList.add('hidden');
+            }
         });
 
         // 保持函数名不变，兼容内部调用
