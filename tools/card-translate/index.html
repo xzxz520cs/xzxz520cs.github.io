@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>游戏王卡牌日中对照文本生成工具</title>
-    <meta name="description" content="游戏王卡牌日中对照文本生成工具 - 天天发蛋糕的工具箱，支持批量卡牌编号输入，自动生成日文与中文官方名称对照，方便卡组整理与翻译。">
+    <meta name="description" content="游戏王卡牌日中对照文本生成工具 - 天天发蛋糕的工具箱，支持批量卡牌编号密码输入，自动生成日文与中文官方名称对照，用于翻译等工作。">
     <meta name="keywords" content="游戏王, 卡牌, 日中对照, 卡牌翻译, 工具, 天天发蛋糕">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYJXFSRHF5"></script>
@@ -71,18 +71,19 @@
     <main class="container">
         <h1 class="mt-0 mb-3">游戏王卡牌日中对照文本生成器</h1>
         <div class="card card--elevated">
-            <p class="mb-3 text-center">输入卡牌编号文本或上传卡组文件，自动提取卡牌编号，生成日中对照。</p>
+            <p class="mb-3 text-center">输入卡牌编号或密码文本或上传卡组文件，进行自动提取，生成日中对照。</p>
             <div class="mb-3">
                 <label for="fileInput" class="mb-1">上传卡组文件</label>
                 <input type="file" id="fileInput" class="file-input mb-2" multiple>
             </div>
             <div class="grid mb-3">
                 <div>
-                    <label for="inputArea" class="mb-1">卡牌编号输入区</label>
-                    <textarea id="inputArea" class="mb-3" placeholder="每行输入一个卡牌编号（只能是数字），或粘贴包含编号的文本。
+                    <label for="inputArea" class="mb-1">卡牌编号密码输入区</label>
+                    <textarea id="inputArea" class="mb-3" placeholder="每行输入一个卡牌编号或密码（纯数字），或粘贴包含编号密码的文本。
 
 有效输入示例：
 89631139
+4125
 12345678
 
 无效输入示例（不会被识别）：
@@ -92,9 +93,9 @@
 12345678abc        ← 含有非数字字符
 
 说明：
-- 只有整行仅为数字的内容会被识别为卡牌编号。
+- 只有整行仅为数字的内容会被识别为卡牌编号密码。
 - 粘贴YGOPro/文本卡组导出内容时，只有纯数字行会被提取。
-- 可混合输入，自动提取所有有效编号，忽略无效行。
+- 可混合输入，自动提取所有有效编号密码行，忽略无效行。
 
 输出说明：
 - 自动查询卡牌信息，支持批量输入。
@@ -114,7 +115,9 @@
                 </div>
                 <div>
                     <label for="customTemplate" class="mb-1">自定义输出模板</label>
-                    <textarea id="customTemplate" class="mb-2" placeholder="可自定义每行输出内容，使用 {字段名} 占位符。
+                    <textarea id="customTemplate" class="mb-2" placeholder="默认输出为“日文名（如假名与日文名不重复则为‘日文名->假名’）->中文官方名（优先级为简中官方、MD译名、NWBBS译名、YGOPro译名）”，如果没有日文名则显示英文名，未找到卡片时输出“编号密码->未找到卡片”。
+                    
+可自定义每行输出内容，使用 {字段名} 占位符。
 
 示例模板：
 {_inputNum} | {jp_name} | {cn_official}
@@ -125,7 +128,7 @@
 说明：
 - 每行输出会根据模板自动替换字段。
 - 留空则使用默认格式。
-- 仅对有效卡牌编号生效，未找到卡片时输出“编号→未找到卡片”。
+- 仅对有效卡牌编号密码生效，未找到卡片时输出“编号密码→未找到卡片”。
 "></textarea>
                 </div>
             </div>
@@ -149,7 +152,7 @@
                         </tr>
                         <tr>
                             <td><code>{id}</code></td>
-                            <td>非正式卡片密码</td>
+                            <td>卡片密码</td>
                         </tr>
                         <tr>
                             <td><code>{cid}</code></td>
@@ -257,7 +260,7 @@
             // 只保留唯一编号
             let numbers = Array.from(new Set(extractNumbers(text)));
             if (numbers.length === 0) {
-                output.textContent = '未检测到卡牌编号。';
+                output.textContent = '未检测到卡牌编号密码。';
                 copyBtn.classList.add('hidden');
                 return;
             }
