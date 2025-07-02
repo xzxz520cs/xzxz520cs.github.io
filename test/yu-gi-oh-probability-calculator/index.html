@@ -37,8 +37,8 @@
                         <ul class="dropdown-menu">
                             <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a>
                             </li>
-                            <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
                             <li><a href="/tools/card-translate/" class="dropdown-item">游戏王卡牌日中对照文本生成器</a></li>
+                            <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
                             <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                                     class="dropdown-item">恢复关闭的标签页</a></li>
                         </ul>
@@ -58,8 +58,8 @@
                         <ul class="drawer-submenu">
                             <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a>
                             </li>
-                            <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
                             <li><a href="/tools/card-translate/" class="drawer-subitem">游戏王卡牌日中对照文本生成器</a></li>
+                            <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
                             <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                                     class="drawer-subitem">恢复关闭的标签页</a></li>
                         </ul>
@@ -359,10 +359,11 @@ a + b >= 3 && PROB(64)  // A和B类卡合计至少3张，且64%概率满足条�
                         A类卡, B类卡, ...,
                         Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
                         <strong>使用提示：</strong>计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易与逻辑判断条件混淆的名称(如a>1)。建议使用纯中文名。<br>
-                        <strong>概率函数功能（测试中）：</strong>使用 <code>PROB(n)</code> 表示n%的概率满足条件，n必须是1-99的整数。此功能可以用来模拟一些具有概率性的卡片效果，例如：<br>
-- <code>PROB(50) && a >= 1</code> 表示：有50%的概率满足条件，并且需要至少1张A类卡<br>
-- <code>a + b >= 3 && PROB(64)</code> 表示：A和B类卡合计至少3张，且有64%的概率满足条件<br>
-此功能目前处于测试阶段，您的使用反馈对我们很重要。如发现问题，请通过页面底部的邮箱联系我们。<br>
+                        <strong>概率函数功能（测试中）：</strong>使用 <code>PROB(n)</code>
+                        表示n%的概率满足条件，n必须是1-99的整数。此功能可以用来模拟一些具有概率性的卡片效果，例如：<br>
+                        - <code>PROB(50) && a >= 1</code> 表示：有50%的概率满足条件，并且需要至少1张A类卡<br>
+                        - <code>a + b >= 3 && PROB(64)</code> 表示：A和B类卡合计至少3张，且有64%的概率满足条件<br>
+                        此功能目前处于测试阶段，您的使用反馈对我们很重要。如发现问题，请通过页面底部的邮箱联系我们。<br>
                         <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。<br>
                         <strong>注意：</strong>当卡种类和抽卡数较高时，计算时间会呈指数级上升，此时推荐使用快速估算。
                     </div>
@@ -427,10 +428,11 @@ a + b >= 3 && PROB(64)  // A和B类卡合计至少3张，且64%概率满足条�
                 A类卡, B类卡, ...,
                 Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
                 <strong>使用提示：</strong>计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易与逻辑判断条件混淆的名称(如a>1)。建议使用纯中文名。<br>
-                <strong>概率函数功能（测试中）：</strong>使用 <code>PROB(n)</code> 表示n%的概率满足条件，n必须是1-99的整数。此功能可以用来模拟一些具有概率性的卡片效果，例如：<br>
-- <code>PROB(50) && a >= 1</code> 表示：有50%的概率满足条件，并且需要至少1张A类卡<br>
-- <code>a + b >= 3 && PROB(64)</code> 表示：A和B类卡合计至少3张，且有64%的概率满足条件<br>
-此功能目前处于测试阶段，您的使用反馈对我们很重要。如发现问题，请通过页面底部的邮箱联系我们。<br>
+                <strong>概率函数功能（测试中）：</strong>使用 <code>PROB(n)</code>
+                表示n%的概率满足条件，n必须是1-99的整数。此功能可以用来模拟一些具有概率性的卡片效果，例如：<br>
+                - <code>PROB(50) && a >= 1</code> 表示：有50%的概率满足条件，并且需要至少1张A类卡<br>
+                - <code>a + b >= 3 && PROB(64)</code> 表示：A和B类卡合计至少3张，且有64%的概率满足条件<br>
+                此功能目前处于测试阶段，您的使用反馈对我们很重要。如发现问题，请通过页面底部的邮箱联系我们。<br>
                 <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。<br>
                 <strong>注意：</strong>当卡种类和抽卡数较高时，计算时间会呈指数级上升，此时推荐使用快速估算。
             </div>

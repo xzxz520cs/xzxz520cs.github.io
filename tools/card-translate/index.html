@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>游戏王卡牌日中对照文本生成工具</title>
     <meta name="description" content="游戏王卡牌日中对照文本生成工具 - 天天发蛋糕的工具箱，支持批量卡牌编号密码输入，自动生成日文与中文官方名称对照，用于翻译等工作。">
-    <meta name="keywords" content="游戏王, 卡牌, 日中对照, 卡牌翻译, 工具, 天天发蛋糕">
+    <meta name="keywords" content="游戏王, 卡牌, 日中对照, 卡牌翻译, 工具箱, 卡牌编号, 卡牌密码">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYJXFSRHF5"></script>
     <script>
@@ -35,8 +35,8 @@
                         <ul class="dropdown-menu">
                             <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a>
                             </li>
-                            <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
                             <li><a href="/tools/card-translate/" class="dropdown-item">游戏王卡牌日中对照文本生成器</a></li>
+                            <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
                             <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                                     class="dropdown-item">恢复关闭的标签页</a></li>
                         </ul>
@@ -56,8 +56,8 @@
                         <ul class="drawer-submenu">
                             <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a>
                             </li>
-                            <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
                             <li><a href="/tools/card-translate/" class="drawer-subitem">游戏王卡牌日中对照文本生成器</a></li>
+                            <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
                             <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                                     class="drawer-subitem">恢复关闭的标签页</a></li>
                         </ul>
@@ -376,21 +376,22 @@
         });
     </script>
     <style>
-    /* 进度条样式，全部用类，不用style属性 */
-    .progress-bar-container {
-        width: 100%;
-        height: 12px;
-        background: var(--color-bg-alt);
-        border-radius: var(--radius-full);
-        overflow: hidden;
-        margin-bottom: 0.5em;
-    }
-    .progress-bar {
-        height: 100%;
-        background: var(--color-secondary);
-        width: 0;
-        transition: width 0.3s;
-    }
+        /* 进度条样式，全部用类，不用style属性 */
+        .progress-bar-container {
+            width: 100%;
+            height: 12px;
+            background: var(--color-bg-alt);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-bottom: 0.5em;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--color-secondary);
+            width: 0;
+            transition: width 0.3s;
+        }
     </style>
 </body>
 
