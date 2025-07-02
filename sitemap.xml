@@ -2,22 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
         <loc>https://ttfdg.cn/</loc>
-        <lastmod>2025-05-06</lastmod>
         <priority>1.0</priority>
     </url>
     <url>
         <loc>https://ttfdg.cn/tools/yu-gi-oh-probability-calculator/</loc>
-        <lastmod>2025-05-06</lastmod>
-        <priority>0.8</priority>
+        <priority>1.0</priority>
+    </url>
+        <url>
+        <loc>https://ttfdg.cn/tools/card-translate/</loc>
+        <priority>0.7</priority>
     </url>
     <url>
         <loc>https://ttfdg.cn/tools/webp-avif-2-jpg-png/</loc>
-        <lastmod>2025-05-06</lastmod>
-        <priority>0.8</priority>
+        <priority>0.3</priority>
     </url>
     <url>
         <loc>https://ttfdg.cn/tools/text-to-speech/</loc>
-        <lastmod>2025-05-06</lastmod>
-        <priority>0.8</priority>
+        <priority>0.3</priority>
     </url>
 </urlset>
