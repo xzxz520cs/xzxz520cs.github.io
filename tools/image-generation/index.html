@@ -313,11 +313,19 @@
       // 新增：处理上传的输入图像（如果存在）
       const imageFileInput = document.getElementById("inputImage");
       if (imageFileInput.files && imageFileInput.files.length > 0) {
-        // 若只传一张图，使用单张数据；若多张则只取第一张（或按需求全部处理）
         try {
-          // 本例中仅处理第一张作为参考
-          const base64Image = await fileToDataURL(imageFileInput.files[0]);
-          data.input_image = base64Image;
+          if (imageFileInput.files.length === 1) {
+            // 单张图片，兼容旧API
+            const base64Image = await fileToDataURL(imageFileInput.files[0]);
+            data.input_image = base64Image;
+          } else {
+            // 多张图片，融合
+            const base64Images = [];
+            for (let i = 0; i < imageFileInput.files.length; i++) {
+              base64Images.push(await fileToDataURL(imageFileInput.files[i]));
+            }
+            data.input_images = base64Images;
+          }
         } catch (e) {
           console.error(e);
           alert("读取上传的图像失败！");
