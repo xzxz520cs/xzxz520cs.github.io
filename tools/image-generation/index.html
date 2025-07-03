@@ -413,14 +413,11 @@
       formData.append("prompt", prompt);
       formData.append("quality", quality);
       formData.append("n", n);
-      // 多图融合：全部图片都 append 到 images 字段
-      if (imageInput.files.length === 1) {
-        formData.append("image", imageInput.files[0], imageInput.files[0].name);
-      } else {
-        for (let i = 0; i < imageInput.files.length; i++) {
-          formData.append("images", imageInput.files[i], imageInput.files[i].name);
-        }
+      // 编辑接口只允许上传一张主图
+      if (imageInput.files.length > 1) {
+        alert("编辑功能只支持上传一张图片，已自动选用第一张。若需多图融合请用生成功能。");
       }
+      formData.append("image", imageInput.files[0], imageInput.files[0].name);
       if (maskInput.files && maskInput.files.length > 0) {
           formData.append("mask", maskInput.files[0], maskInput.files[0].name);
       }
