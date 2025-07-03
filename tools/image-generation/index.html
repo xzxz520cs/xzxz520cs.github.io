@@ -402,32 +402,30 @@
           alert("请输入 API Key、API URL 和提示语！");
           return;
       }
-      if (!imageInput.files || imageInput.files.length === 0) {
-          alert("请上传要编辑的图像！");
-          return;
-      }
-
-      // 使用FormData提交文件数据（支持多图融合，全部用 images 字段，校验类型和大小）
+      // 使用FormData提交文件数据（编辑接口允许多张 image，字段为 images）
       const formData = new FormData();
       formData.append("model", "gpt-image-1");
       formData.append("prompt", prompt);
       formData.append("quality", quality);
-      formData.append("n", n);
-      // 校验图片数量、类型、大小
+      // gpt-image-1 支持最多16张图片
+      if (!imageInput.files || imageInput.files.length === 0) {
+          alert("请上传要编辑的图像！");
+          return;
+      }
       if (imageInput.files.length > 16) {
-        alert("最多只能上传16张图片！");
-        return;
+          alert("最多只能上传16张图片！");
+          return;
       }
       for (let i = 0; i < imageInput.files.length; i++) {
         const file = imageInput.files[i];
         const ext = file.name.split('.').pop().toLowerCase();
         if (!["png", "jpg", "jpeg", "webp"].includes(ext)) {
-          alert("仅支持png、jpg、jpeg、webp格式的图片！");
-          return;
+            alert(`第${i+1}张图片仅支持png、jpg、jpeg、webp格式！`);
+            return;
         }
         if (file.size > 50 * 1024 * 1024) {
-          alert(`第${i+1}张图片超过50MB限制！`);
-          return;
+            alert(`第${i+1}张图片超过50MB限制！`);
+            return;
         }
         formData.append("images", file, file.name);
       }
