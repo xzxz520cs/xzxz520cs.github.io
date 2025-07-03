@@ -343,18 +343,24 @@
           // 提取除图片数据以外的信息并打印到控制台
           const { data, ...otherInfo } = result;
           console.log("API返回内容(除图片数据):", otherInfo);
-          if (data && data.length > 0 && data[0].b64_json) {
-            const imgData = data[0].b64_json;
-            const mime = (formatVal === "jpeg" || formatVal === "webp") ? formatVal : "png";
-            const imageSrc = "data:image/" + mime + ";base64," + imgData;
+          if (data && data.length > 0) {
             previewItem.innerHTML = "";
-            const img = document.createElement("img");
-            img.className = "full-width";
-            img.src = imageSrc;
-            const caption = document.createElement("p");
-            caption.textContent = prompt;
-            previewItem.appendChild(caption);
-            previewItem.appendChild(img);
+            data.forEach((item, idx) => {
+              if (item.b64_json) {
+                const mime = (formatVal === "jpeg" || formatVal === "webp") ? formatVal : "png";
+                const imageSrc = "data:image/" + mime + ";base64," + item.b64_json;
+                const img = document.createElement("img");
+                img.className = "full-width";
+                img.src = imageSrc;
+                const caption = document.createElement("p");
+                caption.textContent = prompt + (data.length > 1 ? ` [${idx + 1}]` : "");
+                previewItem.appendChild(caption);
+                previewItem.appendChild(img);
+              }
+            });
+            if (previewItem.innerHTML === "") {
+              previewItem.textContent = "返回数据中无图片数据";
+            }
           } else {
             previewItem.textContent = "返回数据中无图片数据";
           }
