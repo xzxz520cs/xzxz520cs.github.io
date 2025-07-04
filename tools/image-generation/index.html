@@ -98,8 +98,34 @@
         <label for="inputImage">上传输入图像</label>
         <input type="file" id="inputImage" class="form-control" accept="image/*" multiple>
       </div>
+      <!-- 新增：绘制遮罩相关按钮、画布容器和工具箱 -->
+      <div class="form-group mt-2" id="drawMaskGroup">
+        <button id="drawMaskBtn" class="btn btn--secondary" type="button" disabled>绘制遮罩</button>
+        <button id="downloadMaskBtn" class="btn btn--secondary" type="button" style="display:none;">下载遮罩</button>
+        <div id="maskCanvasContainer" style="display:none; position:relative; margin-top:10px;">
+          <!-- 画布和预览光标canvas都放这里 -->
+        </div>
+        <div id="maskToolbox" style="display:none; margin-top:8px;">
+          <label>模式:
+            <select id="maskToolMode">
+              <option value="brush">画笔</option>
+              <option value="eraser">橡皮擦</option>
+            </select>
+          </label>
+          <label style="margin-left:10px;">画笔形状:
+            <select id="maskBrushShape">
+              <option value="circle">圆形</option>
+              <option value="square">方形</option>
+            </select>
+          </label>
+          <label style="margin-left:10px;">画笔大小:
+            <input type="range" id="maskBrushSize" min="5" max="100" value="30">
+            <span id="maskBrushSizeVal">30</span>px
+          </label>
+        </div>
+      </div>
       <!-- 新增：遮罩上传（用于编辑时局部修改） -->
-      <div class="form-group mt-2">
+      <div class="form-group mt-2" id="maskUploadGroup">
         <label for="maskImage">上传遮罩图像（选填）</label>
         <input type="file" id="maskImage" class="form-control" accept="image/*">
       </div>
@@ -269,6 +295,59 @@
       });
     }
 
+    // 画笔绘制函数，需放在setupMaskCanvas前
+    let maskToolMode = 'brush';
+    let lastDrawX = null, lastDrawY = null;
+    document.getElementById('maskToolMode').addEventListener('change', e => {
+      maskToolMode = e.target.value;
+    });
+    function drawAt(e) {
+      const rect = maskCanvas.getBoundingClientRect();
+      const x = Math.round((e.clientX - rect.left) * maskCanvas.width / rect.width);
+      const y = Math.round((e.clientY - rect.top) * maskCanvas.height / rect.height);
+      // 连续性优化：插值补点
+      if (lastDrawX !== null && lastDrawY !== null) {
+        const dx = x - lastDrawX, dy = y - lastDrawY;
+        const steps = Math.max(Math.abs(dx), Math.abs(dy));
+        for (let s = 1; s <= steps; s++) {
+          const ix = Math.round(lastDrawX + dx * s / steps);
+          const iy = Math.round(lastDrawY + dy * s / steps);
+          drawDot(ix, iy);
+        }
+      } else {
+        drawDot(x, y);
+      }
+      lastDrawX = x;
+      lastDrawY = y;
+      renderMaskCanvas();
+    }
+    function drawDot(x, y) {
+      const half = Math.floor(brushSize / 2);
+      if (brushShape === 'circle') {
+        for (let dx = -half; dx <= half; dx++) {
+          for (let dy = -half; dy <= half; dy++) {
+            if (dx*dx + dy*dy <= half*half) {
+              const px = x + dx, py = y + dy;
+              if (px >= 0 && px < maskImageData.width && py >= 0 && py < maskImageData.height) {
+                const idx = (py * maskImageData.width + px) * 4 + 3;
+                maskImageData.data[idx] = (maskToolMode === 'brush') ? 0 : 255;
+              }
+            }
+          }
+        }
+      } else {
+        for (let dx = -half; dx <= half; dx++) {
+          for (let dy = -half; dy <= half; dy++) {
+            const px = x + dx, py = y + dy;
+            if (px >= 0 && px < maskImageData.width && py >= 0 && py < maskImageData.height) {
+              const idx = (py * maskImageData.width + px) * 4 + 3;
+              maskImageData.data[idx] = (maskToolMode === 'brush') ? 0 : 255;
+            }
+          }
+        }
+      }
+    }
+
     // 生成图像逻辑
     document.getElementById("generateBtn").addEventListener("click", async () => {
       const apiKey = document.getElementById("apiKey").value.trim();
@@ -400,7 +479,8 @@
       const quality = document.getElementById("quality").value || "auto";
       const imageInput = document.getElementById("inputImage");
       const maskInput = document.getElementById("maskImage");
-
+      // 新增：遮罩绘制模式判断
+      const isDrawingMask = document.getElementById('drawMaskBtn').textContent === '放弃绘制';
       if (!apiKey || !apiUrl || !prompt) {
           alert("请输入 API Key、API URL 和提示语！");
           return;
@@ -413,32 +493,53 @@
           alert("最多只能上传16张图片！");
           return;
       }
-
       const formData = new FormData();
       formData.append("model", "gpt-image-1");
       formData.append("prompt", prompt);
       formData.append("n", n);
       formData.append("size", size);
       formData.append("quality", quality);
-
-      // 按官方要求：无论单张还是多张都用 image[] 字段，多次 append
       for (let i = 0; i < imageInput.files.length; i++) {
         formData.append("image[]", imageInput.files[i], imageInput.files[i].name);
       }
-      if (maskInput.files && maskInput.files.length > 0) {
+      // 遮罩处理：优先用绘制的遮罩
+      if (isDrawingMask && window.maskImageData && window.maskCanvas) {
+        // 导出遮罩为PNG Blob
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = window.maskImageData.width;
+        exportCanvas.height = window.maskImageData.height;
+        const exportCtx = exportCanvas.getContext('2d');
+        const imgData = exportCtx.createImageData(window.maskImageData.width, window.maskImageData.height);
+        for (let i = 0; i < window.maskImageData.data.length; i += 4) {
+          imgData.data[i] = 0;
+          imgData.data[i+1] = 0;
+          imgData.data[i+2] = 0;
+          imgData.data[i+3] = window.maskImageData.data[i+3];
+        }
+        exportCtx.putImageData(imgData, 0, 0);
+        // toBlob为异步
+        await new Promise((resolve, reject) => {
+          exportCanvas.toBlob(blob => {
+            if (blob) {
+              formData.append("mask", blob, "mask.png");
+              resolve();
+            } else {
+              alert("遮罩导出失败");
+              reject();
+            }
+          }, 'image/png');
+        });
+      } else if (maskInput.files && maskInput.files.length > 0) {
         formData.append("mask", maskInput.files[0], maskInput.files[0].name);
       }
-
-      const baseUrl = apiUrl.replace(/\/+$/, "");
+      const baseUrl = apiUrl.replace(/\/+/g, "");
       const editUrl = baseUrl + "/v1/images/edits";
-
       const previewContainer = document.getElementById("previewContainer");
       const previewItem = document.createElement("div");
       previewItem.className = "image-item mb-2 separator-horizontal";
       previewItem.textContent = "处理中...";
       previewContainer.insertBefore(previewItem, previewContainer.firstChild);
       previewContainer.classList.remove("hidden");
-
       try {
         const response = await fetch(editUrl, {
           method: "POST",
@@ -480,6 +581,240 @@
       } catch (error) {
         console.error("请求错误详情：", error);
         previewItem.textContent = "请求出现错误：" + error;
+      }
+    });
+
+    // 新增：遮罩绘制按钮可用性
+    const drawMaskBtn = document.getElementById("drawMaskBtn");
+    const maskUploadGroup = document.getElementById("maskUploadGroup");
+    const maskCanvasContainer = document.getElementById("maskCanvasContainer");
+    const maskToolbox = document.getElementById("maskToolbox");
+    const downloadMaskBtn = document.getElementById("downloadMaskBtn");
+    const inputImage = document.getElementById("inputImage");
+    let maskCanvas = null;
+    let maskCtx = null;
+    let drawing = false;
+    let brushShape = 'circle';
+    // 默认画笔大小
+    let brushSize = 30; // 直径/边长
+    let maskImageData = null;
+    let maskBaseImage = null;
+    let isDrawingMask = false;
+    let maskCursorOverlay = null;
+
+    // 画笔工具箱事件
+    document.getElementById('maskBrushShape').addEventListener('change', e => {
+      brushShape = e.target.value;
+    });
+    document.getElementById('maskBrushSize').addEventListener('input', e => {
+      brushSize = parseInt(e.target.value);
+      document.getElementById('maskBrushSizeVal').textContent = brushSize;
+    });
+
+    // 监听输入图片变化，决定绘制遮罩按钮可用性
+    inputImage.addEventListener('change', () => {
+      drawMaskBtn.disabled = !(inputImage.files && inputImage.files.length > 0);
+      if (!inputImage.files || inputImage.files.length === 0) {
+        if (isDrawingMask) {
+          exitDrawMaskMode();
+        }
+      }
+    });
+
+    // 绘制遮罩按钮逻辑
+    drawMaskBtn.addEventListener('click', async () => {
+      if (!isDrawingMask) {
+        // 进入绘制模式
+        isDrawingMask = true;
+        drawMaskBtn.textContent = '放弃绘制';
+        maskUploadGroup.style.display = 'none';
+        maskCanvasContainer.style.display = '';
+        maskToolbox.style.display = '';
+        downloadMaskBtn.style.display = '';
+        // 初始化画布
+        await setupMaskCanvas();
+      } else {
+        // 退出绘制模式
+        exitDrawMaskMode();
+      }
+    });
+
+    function exitDrawMaskMode() {
+      isDrawingMask = false;
+      drawMaskBtn.textContent = '绘制遮罩';
+      maskUploadGroup.style.display = '';
+      maskCanvasContainer.style.display = 'none';
+      maskToolbox.style.display = 'none';
+      downloadMaskBtn.style.display = 'none';
+      if (maskCanvasContainer.firstChild) maskCanvasContainer.removeChild(maskCanvasContainer.firstChild);
+      maskCanvas = null;
+      maskCtx = null;
+      maskImageData = null;
+      maskBaseImage = null;
+    }
+
+    // 初始化遮罩画布
+    async function setupMaskCanvas() {
+      // 清空容器
+      maskCanvasContainer.innerHTML = '';
+      maskCanvas = document.createElement('canvas');
+      maskCanvas.style.border = '1px solid #ccc';
+      maskCanvas.style.display = 'block';
+      maskCanvas.style.position = 'relative';
+      maskCanvasContainer.appendChild(maskCanvas);
+      // 读取第一张图片
+      const file = inputImage.files[0];
+      const img = new window.Image();
+      img.src = await fileToDataURL(file);
+      await new Promise(res => { img.onload = res; });
+      maskBaseImage = img;
+      // 限制画布最大显示尺寸
+      const maxDisplay = 512;
+      let displayW = img.width, displayH = img.height;
+      if (img.width > maxDisplay || img.height > maxDisplay) {
+        if (img.width >= img.height) {
+          displayW = maxDisplay;
+          displayH = Math.round(img.height * maxDisplay / img.width);
+        } else {
+          displayH = maxDisplay;
+          displayW = Math.round(img.width * maxDisplay / img.height);
+        }
+      }
+      maskCanvas.width = img.width;
+      maskCanvas.height = img.height;
+      maskCanvas.style.width = displayW + 'px';
+      maskCanvas.style.height = displayH + 'px';
+      maskCtx = maskCanvas.getContext('2d');
+      // 新建遮罩层（全不透明）
+      maskImageData = maskCtx.createImageData(img.width, img.height);
+      for (let i = 0; i < maskImageData.data.length; i += 4) {
+        maskImageData.data[i+3] = 255; // alpha=255
+      }
+      // 动态设置画笔最大值
+      const maxBrushSize = Math.round(Math.max(img.width, img.height) * 1.2);
+      const brushSizeInput = document.getElementById('maskBrushSize');
+      brushSizeInput.max = maxBrushSize;
+      // 若当前brushSize超出最大值，重置
+      if (brushSize > maxBrushSize) {
+        brushSize = maxBrushSize;
+        brushSizeInput.value = brushSize;
+        document.getElementById('maskBrushSizeVal').textContent = brushSize;
+      } else {
+        // 同步显示
+        brushSizeInput.value = brushSize;
+        document.getElementById('maskBrushSizeVal').textContent = brushSize;
+      }
+      // 预览光标canvas（全局唯一）
+      if (!maskCursorOverlay) {
+        maskCursorOverlay = document.createElement('canvas');
+        maskCursorOverlay.style.position = 'absolute';
+        maskCursorOverlay.style.left = '0';
+        maskCursorOverlay.style.top = '0';
+        maskCursorOverlay.style.pointerEvents = 'none';
+        maskCanvasContainer.appendChild(maskCursorOverlay);
+      } else {
+        maskCanvasContainer.appendChild(maskCursorOverlay);
+      }
+      maskCursorOverlay.width = maskCanvas.width;
+      maskCursorOverlay.height = maskCanvas.height;
+      maskCursorOverlay.style.width = maskCanvas.style.width;
+      maskCursorOverlay.style.height = maskCanvas.style.height;
+      // 画布事件
+      maskCanvas.onmousedown = e => { drawing = true; lastDrawX = lastDrawY = null; drawAt(e); };
+      maskCanvas.onmouseup = () => { drawing = false; lastDrawX = lastDrawY = null; };
+      maskCanvas.onmouseleave = () => { drawing = false; lastDrawX = lastDrawY = null; maskCursorOverlay.style.display = 'none'; };
+      maskCanvas.onmousemove = e => {
+        if (drawing) drawAt(e);
+        drawCursorOverlay(e);
+      };
+      maskCanvas.onmouseenter = e => { maskCursorOverlay.style.display = ''; drawCursorOverlay(e); };
+      // 触摸支持（不显示预览）
+      maskCanvas.ontouchstart = e => { drawing = true; lastDrawX = lastDrawY = null; drawAt(e.touches[0]); e.preventDefault(); maskCursorOverlay.style.display = 'none'; };
+      maskCanvas.ontouchend = () => { drawing = false; lastDrawX = lastDrawY = null; };
+      maskCanvas.ontouchcancel = () => { drawing = false; lastDrawX = lastDrawY = null; };
+      maskCanvas.ontouchmove = e => { if (drawing) drawAt(e.touches[0]); e.preventDefault(); maskCursorOverlay.style.display = 'none'; };
+      // 预览光标绘制函数
+      function drawCursorOverlay(e) {
+        const rect = maskCanvas.getBoundingClientRect();
+        const x = Math.round((e.clientX - rect.left) * maskCanvas.width / rect.width);
+        const y = Math.round((e.clientY - rect.top) * maskCanvas.height / rect.height);
+        const ctx = maskCursorOverlay.getContext('2d');
+        ctx.clearRect(0, 0, maskCursorOverlay.width, maskCursorOverlay.height);
+        ctx.save();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#fff';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        const half = brushSize / 2;
+        if (brushShape === 'circle') {
+          ctx.arc(x, y, half, 0, 2 * Math.PI);
+        } else {
+          ctx.rect(x - half, y - half, brushSize, brushSize);
+        }
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#000';
+        ctx.shadowColor = 'transparent';
+        ctx.beginPath();
+        if (brushShape === 'circle') {
+          ctx.arc(x, y, half, 0, 2 * Math.PI);
+        } else {
+          ctx.rect(x - half, y - half, brushSize, brushSize);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+      // 初始渲染
+      renderMaskCanvas();
+    }
+    function renderMaskCanvas() {
+      // 先画底图
+      maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+      maskCtx.drawImage(maskBaseImage, 0, 0, maskCanvas.width, maskCanvas.height);
+      // 用离屏canvas生成红色遮罩层
+      const maskVisCanvas = document.createElement('canvas');
+      maskVisCanvas.width = maskImageData.width;
+      maskVisCanvas.height = maskImageData.height;
+      const visCtx = maskVisCanvas.getContext('2d');
+      const visImg = visCtx.createImageData(maskImageData.width, maskImageData.height);
+      for (let i = 0; i < maskImageData.data.length; i += 4) {
+        if (maskImageData.data[i+3] === 0) {
+          visImg.data[i] = 255; visImg.data[i+1] = 0; visImg.data[i+2] = 0; visImg.data[i+3] = 100; // 红色半透明
+        } else {
+          visImg.data[i+3] = 0;
+        }
+      }
+      visCtx.putImageData(visImg, 0, 0);
+      maskCtx.drawImage(maskVisCanvas, 0, 0, maskCanvas.width, maskCanvas.height);
+    }
+    // 下载遮罩
+    downloadMaskBtn.addEventListener('click', () => {
+      if (!maskCanvas || !maskImageData) return;
+      // 只导出alpha通道，黑底透明
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = maskImageData.width;
+      exportCanvas.height = maskImageData.height;
+      const exportCtx = exportCanvas.getContext('2d');
+      const imgData = exportCtx.createImageData(maskImageData.width, maskImageData.height);
+      for (let i = 0; i < maskImageData.data.length; i += 4) {
+        imgData.data[i] = 0;
+        imgData.data[i+1] = 0;
+        imgData.data[i+2] = 0;
+        imgData.data[i+3] = maskImageData.data[i+3];
+      }
+      exportCtx.putImageData(imgData, 0, 0);
+      exportCanvas.toBlob(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'mask.png';
+        a.click();
+      }, 'image/png');
+    });
+    // 退出绘制模式时，恢复遮罩上传
+    document.getElementById("maskImage").addEventListener('change', () => {
+      if (isDrawingMask) {
+        exitDrawMaskMode();
       }
     });
   </script>
