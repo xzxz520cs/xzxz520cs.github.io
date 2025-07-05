@@ -55,7 +55,7 @@
             <a href="#" class="drawer-link">工具</a>
             <ul class="drawer-submenu">
               <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a></li>
-              <li><a href="/tools/card-translate/" class="drawer-subitem">游戏王卡牌日中对照文本生成器</a></li>              
+              <li><a href="/tools/card-translate/" class="drawer-subitem">游戏王卡牌日中对照文本生成器</a></li>
               <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
               <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                   class="drawer-subitem">恢复关闭的标签页</a></li>
@@ -77,7 +77,8 @@
       </div>
       <div class="form-group mt-2">
         <label for="apiUrl">API URL</label>
-        <input type="text" id="apiUrl" placeholder="请输入你的 API URL如https://api.example.com" name="apiUrl" class="form-control">
+        <input type="text" id="apiUrl" placeholder="请输入你的 API URL如https://api.example.com" name="apiUrl"
+          class="form-control">
       </div>
       <!-- 固定模型为 gpt-image-1 -->
       <div class="form-group mt-2">
@@ -326,7 +327,7 @@
       if (brushShape === 'circle') {
         for (let dx = -half; dx <= half; dx++) {
           for (let dy = -half; dy <= half; dy++) {
-            if (dx*dx + dy*dy <= half*half) {
+            if (dx * dx + dy * dy <= half * half) {
               const px = x + dx, py = y + dy;
               if (px >= 0 && px < maskImageData.width && py >= 0 && py < maskImageData.height) {
                 const idx = (py * maskImageData.width + px) * 4 + 3;
@@ -482,16 +483,16 @@
       // 新增：遮罩绘制模式判断
       const isDrawingMask = document.getElementById('drawMaskBtn').textContent === '放弃绘制';
       if (!apiKey || !apiUrl || !prompt) {
-          alert("请输入 API Key、API URL 和提示语！");
-          return;
+        alert("请输入 API Key、API URL 和提示语！");
+        return;
       }
       if (!imageInput.files || imageInput.files.length === 0) {
-          alert("请上传要编辑的图像！");
-          return;
+        alert("请上传要编辑的图像！");
+        return;
       }
       if (imageInput.files.length > 16) {
-          alert("最多只能上传16张图片！");
-          return;
+        alert("最多只能上传16张图片！");
+        return;
       }
       const formData = new FormData();
       formData.append("model", "gpt-image-1");
@@ -512,9 +513,9 @@
         const imgData = exportCtx.createImageData(window.maskImageData.width, window.maskImageData.height);
         for (let i = 0; i < window.maskImageData.data.length; i += 4) {
           imgData.data[i] = 0;
-          imgData.data[i+1] = 0;
-          imgData.data[i+2] = 0;
-          imgData.data[i+3] = window.maskImageData.data[i+3];
+          imgData.data[i + 1] = 0;
+          imgData.data[i + 2] = 0;
+          imgData.data[i + 3] = window.maskImageData.data[i + 3];
         }
         exportCtx.putImageData(imgData, 0, 0);
         // toBlob为异步
@@ -688,7 +689,7 @@
       // 新建遮罩层（全不透明）
       maskImageData = maskCtx.createImageData(img.width, img.height);
       for (let i = 0; i < maskImageData.data.length; i += 4) {
-        maskImageData.data[i+3] = 255; // alpha=255
+        maskImageData.data[i + 3] = 255; // alpha=255
       }
       // 动态设置画笔最大值
       const maxBrushSize = Math.round(Math.max(img.width, img.height) * 1.2);
@@ -779,10 +780,10 @@
       const visCtx = maskVisCanvas.getContext('2d');
       const visImg = visCtx.createImageData(maskImageData.width, maskImageData.height);
       for (let i = 0; i < maskImageData.data.length; i += 4) {
-        if (maskImageData.data[i+3] === 0) {
-          visImg.data[i] = 255; visImg.data[i+1] = 0; visImg.data[i+2] = 0; visImg.data[i+3] = 100; // 红色半透明
+        if (maskImageData.data[i + 3] === 0) {
+          visImg.data[i] = 255; visImg.data[i + 1] = 0; visImg.data[i + 2] = 0; visImg.data[i + 3] = 100; // 红色半透明
         } else {
-          visImg.data[i+3] = 0;
+          visImg.data[i + 3] = 0;
         }
       }
       visCtx.putImageData(visImg, 0, 0);
@@ -799,9 +800,9 @@
       const imgData = exportCtx.createImageData(maskImageData.width, maskImageData.height);
       for (let i = 0; i < maskImageData.data.length; i += 4) {
         imgData.data[i] = 0;
-        imgData.data[i+1] = 0;
-        imgData.data[i+2] = 0;
-        imgData.data[i+3] = maskImageData.data[i+3];
+        imgData.data[i + 1] = 0;
+        imgData.data[i + 2] = 0;
+        imgData.data[i + 3] = maskImageData.data[i + 3];
       }
       exportCtx.putImageData(imgData, 0, 0);
       exportCanvas.toBlob(blob => {
