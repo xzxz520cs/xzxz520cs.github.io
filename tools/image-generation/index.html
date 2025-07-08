@@ -306,18 +306,10 @@
       const rect = maskCanvas.getBoundingClientRect();
       const x = Math.round((e.clientX - rect.left) * maskCanvas.width / rect.width);
       const y = Math.round((e.clientY - rect.top) * maskCanvas.height / rect.height);
-      // 连续性优化：插值补点
-      if (lastDrawX !== null && lastDrawY !== null) {
-        const dx = x - lastDrawX, dy = y - lastDrawY;
-        const steps = Math.max(Math.abs(dx), Math.abs(dy));
-        for (let s = 1; s <= steps; s++) {
-          const ix = Math.round(lastDrawX + dx * s / steps);
-          const iy = Math.round(lastDrawY + dy * s / steps);
-          drawDot(ix, iy);
-        }
-      } else {
-        drawDot(x, y);
-      }
+      
+      // 直接绘制当前点
+      drawDot(x, y);
+      
       lastDrawX = x;
       lastDrawY = y;
       renderMaskCanvas();
