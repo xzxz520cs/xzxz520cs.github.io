@@ -101,26 +101,26 @@
       </div>
       <!-- 新增：绘制遮罩相关按钮、画布容器和工具箱 -->
       <div class="form-group mt-2" id="drawMaskGroup">
-        <button id="drawMaskBtn" class="btn btn--secondary" type="button" disabled>绘制遮罩</button>
-        <button id="downloadMaskBtn" class="btn btn--secondary" type="button" style="display:none;">下载遮罩</button>
-        <p class="text-muted" style="margin-top:8px;">提示：遮罩区域(红色)表示需要保留不被修改的部分，非遮罩区域将被AI修改</p>
-        <div id="maskCanvasContainer" style="display:none; position:relative; margin-top:10px;">
+        <button id="drawMaskBtn" class="btn btn--secondary disabled" type="button">绘制遮罩</button>
+        <button id="downloadMaskBtn" class="btn btn--secondary hidden" type="button">下载遮罩</button>
+        <p class="text-muted mt-3">提示：遮罩区域(红色/不透明)表示需要保留不被修改的部分，非遮罩区域（透明区域）将被AI修改</p>
+        <div id="maskCanvasContainer" class="hidden relative-position mt-3">
           <!-- 画布和预览光标canvas都放这里 -->
         </div>
-        <div id="maskToolbox" style="display:none; margin-top:8px;">
+        <div id="maskToolbox" class="hidden mt-3">
           <label>模式:
             <select id="maskToolMode">
               <option value="brush">画笔</option>
               <option value="eraser">橡皮擦</option>
             </select>
           </label>
-          <label style="margin-left:10px;">画笔形状:
+          <label>画笔形状:
             <select id="maskBrushShape">
               <option value="circle">圆形</option>
               <option value="square">方形</option>
             </select>
           </label>
-          <label style="margin-left:10px;">画笔大小:
+          <label>画笔大小:
             <input type="range" id="maskBrushSize" min="5" max="100" value="30">
             <span id="maskBrushSizeVal">30</span>px
           </label>
@@ -135,9 +135,9 @@
       <div class="form-group mt-2">
         <label for="size">图像尺寸</label>
         <select id="size" class="form-control">
-          <option value="1024x1024" selected>1024x1024</option>
-          <option value="1024x1536">1024x1536</option>
-          <option value="1536x1024">1536x1024</option>
+          <option value="1024x1024" selected>1024x1024（默认）</option>
+          <option value="1024x1536">1024x1536（竖屏）</option>
+          <option value="1536x1024">1536x1024（横屏）</option>
           <option value="auto">auto</option>
         </select>
       </div>
@@ -170,7 +170,7 @@
       </div>
       <!-- 新增：压缩率 (仅在JPEG/WebP时生效) -->
       <div class="form-group mt-2">
-        <label for="compression">压缩率 (0-100)</label>
+        <label for="compression">压缩率 (0-100) 0为无损</label>
         <input type="number" id="compression" placeholder="请输入压缩率" class="form-control" min="0" max="100" value="0">
       </div>
       <!-- 新增：内容审核 -->
@@ -359,6 +359,10 @@
         alert("请输入 API Key、API URL 和提示语！");
         return;
       }
+      
+      const generateBtn = document.getElementById("generateBtn");
+      generateBtn.disabled = true;
+      generateBtn.classList.add('disabled');
 
       const previewContainer = document.getElementById("previewContainer");
       // 显示占位信息
@@ -453,6 +457,10 @@
       } catch (error) {
         console.error("请求错误详情：", error);
         previewItem.textContent = "请求出现错误：" + error;
+      } finally {
+        const generateBtn = document.getElementById("generateBtn");
+        generateBtn.disabled = false;
+        generateBtn.classList.remove('disabled');
       }
     });
 
@@ -479,6 +487,10 @@
         alert("请输入 API Key、API URL 和提示语！");
         return;
       }
+      
+      const editBtn = document.getElementById("editBtn");
+      editBtn.disabled = true;
+      editBtn.classList.add('disabled');
       if (!imageInput.files || imageInput.files.length === 0) {
         alert("请上传要编辑的图像！");
         return;
@@ -575,6 +587,10 @@
       } catch (error) {
         console.error("请求错误详情：", error);
         previewItem.textContent = "请求出现错误：" + error;
+      } finally {
+        const editBtn = document.getElementById("editBtn");
+        editBtn.disabled = false;
+        editBtn.classList.remove('disabled');
       }
     });
 
@@ -607,7 +623,11 @@
 
     // 监听输入图片变化，决定绘制遮罩按钮可用性
     inputImage.addEventListener('change', () => {
-      drawMaskBtn.disabled = !(inputImage.files && inputImage.files.length > 0);
+      if (inputImage.files && inputImage.files.length > 0) {
+        drawMaskBtn.classList.remove('disabled');
+      } else {
+        drawMaskBtn.classList.add('disabled');
+      }
       if (!inputImage.files || inputImage.files.length === 0) {
         if (isDrawingMask) {
           exitDrawMaskMode();
@@ -621,10 +641,10 @@
         // 进入绘制模式
         isDrawingMask = true;
         drawMaskBtn.textContent = '放弃绘制';
-        maskUploadGroup.style.display = 'none';
-        maskCanvasContainer.style.display = '';
-        maskToolbox.style.display = '';
-        downloadMaskBtn.style.display = '';
+        maskUploadGroup.classList.add("hidden");
+        maskCanvasContainer.classList.remove("hidden");
+        maskToolbox.classList.remove("hidden");
+        downloadMaskBtn.classList.remove("hidden");
         // 初始化画布
         await setupMaskCanvas();
       } else {
@@ -636,10 +656,10 @@
     function exitDrawMaskMode() {
       isDrawingMask = false;
       drawMaskBtn.textContent = '绘制遮罩';
-      maskUploadGroup.style.display = '';
-      maskCanvasContainer.style.display = 'none';
-      maskToolbox.style.display = 'none';
-      downloadMaskBtn.style.display = 'none';
+      maskUploadGroup.classList.remove("hidden");
+      maskCanvasContainer.classList.add("hidden");
+      maskToolbox.classList.add("hidden");
+      downloadMaskBtn.classList.add("hidden");
       if (maskCanvasContainer.firstChild) maskCanvasContainer.removeChild(maskCanvasContainer.firstChild);
       maskCanvas = null;
       maskCtx = null;
@@ -663,7 +683,7 @@
       await new Promise(res => { img.onload = res; });
       maskBaseImage = img;
       // 限制画布最大显示尺寸
-      const maxDisplay = 512;
+      const maxDisplay = 768;
       let displayW = img.width, displayH = img.height;
       if (img.width > maxDisplay || img.height > maxDisplay) {
         if (img.width >= img.height) {
@@ -716,17 +736,17 @@
       // 画布事件
       maskCanvas.onmousedown = e => { drawing = true; lastDrawX = lastDrawY = null; drawAt(e); };
       maskCanvas.onmouseup = () => { drawing = false; lastDrawX = lastDrawY = null; };
-      maskCanvas.onmouseleave = () => { drawing = false; lastDrawX = lastDrawY = null; maskCursorOverlay.style.display = 'none'; };
+      maskCanvas.onmouseleave = () => { drawing = false; lastDrawX = lastDrawY = null; maskCursorOverlay.classList.add('hidden'); };
       maskCanvas.onmousemove = e => {
         if (drawing) drawAt(e);
         drawCursorOverlay(e);
       };
-      maskCanvas.onmouseenter = e => { maskCursorOverlay.style.display = ''; drawCursorOverlay(e); };
+      maskCanvas.onmouseenter = e => { maskCursorOverlay.classList.remove('hidden'); drawCursorOverlay(e); };
       // 触摸支持（不显示预览）
-      maskCanvas.ontouchstart = e => { drawing = true; lastDrawX = lastDrawY = null; drawAt(e.touches[0]); e.preventDefault(); maskCursorOverlay.style.display = 'none'; };
+      maskCanvas.ontouchstart = e => { drawing = true; lastDrawX = lastDrawY = null; drawAt(e.touches[0]); e.preventDefault(); maskCursorOverlay.classList.add('hidden'); };
       maskCanvas.ontouchend = () => { drawing = false; lastDrawX = lastDrawY = null; };
       maskCanvas.ontouchcancel = () => { drawing = false; lastDrawX = lastDrawY = null; };
-      maskCanvas.ontouchmove = e => { if (drawing) drawAt(e.touches[0]); e.preventDefault(); maskCursorOverlay.style.display = 'none'; };
+      maskCanvas.ontouchmove = e => { if (drawing) drawAt(e.touches[0]); e.preventDefault(); maskCursorOverlay.classList.add('hidden'); };
       // 预览光标绘制函数
       function drawCursorOverlay(e) {
         const rect = maskCanvas.getBoundingClientRect();

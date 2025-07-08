@@ -911,9 +911,15 @@ tr:nth-child(even) td {
   margin-left: 2px;
 }
 
-/* 通用隐藏类 */
+/* 通用隐藏类和禁用状态 */
 .hidden {
   display: none;
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* 横向分隔线 */
@@ -926,6 +932,11 @@ tr:nth-child(even) td {
 .separator-vertical {
     width: 0;
     border-left: 1px dashed var(--color-border);
+}
+
+/* 相对定位工具类 */
+.relative-position {
+    position: relative;
 }
 
 .full-height {
