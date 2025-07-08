@@ -535,6 +535,20 @@ img {
   border-color: var(--color-secondary-active);
 }
 
+/* 切换按钮样式 - 无动画 */
+.btn--toggle {
+  --btn-bg: var(--color-gray-light);
+  --btn-color: var(--color-text);
+  background-color: var(--btn-bg);
+  color: var(--btn-color);
+}
+
+.btn--toggle.active,
+.btn--toggle:active {
+  --btn-bg: var(--color-primary);
+  --btn-color: var(--color-text-light);
+}
+
 .btn--block {
   display: block;
   width: 100%;
