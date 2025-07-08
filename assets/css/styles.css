@@ -159,6 +159,7 @@ h6 {
 
 /* 暗色模式标题颜色 */
 @media (prefers-color-scheme: dark) {
+
   h1,
   h2,
   h3,
@@ -535,18 +536,10 @@ img {
   border-color: var(--color-secondary-active);
 }
 
-/* 切换按钮样式 - 无动画 */
-.btn--toggle {
-  --btn-bg: var(--color-gray-light);
-  --btn-color: var(--color-text);
-  background-color: var(--btn-bg);
-  color: var(--btn-color);
-}
-
+/* 切换按钮样式*/
 .btn--toggle.active,
 .btn--toggle:active {
-  --btn-bg: var(--color-primary);
-  --btn-color: var(--color-text-light);
+  border: 2px solid var(--color-primary);
 }
 
 .btn--block {
@@ -585,6 +578,7 @@ textarea {
 }
 
 @media (prefers-color-scheme: dark) {
+
   input[type="text"],
   input[type="number"],
   input[type="email"],
@@ -660,10 +654,12 @@ tr:nth-child(even) td {
     background: var(--color-bg);
     box-shadow: var(--shadow-md);
   }
+
   thead {
     background: var(--color-secondary);
     color: var(--color-text-light);
   }
+
   tr:nth-child(even) td {
     background: var(--color-bg-alt);
   }
@@ -938,19 +934,19 @@ tr:nth-child(even) td {
 
 /* 横向分隔线 */
 .separator-horizontal {
-    border: none;
-    border-top: 1px dashed var(--color-border);
+  border: none;
+  border-top: 1px dashed var(--color-border);
 }
 
 /* 竖向分隔线 */
 .separator-vertical {
-    width: 0;
-    border-left: 1px dashed var(--color-border);
+  width: 0;
+  border-left: 1px dashed var(--color-border);
 }
 
 /* 相对定位工具类 */
 .relative-position {
-    position: relative;
+  position: relative;
 }
 
 .full-height {
