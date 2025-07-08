@@ -73,7 +73,8 @@
     <div class="card card--elevated">
       <div class="form-group mt-2">
         <label for="apiKey">API Key</label>
-        <input type="text" id="apiKey" placeholder="请输入你的 API Key（请自备）" name="apiKey" autocomplete="on" class="form-control">
+        <input type="text" id="apiKey" placeholder="请输入你的 API Key（请自备）" name="apiKey" autocomplete="on"
+          class="form-control">
       </div>
       <div class="form-group mt-2">
         <label for="apiUrl">API URL</label>
@@ -104,9 +105,6 @@
         <button id="drawMaskBtn" class="btn btn--secondary disabled" type="button">绘制遮罩</button>
         <button id="downloadMaskBtn" class="btn btn--secondary hidden" type="button">下载遮罩</button>
         <p class="text-muted mt-3">提示：遮罩区域(红色/不透明)表示需要保留不被修改的部分，非遮罩区域（透明区域）将被AI修改</p>
-        <div id="maskCanvasContainer" class="hidden relative-position mt-3">
-          <!-- 画布和预览光标canvas都放这里 -->
-        </div>
         <div id="maskToolbox" class="hidden mt-3">
           <label>模式:
             <select id="maskToolMode">
@@ -124,6 +122,9 @@
             <input type="range" id="maskBrushSize" min="5" max="100" value="30">
             <span id="maskBrushSizeVal">30</span>px
           </label>
+        </div>
+        <div id="maskCanvasContainer" class="hidden relative-position mt-3">
+          <!-- 画布和预览光标canvas都放这里 -->
         </div>
       </div>
       <!-- 新增：遮罩上传（用于编辑时局部修改） -->
@@ -307,10 +308,10 @@
       const rect = maskCanvas.getBoundingClientRect();
       const x = Math.round((e.clientX - rect.left) * maskCanvas.width / rect.width);
       const y = Math.round((e.clientY - rect.top) * maskCanvas.height / rect.height);
-      
+
       // 直接绘制当前点
       drawDot(x, y);
-      
+
       lastDrawX = x;
       lastDrawY = y;
       renderMaskCanvas();
@@ -359,7 +360,7 @@
         alert("请输入 API Key、API URL 和提示语！");
         return;
       }
-      
+
       const generateBtn = document.getElementById("generateBtn");
       generateBtn.disabled = true;
       generateBtn.classList.add('disabled');
@@ -487,7 +488,7 @@
         alert("请输入 API Key、API URL 和提示语！");
         return;
       }
-      
+
       const editBtn = document.getElementById("editBtn");
       editBtn.disabled = true;
       editBtn.classList.add('disabled');
