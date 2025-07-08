@@ -946,3 +946,59 @@ tr:nth-child(even) td {
 .full-width {
   width: 100%;
 }
+
+/* 工具箱样式 */
+.toolbox-container {
+  display: flex;
+  flex-direction: column;
+  width: 48px;
+  padding: var(--space-xs);
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+}
+
+.tool-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.tool-buttons .btn {
+  padding: var(--space-xs);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.tool-buttons .btn svg {
+  pointer-events: none;
+}
+
+.tool-buttons .btn.active {
+  background: var(--color-secondary);
+  color: var(--color-text-light);
+}
+
+.brush-size-control {
+  margin-top: var(--space-sm);
+}
+
+.brush-size-control label {
+  font-size: 0.8em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brush-size-control input {
+  margin-top: var(--space-xs);
+}
+
+/* 间距工具类 */
+.gap-1 {
+  gap: var(--space-xs);
+}
+
+.ml-2 {
+  margin-left: var(--space-sm);
+}

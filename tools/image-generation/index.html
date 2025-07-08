@@ -105,25 +105,41 @@
         <button id="drawMaskBtn" class="btn btn--secondary disabled" type="button">绘制遮罩</button>
         <button id="downloadMaskBtn" class="btn btn--secondary hidden" type="button">下载遮罩</button>
         <p class="text-muted mt-3">提示：遮罩区域(红色/不透明)表示需要保留不被修改的部分，非遮罩区域（透明区域）将被AI修改</p>
-        <div id="maskToolbox" class="hidden mt-3">
-          <label>模式:
-            <select id="maskToolMode">
-              <option value="brush">画笔</option>
-              <option value="eraser">橡皮擦</option>
-            </select>
-          </label>
-          <label>画笔形状:
-            <select id="maskBrushShape">
-              <option value="circle">圆形</option>
-              <option value="square">方形</option>
-            </select>
-          </label>
-          <label>画笔大小:
-            <input type="range" id="maskBrushSize" min="5" max="100" value="30">
-            <span id="maskBrushSizeVal">30</span>px
-          </label>
-        </div>
-        <div id="maskCanvasContainer" class="hidden relative-position mt-3">
+        <div id="maskToolbox" class="hidden mt-3 flex flex--column">
+            <div class="tool-buttons flex flex--column gap-1">
+              <button id="brushModeBtn" class="btn btn--secondary active" type="button" title="画笔">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                  <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                  <path d="M2 2l7.586 7.586"></path>
+                  <circle cx="11" cy="11" r="2"></circle>
+                </svg>
+              </button>
+              <button id="eraserModeBtn" class="btn btn--secondary" type="button" title="橡皮擦">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M7 21h10"></path>
+                  <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"></path>
+                </svg>
+              </button>
+              <button id="circleBrushBtn" class="btn btn--secondary active" type="button" title="圆形画笔">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                </svg>
+              </button>
+              <button id="squareBrushBtn" class="btn btn--secondary" type="button" title="方形画笔">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                </svg>
+              </button>
+            </div>
+            <div class="brush-size-control">
+              <label>画笔大小:
+                <input type="range" id="maskBrushSize" min="5" max="100" value="30">
+                <span id="maskBrushSizeVal">30</span>px
+              </label>
+            </div>
+          </div>
+          <div id="maskCanvasContainer" class="hidden relative-position mt-3 flex">
           <!-- 画布和预览光标canvas都放这里 -->
         </div>
       </div>
@@ -212,6 +228,32 @@
 
   <!-- 脚本部分 -->
   <script>
+    // 画笔模式按钮事件
+    document.getElementById('brushModeBtn').addEventListener('click', () => {
+      maskToolMode = 'brush';
+      document.getElementById('brushModeBtn').classList.add('active');
+      document.getElementById('eraserModeBtn').classList.remove('active');
+    });
+
+    document.getElementById('eraserModeBtn').addEventListener('click', () => {
+      maskToolMode = 'eraser';
+      document.getElementById('eraserModeBtn').classList.add('active');
+      document.getElementById('brushModeBtn').classList.remove('active');
+    });
+
+    // 画笔形状按钮事件
+    document.getElementById('circleBrushBtn').addEventListener('click', () => {
+      brushShape = 'circle';
+      document.getElementById('circleBrushBtn').classList.add('active');
+      document.getElementById('squareBrushBtn').classList.remove('active');
+    });
+
+    document.getElementById('squareBrushBtn').addEventListener('click', () => {
+      brushShape = 'square';
+      document.getElementById('squareBrushBtn').classList.add('active');
+      document.getElementById('circleBrushBtn').classList.remove('active');
+    });
+
     // 初始化：加载并保存 API Key 和 API URL 到 localStorage
     document.addEventListener('DOMContentLoaded', () => {
       // 加载 API Key 和 API URL
@@ -301,9 +343,6 @@
     // 画笔绘制函数，需放在setupMaskCanvas前
     let maskToolMode = 'brush';
     let lastDrawX = null, lastDrawY = null;
-    document.getElementById('maskToolMode').addEventListener('change', e => {
-      maskToolMode = e.target.value;
-    });
     function drawAt(e) {
       const rect = maskCanvas.getBoundingClientRect();
       const x = Math.round((e.clientX - rect.left) * maskCanvas.width / rect.width);
@@ -614,9 +653,6 @@
     let maskCursorOverlay = null;
 
     // 画笔工具箱事件
-    document.getElementById('maskBrushShape').addEventListener('change', e => {
-      brushShape = e.target.value;
-    });
     document.getElementById('maskBrushSize').addEventListener('input', e => {
       brushSize = parseInt(e.target.value);
       document.getElementById('maskBrushSizeVal').textContent = brushSize;
