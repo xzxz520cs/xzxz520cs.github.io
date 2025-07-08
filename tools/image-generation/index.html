@@ -103,6 +103,7 @@
       <div class="form-group mt-2" id="drawMaskGroup">
         <button id="drawMaskBtn" class="btn btn--secondary" type="button" disabled>绘制遮罩</button>
         <button id="downloadMaskBtn" class="btn btn--secondary" type="button" style="display:none;">下载遮罩</button>
+        <p class="text-muted" style="margin-top:8px;">提示：遮罩区域(红色)表示需要保留不被修改的部分，非遮罩区域将被AI修改</p>
         <div id="maskCanvasContainer" style="display:none; position:relative; margin-top:10px;">
           <!-- 画布和预览光标canvas都放这里 -->
         </div>
@@ -773,7 +774,7 @@
       const visImg = visCtx.createImageData(maskImageData.width, maskImageData.height);
       for (let i = 0; i < maskImageData.data.length; i += 4) {
         if (maskImageData.data[i + 3] === 0) {
-          visImg.data[i] = 255; visImg.data[i + 1] = 0; visImg.data[i + 2] = 0; visImg.data[i + 3] = 100; // 红色半透明
+          visImg.data[i] = 255; visImg.data[i + 1] = 0; visImg.data[i + 2] = 0; visImg.data[i + 3] = 180; // 红色更明显
         } else {
           visImg.data[i + 3] = 0;
         }
@@ -791,10 +792,11 @@
       const exportCtx = exportCanvas.getContext('2d');
       const imgData = exportCtx.createImageData(maskImageData.width, maskImageData.height);
       for (let i = 0; i < maskImageData.data.length; i += 4) {
+        // 绘制部分输出为黑色不透明(alpha=255)，未绘制部分透明(alpha=0)
         imgData.data[i] = 0;
         imgData.data[i + 1] = 0;
         imgData.data[i + 2] = 0;
-        imgData.data[i + 3] = maskImageData.data[i + 3];
+        imgData.data[i + 3] = 255 - maskImageData.data[i + 3]; // 反转alpha值
       }
       exportCtx.putImageData(imgData, 0, 0);
       exportCanvas.toBlob(blob => {
