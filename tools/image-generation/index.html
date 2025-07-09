@@ -633,28 +633,18 @@
         exportCanvas.width = maskBaseImage.width;
         exportCanvas.height = maskBaseImage.height;
         const exportCtx = exportCanvas.getContext('2d');
-        
         // 创建与绘制尺寸相同的临时画布
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = window.maskImageData.width;
         tempCanvas.height = window.maskImageData.height;
         const tempCtx = tempCanvas.getContext('2d');
-        
-        // 创建与绘制尺寸相同的ImageData，修正alpha通道为255-原值
-        const tempImgData = tempCtx.createImageData(window.maskImageData.width, window.maskImageData.height);
-        for (let i = 0; i < window.maskImageData.data.length; i += 4) {
-          tempImgData.data[i] = 0;
-          tempImgData.data[i + 1] = 0;
-          tempImgData.data[i + 2] = 0;
-          tempImgData.data[i + 3] = 255 - window.maskImageData.data[i + 3]; // 反转alpha
-        }
-        tempCtx.putImageData(tempImgData, 0, 0);
-        
+        // 直接拷贝maskImageData，不做alpha反转
+        tempCtx.putImageData(window.maskImageData, 0, 0);
         // 使用高质量缩放将临时画布拉伸到原图尺寸
         exportCtx.imageSmoothingEnabled = true;
         exportCtx.imageSmoothingQuality = 'high';
         exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
-        // 修正：拉伸后再二值化alpha通道，确保只有0/255
+        // 拉伸后再二值化alpha通道，确保只有0/255
         const exportImgData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
         for (let i = 0; i < exportImgData.data.length; i += 4) {
           exportImgData.data[i] = 0;
@@ -677,33 +667,9 @@
         });
       } else if (maskInput.files && maskInput.files.length > 0) {
         // 遮罩上传也转为 PNG 且尺寸与第一张图一致
-        // 需要修正alpha通道为255-原值
+        // 不再反转alpha，直接导出
         const maskPngBlob = await fileToPngBlob(maskInput.files[0], targetWidth, targetHeight);
-        // 读取blob为ImageData，反转alpha后再导出
-        const maskImg = new window.Image();
-        maskImg.src = await fileToDataURL(maskPngBlob);
-        await new Promise(res => { maskImg.onload = res; });
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = maskImg.width;
-        tempCanvas.height = maskImg.height;
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.drawImage(maskImg, 0, 0);
-        const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-        for (let i = 0; i < imgData.data.length; i += 4) {
-          imgData.data[i + 3] = 255 - imgData.data[i + 3];
-        }
-        tempCtx.putImageData(imgData, 0, 0);
-        await new Promise((resolve, reject) => {
-          tempCanvas.toBlob(blob => {
-            if (blob) {
-              formData.append("mask", blob, "mask.png");
-              resolve();
-            } else {
-              alert("遮罩导出失败");
-              reject();
-            }
-          }, 'image/png');
-        });
+        formData.append("mask", maskPngBlob, "mask.png");
       }
       const baseUrl = apiUrl.replace(/\/+/g, "");
       const editUrl = baseUrl + "/v1/images/edits";
@@ -994,23 +960,24 @@
       exportCanvas.width = maskBaseImage.width;
       exportCanvas.height = maskBaseImage.height;
       const exportCtx = exportCanvas.getContext('2d');
-      
       // 先将遮罩绘制到临时画布
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = maskImageData.width;
       tempCanvas.height = maskImageData.height;
       const tempCtx = tempCanvas.getContext('2d');
-      const tempImgData = tempCtx.createImageData(maskImageData.width, maskImageData.height);
-      for (let i = 0; i < maskImageData.data.length; i += 4) {
-        tempImgData.data[i] = 0;
-        tempImgData.data[i + 1] = 0;
-        tempImgData.data[i + 2] = 0;
-        tempImgData.data[i + 3] = 255 - maskImageData.data[i + 3];
-      }
-      tempCtx.putImageData(tempImgData, 0, 0);
-      
+      // 直接拷贝maskImageData，不做alpha反转
+      tempCtx.putImageData(maskImageData, 0, 0);
       // 将临时画布拉伸到原图尺寸
       exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
+      // 拉伸后再二值化alpha通道，确保只有0/255
+      const exportImgData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
+      for (let i = 0; i < exportImgData.data.length; i += 4) {
+        exportImgData.data[i] = 0;
+        exportImgData.data[i + 1] = 0;
+        exportImgData.data[i + 2] = 0;
+        exportImgData.data[i + 3] = exportImgData.data[i + 3] > 127 ? 255 : 0;
+      }
+      exportCtx.putImageData(exportImgData, 0, 0);
       exportCanvas.toBlob(blob => {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
