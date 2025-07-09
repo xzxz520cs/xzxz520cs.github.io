@@ -641,8 +641,8 @@
         // 直接拷贝maskImageData，不做alpha反转
         tempCtx.putImageData(window.maskImageData, 0, 0);
         // 使用高质量缩放将临时画布拉伸到原图尺寸
-        exportCtx.imageSmoothingEnabled = false;
-        exportCtx.imageSmoothingQuality = 'low';
+        exportCtx.imageSmoothingEnabled = true;
+        exportCtx.imageSmoothingQuality = 'high';
         exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
         // 拉伸后再严格二值化所有通道，确保只有0/255
         const exportImgData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
