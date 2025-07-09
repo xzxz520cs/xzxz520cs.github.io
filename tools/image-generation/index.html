@@ -333,6 +333,7 @@
     let lastDrawX = null, lastDrawY = null;
     function drawAt(e) {
       const rect = maskCanvas.getBoundingClientRect();
+      // 计算画布上的坐标(已考虑缩放)
       const x = Math.round((e.clientX - rect.left) * maskCanvas.width / rect.width);
       const y = Math.round((e.clientY - rect.top) * maskCanvas.height / rect.height);
 
@@ -540,17 +541,30 @@
       if (isDrawingMask && window.maskImageData && window.maskCanvas) {
         // 导出遮罩为PNG Blob
         const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = window.maskImageData.width;
-        exportCanvas.height = window.maskImageData.height;
+        exportCanvas.width = maskBaseImage.width;
+        exportCanvas.height = maskBaseImage.height;
         const exportCtx = exportCanvas.getContext('2d');
-        const imgData = exportCtx.createImageData(window.maskImageData.width, window.maskImageData.height);
+        
+        // 创建与绘制尺寸相同的临时画布
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = window.maskImageData.width;
+        tempCanvas.height = window.maskImageData.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        // 创建与绘制尺寸相同的ImageData
+        const tempImgData = tempCtx.createImageData(window.maskImageData.width, window.maskImageData.height);
         for (let i = 0; i < window.maskImageData.data.length; i += 4) {
-          imgData.data[i] = 0;
-          imgData.data[i + 1] = 0;
-          imgData.data[i + 2] = 0;
-          imgData.data[i + 3] = window.maskImageData.data[i + 3];
+          tempImgData.data[i] = 0;
+          tempImgData.data[i + 1] = 0;
+          tempImgData.data[i + 2] = 0;
+          tempImgData.data[i + 3] = window.maskImageData.data[i + 3];
         }
-        exportCtx.putImageData(imgData, 0, 0);
+        tempCtx.putImageData(tempImgData, 0, 0);
+        
+        // 使用高质量缩放将临时画布拉伸到原图尺寸
+        exportCtx.imageSmoothingEnabled = true;
+        exportCtx.imageSmoothingQuality = 'high';
+        exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
         // toBlob为异步
         await new Promise((resolve, reject) => {
           exportCanvas.toBlob(blob => {
@@ -701,36 +715,41 @@
       maskCanvas.style.display = 'block';
       maskCanvas.style.position = 'relative';
       maskCanvasContainer.appendChild(maskCanvas);
-      // 读取第一张图片
-      const file = inputImage.files[0];
+      // 明确使用第一张上传的图片作为遮罩底图
+      if (!inputImage.files || inputImage.files.length === 0) {
+        alert("请先上传图片！");
+        exitDrawMaskMode();
+        return;
+      }
+      const file = inputImage.files[0]; // 始终使用第一张图片
       const img = new window.Image();
       img.src = await fileToDataURL(file);
       await new Promise(res => { img.onload = res; });
       maskBaseImage = img;
-      // 限制画布最大显示尺寸
-      const maxDisplay = 768;
-      let displayW = img.width, displayH = img.height;
-      if (img.width > maxDisplay || img.height > maxDisplay) {
-        if (img.width >= img.height) {
-          displayW = maxDisplay;
-          displayH = Math.round(img.height * maxDisplay / img.width);
-        } else {
-          displayH = maxDisplay;
-          displayW = Math.round(img.width * maxDisplay / img.height);
-        }
+      
+      // 计算绘制画布尺寸 (最大高度768，最大宽度1532)
+      let drawWidth = img.width, drawHeight = img.height;
+      if (img.height > 768 || img.width > 1532) {
+        const scale = Math.min(768 / img.height, 1532 / img.width);
+        drawWidth = Math.round(img.width * scale);
+        drawHeight = Math.round(img.height * scale);
       }
-      maskCanvas.width = img.width;
-      maskCanvas.height = img.height;
-      maskCanvas.style.width = displayW + 'px';
-      maskCanvas.style.height = displayH + 'px';
+      
+      // 设置画布实际尺寸为绘制尺寸
+      maskCanvas.width = drawWidth;
+      maskCanvas.height = drawHeight;
+      // 显示尺寸与绘制尺寸相同
+      maskCanvas.style.width = drawWidth + 'px';
+      maskCanvas.style.height = drawHeight + 'px';
       maskCtx = maskCanvas.getContext('2d');
-      // 新建遮罩层（全不透明）
-      maskImageData = maskCtx.createImageData(img.width, img.height);
+      // 新建遮罩层（全不透明）- 使用绘制尺寸而非原图尺寸
+      maskImageData = maskCtx.createImageData(drawWidth, drawHeight);
       for (let i = 0; i < maskImageData.data.length; i += 4) {
         maskImageData.data[i + 3] = 255; // alpha=255
       }
-      // 动态设置画笔最大值
-      const maxBrushSize = Math.round(Math.max(img.width, img.height) * 1.2);
+      // 动态设置画笔最大值为缩放后图片长边的1.1倍
+      const scaledMaxDimension = Math.max(img.width, img.height); // 获取缩放后的长边
+      const maxBrushSize = Math.round(scaledMaxDimension * 1.1);
       const brushSizeInput = document.getElementById('maskBrushSize');
       brushSizeInput.max = maxBrushSize;
       // 若当前brushSize超出最大值，重置
@@ -830,20 +849,28 @@
     // 下载遮罩
     downloadMaskBtn.addEventListener('click', () => {
       if (!maskCanvas || !maskImageData) return;
-      // 只导出alpha通道，黑底透明
+      // 创建原图尺寸的导出画布
       const exportCanvas = document.createElement('canvas');
-      exportCanvas.width = maskImageData.width;
-      exportCanvas.height = maskImageData.height;
+      exportCanvas.width = maskBaseImage.width;
+      exportCanvas.height = maskBaseImage.height;
       const exportCtx = exportCanvas.getContext('2d');
-      const imgData = exportCtx.createImageData(maskImageData.width, maskImageData.height);
+      
+      // 先将遮罩绘制到临时画布
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = maskImageData.width;
+      tempCanvas.height = maskImageData.height;
+      const tempCtx = tempCanvas.getContext('2d');
+      const tempImgData = tempCtx.createImageData(maskImageData.width, maskImageData.height);
       for (let i = 0; i < maskImageData.data.length; i += 4) {
-        // 绘制部分输出为黑色不透明(alpha=255)，未绘制部分透明(alpha=0)
-        imgData.data[i] = 0;
-        imgData.data[i + 1] = 0;
-        imgData.data[i + 2] = 0;
-        imgData.data[i + 3] = 255 - maskImageData.data[i + 3]; // 反转alpha值
+        tempImgData.data[i] = 0;
+        tempImgData.data[i + 1] = 0;
+        tempImgData.data[i + 2] = 0;
+        tempImgData.data[i + 3] = 255 - maskImageData.data[i + 3];
       }
-      exportCtx.putImageData(imgData, 0, 0);
+      tempCtx.putImageData(tempImgData, 0, 0);
+      
+      // 将临时画布拉伸到原图尺寸
+      exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
       exportCanvas.toBlob(blob => {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
