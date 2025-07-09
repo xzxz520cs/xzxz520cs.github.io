@@ -95,10 +95,15 @@
         <label for="n">生成数量</label>
         <input type="number" id="n" class="form-control" min="1" value="1">
       </div>
-      <!-- 新增：上传输入图像（支持多选，用于生成或编辑） -->
+      <!-- 新增：上传第一个图像（遮罩会应用在这个图像） -->
       <div class="form-group mt-2">
-        <label for="inputImage">上传输入图像</label>
-        <input type="file" id="inputImage" class="form-control" accept="image/*" multiple>
+        <label for="firstInputImage">上传第一个图像（遮罩会应用在这个图像）</label>
+        <input type="file" id="firstInputImage" class="form-control" accept="image/*">
+      </div>
+      <!-- 新增：上传多个图像（可多选） -->
+      <div class="form-group mt-2">
+        <label for="multiInputImage">上传多个图像</label>
+        <input type="file" id="multiInputImage" class="form-control" accept="image/*" multiple>
       </div>
       <!-- 新增：绘制遮罩相关按钮、画布容器和工具箱 -->
       <div class="form-group mt-2" id="drawMaskGroup">
@@ -328,6 +333,41 @@
       });
     }
 
+    // 将文件转换为PNG格式的Blob对象
+    function fileToPngBlob(file, targetWidth = 0, targetHeight = 0) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            // 如果指定了目标尺寸则使用，否则使用原图尺寸
+            canvas.width = targetWidth > 0 ? targetWidth : img.width;
+            canvas.height = targetHeight > 0 ? targetHeight : img.height;
+            
+            const ctx = canvas.getContext('2d');
+            // 高质量缩放
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob((blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error('Canvas转Blob失败'));
+              }
+            }, 'image/png');
+          };
+          img.onerror = () => reject(new Error('图片加载失败'));
+          img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('文件读取失败'));
+        reader.readAsDataURL(file);
+      });
+    }
+
     // 画笔绘制函数，需放在setupMaskCanvas前
     let maskToolMode = 'brush';
     let lastDrawX = null, lastDrawY = null;
@@ -417,18 +457,33 @@
       }
 
       // 新增：处理上传的输入图像（如果存在）
-      const imageFileInput = document.getElementById("inputImage");
+      const imageFileInput = document.getElementById("multiInputImage");
       if (imageFileInput.files && imageFileInput.files.length > 0) {
         try {
+          // 先获取第一张图片的宽高
+          let targetWidth = 0, targetHeight = 0;
+          {
+            const imgProbe = new window.Image();
+            const probeUrl = await fileToDataURL(imageFileInput.files[0]);
+            await new Promise((res, rej) => {
+              imgProbe.onload = res;
+              imgProbe.onerror = rej;
+              imgProbe.src = probeUrl;
+            });
+            targetWidth = imgProbe.width;
+            targetHeight = imgProbe.height;
+          }
           if (imageFileInput.files.length === 1) {
-            // 单张图片，兼容旧API
-            const base64Image = await fileToDataURL(imageFileInput.files[0]);
+            // 单张图片，转为 PNG DataURL
+            const pngBlob = await fileToPngBlob(imageFileInput.files[0], targetWidth, targetHeight);
+            const base64Image = await fileToDataURL(pngBlob);
             data.input_image = base64Image;
           } else {
-            // 多张图片，融合
+            // 多张图片，全部转为 PNG DataURL
             const base64Images = [];
             for (let i = 0; i < imageFileInput.files.length; i++) {
-              base64Images.push(await fileToDataURL(imageFileInput.files[i]));
+              const pngBlob = await fileToPngBlob(imageFileInput.files[i], targetWidth, targetHeight);
+              base64Images.push(await fileToDataURL(pngBlob));
             }
             data.input_images = base64Images;
           }
@@ -508,7 +563,6 @@
       const n = parseInt(document.getElementById("n").value) || 1;
       const size = document.getElementById("size").value || "1024x1024";
       const quality = document.getElementById("quality").value || "auto";
-      const imageInput = document.getElementById("inputImage");
       const maskInput = document.getElementById("maskImage");
       // 新增：遮罩绘制模式判断
       const isDrawingMask = document.getElementById('drawMaskBtn').textContent === '放弃绘制';
@@ -516,30 +570,65 @@
         alert("请输入 API Key、API URL 和提示语！");
         return;
       }
-
       const editBtn = document.getElementById("editBtn");
       editBtn.disabled = true;
       editBtn.classList.add('disabled');
-      if (!imageInput.files || imageInput.files.length === 0) {
+      // 合并所有上传图片，firstInputImage优先
+      let files = [];
+      if (firstInputImage.files && firstInputImage.files.length > 0) {
+        files.push(firstInputImage.files[0]);
+      }
+      if (multiInputImage.files && multiInputImage.files.length > 0) {
+        for (let i = 0; i < multiInputImage.files.length; i++) {
+          // 避免重复添加firstInputImage
+          if (!firstInputImage.files.length || multiInputImage.files[i] !== firstInputImage.files[0]) {
+            files.push(multiInputImage.files[i]);
+          }
+        }
+      }
+      if (files.length === 0) {
         alert("请上传要编辑的图像！");
+        editBtn.disabled = false;
+        editBtn.classList.remove('disabled');
         return;
       }
-      if (imageInput.files.length > 16) {
+      if (files.length > 16) {
         alert("最多只能上传16张图片！");
+        editBtn.disabled = false;
+        editBtn.classList.remove('disabled');
         return;
       }
+      // 统一所有图片为 PNG 且尺寸与第一张图一致
       const formData = new FormData();
       formData.append("model", "gpt-image-1");
       formData.append("prompt", prompt);
       formData.append("n", n);
       formData.append("size", size);
       formData.append("quality", quality);
-      for (let i = 0; i < imageInput.files.length; i++) {
-        formData.append("image[]", imageInput.files[i], imageInput.files[i].name);
+
+      // 获取目标尺寸（第一张图）
+      let targetWidth = 0, targetHeight = 0;
+      {
+        const imgProbe = new window.Image();
+        const probeUrl = await fileToDataURL(files[0]);
+        await new Promise((res, rej) => {
+          imgProbe.onload = res;
+          imgProbe.onerror = rej;
+          imgProbe.src = probeUrl;
+        });
+        targetWidth = imgProbe.width;
+        targetHeight = imgProbe.height;
       }
+
+      // 所有图片转为 PNG Blob 并 append
+      for (let i = 0; i < files.length; i++) {
+        const pngBlob = await fileToPngBlob(files[i], targetWidth, targetHeight);
+        formData.append("image[]", pngBlob, "image" + (i + 1) + ".png");
+      }
+
       // 遮罩处理：优先用绘制的遮罩
       if (isDrawingMask && window.maskImageData && window.maskCanvas) {
-        // 导出遮罩为PNG Blob
+        // 导出遮罩为PNG Blob（已保证尺寸一致）
         const exportCanvas = document.createElement('canvas');
         exportCanvas.width = maskBaseImage.width;
         exportCanvas.height = maskBaseImage.height;
@@ -551,13 +640,13 @@
         tempCanvas.height = window.maskImageData.height;
         const tempCtx = tempCanvas.getContext('2d');
         
-        // 创建与绘制尺寸相同的ImageData
+        // 创建与绘制尺寸相同的ImageData，修正alpha通道为255-原值
         const tempImgData = tempCtx.createImageData(window.maskImageData.width, window.maskImageData.height);
         for (let i = 0; i < window.maskImageData.data.length; i += 4) {
           tempImgData.data[i] = 0;
           tempImgData.data[i + 1] = 0;
           tempImgData.data[i + 2] = 0;
-          tempImgData.data[i + 3] = window.maskImageData.data[i + 3];
+          tempImgData.data[i + 3] = 255 - window.maskImageData.data[i + 3]; // 反转alpha
         }
         tempCtx.putImageData(tempImgData, 0, 0);
         
@@ -565,6 +654,15 @@
         exportCtx.imageSmoothingEnabled = true;
         exportCtx.imageSmoothingQuality = 'high';
         exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
+        // 修正：拉伸后再二值化alpha通道，确保只有0/255
+        const exportImgData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
+        for (let i = 0; i < exportImgData.data.length; i += 4) {
+          exportImgData.data[i] = 0;
+          exportImgData.data[i + 1] = 0;
+          exportImgData.data[i + 2] = 0;
+          exportImgData.data[i + 3] = exportImgData.data[i + 3] > 127 ? 255 : 0;
+        }
+        exportCtx.putImageData(exportImgData, 0, 0);
         // toBlob为异步
         await new Promise((resolve, reject) => {
           exportCanvas.toBlob(blob => {
@@ -578,7 +676,34 @@
           }, 'image/png');
         });
       } else if (maskInput.files && maskInput.files.length > 0) {
-        formData.append("mask", maskInput.files[0], maskInput.files[0].name);
+        // 遮罩上传也转为 PNG 且尺寸与第一张图一致
+        // 需要修正alpha通道为255-原值
+        const maskPngBlob = await fileToPngBlob(maskInput.files[0], targetWidth, targetHeight);
+        // 读取blob为ImageData，反转alpha后再导出
+        const maskImg = new window.Image();
+        maskImg.src = await fileToDataURL(maskPngBlob);
+        await new Promise(res => { maskImg.onload = res; });
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = maskImg.width;
+        tempCanvas.height = maskImg.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(maskImg, 0, 0);
+        const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        for (let i = 0; i < imgData.data.length; i += 4) {
+          imgData.data[i + 3] = 255 - imgData.data[i + 3];
+        }
+        tempCtx.putImageData(imgData, 0, 0);
+        await new Promise((resolve, reject) => {
+          tempCanvas.toBlob(blob => {
+            if (blob) {
+              formData.append("mask", blob, "mask.png");
+              resolve();
+            } else {
+              alert("遮罩导出失败");
+              reject();
+            }
+          }, 'image/png');
+        });
       }
       const baseUrl = apiUrl.replace(/\/+/g, "");
       const editUrl = baseUrl + "/v1/images/edits";
@@ -642,7 +767,8 @@
     const maskCanvasContainer = document.getElementById("maskCanvasContainer");
     const maskToolbox = document.getElementById("maskToolbox");
     const downloadMaskBtn = document.getElementById("downloadMaskBtn");
-    const inputImage = document.getElementById("inputImage");
+    const firstInputImage = document.getElementById("firstInputImage");
+    const multiInputImage = document.getElementById("multiInputImage");
     let maskCanvas = null;
     let maskCtx = null;
     let drawing = false;
@@ -654,25 +780,53 @@
     let isDrawingMask = false;
     let maskCursorOverlay = null;
 
-    // 画笔工具箱事件
-    document.getElementById('maskBrushSize').addEventListener('input', e => {
-      brushSize = parseInt(e.target.value);
-      document.getElementById('maskBrushSizeVal').textContent = brushSize;
-    });
+    function getMaskTargetFile() {
+      // 优先使用firstInputImage，否则multiInputImage的第一张
+      if (firstInputImage.files && firstInputImage.files.length > 0) {
+        return firstInputImage.files[0];
+      } else if (multiInputImage.files && multiInputImage.files.length > 0) {
+        return multiInputImage.files[0];
+      } else {
+        return null;
+      }
+    }
 
-    // 监听输入图片变化，决定绘制遮罩按钮可用性
-    inputImage.addEventListener('change', () => {
-      if (inputImage.files && inputImage.files.length > 0) {
+    // 画笔大小调节事件监听
+    const brushSizeInput = document.getElementById('maskBrushSize');
+    const brushSizeVal = document.getElementById('maskBrushSizeVal');
+    if (brushSizeInput && brushSizeVal) {
+      brushSizeInput.addEventListener('input', function () {
+        brushSize = parseInt(brushSizeInput.value, 10);
+        brushSizeVal.textContent = brushSize;
+      });
+    }
+
+    function exitDrawMaskMode() {
+      isDrawingMask = false;
+      drawMaskBtn.textContent = '绘制遮罩';
+      maskUploadGroup.classList.remove("hidden");
+      maskCanvasContainer.classList.add("hidden");
+      maskToolbox.classList.add("hidden");
+      downloadMaskBtn.classList.add("hidden");
+      if (maskCanvasContainer.firstChild) maskCanvasContainer.removeChild(maskCanvasContainer.firstChild);
+      maskCanvas = null;
+      maskCtx = null;
+      maskImageData = null;
+      maskBaseImage = null;
+    }
+    // 监听输入图片变化，决定绘制遮罩按钮可用性，并在图片被移除时退出绘制模式
+    function updateDrawMaskBtnState() {
+      if (getMaskTargetFile()) {
         drawMaskBtn.classList.remove('disabled');
       } else {
         drawMaskBtn.classList.add('disabled');
-      }
-      if (!inputImage.files || inputImage.files.length === 0) {
         if (isDrawingMask) {
           exitDrawMaskMode();
         }
       }
-    });
+    }
+    firstInputImage.addEventListener('change', updateDrawMaskBtnState);
+    multiInputImage.addEventListener('change', updateDrawMaskBtnState);
 
     // 绘制遮罩按钮逻辑
     drawMaskBtn.addEventListener('click', async () => {
@@ -692,20 +846,6 @@
       }
     });
 
-    function exitDrawMaskMode() {
-      isDrawingMask = false;
-      drawMaskBtn.textContent = '绘制遮罩';
-      maskUploadGroup.classList.remove("hidden");
-      maskCanvasContainer.classList.add("hidden");
-      maskToolbox.classList.add("hidden");
-      downloadMaskBtn.classList.add("hidden");
-      if (maskCanvasContainer.firstChild) maskCanvasContainer.removeChild(maskCanvasContainer.firstChild);
-      maskCanvas = null;
-      maskCtx = null;
-      maskImageData = null;
-      maskBaseImage = null;
-    }
-
     // 初始化遮罩画布
     async function setupMaskCanvas() {
       // 清空容器
@@ -715,13 +855,13 @@
       maskCanvas.style.display = 'block';
       maskCanvas.style.position = 'relative';
       maskCanvasContainer.appendChild(maskCanvas);
-      // 明确使用第一张上传的图片作为遮罩底图
-      if (!inputImage.files || inputImage.files.length === 0) {
+      // 明确使用firstInputImage或multiInputImage的第一张
+      const file = getMaskTargetFile();
+      if (!file) {
         alert("请先上传图片！");
         exitDrawMaskMode();
         return;
       }
-      const file = inputImage.files[0]; // 始终使用第一张图片
       const img = new window.Image();
       img.src = await fileToDataURL(file);
       await new Promise(res => { img.onload = res; });
