@@ -611,9 +611,9 @@
       {
         const imgProbe = new window.Image();
         const probeUrl = await fileToDataURL(files[0]);
-        await new Promise((res, rej) => {
+        await new Promise(res => {
           imgProbe.onload = res;
-          imgProbe.onerror = rej;
+          imgProbe.onerror = res;
           imgProbe.src = probeUrl;
         });
         targetWidth = imgProbe.width;
@@ -641,16 +641,25 @@
         // 直接拷贝maskImageData，不做alpha反转
         tempCtx.putImageData(window.maskImageData, 0, 0);
         // 使用高质量缩放将临时画布拉伸到原图尺寸
-        exportCtx.imageSmoothingEnabled = true;
-        exportCtx.imageSmoothingQuality = 'high';
+        exportCtx.imageSmoothingEnabled = false;
+        exportCtx.imageSmoothingQuality = 'low';
         exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
-        // 拉伸后再二值化alpha通道，确保只有0/255
+        // 拉伸后再严格二值化所有通道，确保只有0/255
         const exportImgData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
         for (let i = 0; i < exportImgData.data.length; i += 4) {
-          exportImgData.data[i] = 0;
-          exportImgData.data[i + 1] = 0;
-          exportImgData.data[i + 2] = 0;
-          exportImgData.data[i + 3] = exportImgData.data[i + 3] > 127 ? 255 : 0;
+          if (exportImgData.data[i + 3] > 127) {
+            // 保留区域：白色不透明
+            exportImgData.data[i] = 255;
+            exportImgData.data[i + 1] = 255;
+            exportImgData.data[i + 2] = 255;
+            exportImgData.data[i + 3] = 255;
+          } else {
+            // 可编辑区域：黑色透明
+            exportImgData.data[i] = 0;
+            exportImgData.data[i + 1] = 0;
+            exportImgData.data[i + 2] = 0;
+            exportImgData.data[i + 3] = 0;
+          }
         }
         exportCtx.putImageData(exportImgData, 0, 0);
         // toBlob为异步
@@ -969,13 +978,22 @@
       tempCtx.putImageData(maskImageData, 0, 0);
       // 将临时画布拉伸到原图尺寸
       exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
-      // 拉伸后再二值化alpha通道，确保只有0/255
+      // 拉伸后再严格二值化所有通道，确保只有0/255
       const exportImgData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
       for (let i = 0; i < exportImgData.data.length; i += 4) {
-        exportImgData.data[i] = 0;
-        exportImgData.data[i + 1] = 0;
-        exportImgData.data[i + 2] = 0;
-        exportImgData.data[i + 3] = exportImgData.data[i + 3] > 127 ? 255 : 0;
+        if (exportImgData.data[i + 3] > 127) {
+          // 保留区域：白色不透明
+          exportImgData.data[i] = 255;
+          exportImgData.data[i + 1] = 255;
+          exportImgData.data[i + 2] = 255;
+          exportImgData.data[i + 3] = 255;
+        } else {
+          // 可编辑区域：黑色透明
+          exportImgData.data[i] = 0;
+          exportImgData.data[i + 1] = 0;
+          exportImgData.data[i + 2] = 0;
+          exportImgData.data[i + 3] = 0;
+        }
       }
       exportCtx.putImageData(exportImgData, 0, 0);
       exportCanvas.toBlob(blob => {
