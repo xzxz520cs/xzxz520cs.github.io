@@ -628,21 +628,19 @@
 
       // 遮罩处理：优先用绘制的遮罩
       if (isDrawingMask && window.maskImageData && window.maskCanvas) {
-        // 导出遮罩为PNG Blob（已保证尺寸一致）
+        // 复用“下载遮罩”按钮的导出逻辑，确保上传和下载一致
         const exportCanvas = document.createElement('canvas');
         exportCanvas.width = maskBaseImage.width;
         exportCanvas.height = maskBaseImage.height;
         const exportCtx = exportCanvas.getContext('2d');
-        // 创建与绘制尺寸相同的临时画布
+        // 先将遮罩绘制到临时画布
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = window.maskImageData.width;
         tempCanvas.height = window.maskImageData.height;
         const tempCtx = tempCanvas.getContext('2d');
         // 直接拷贝maskImageData，不做alpha反转
         tempCtx.putImageData(window.maskImageData, 0, 0);
-        // 使用高质量缩放将临时画布拉伸到原图尺寸
-        exportCtx.imageSmoothingEnabled = true;
-        exportCtx.imageSmoothingQuality = 'high';
+        // 将临时画布拉伸到原图尺寸
         exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
         // 拉伸后再严格二值化所有通道，确保只有0/255
         const exportImgData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
