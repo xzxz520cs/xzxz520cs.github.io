@@ -20,4 +20,8 @@
         <loc>https://ttfdg.cn/tools/text-to-speech/</loc>
         <priority>0.3</priority>
     </url>
+    <url>
+        <loc>https://ttfdg.cn/tools/image-generation/</loc>
+        <priority>0.3</priority>
+    </url>
 </urlset>
