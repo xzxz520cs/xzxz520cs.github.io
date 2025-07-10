@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>gpt-image-1 API 图像生成调用工具 - 天天发蛋糕的工具箱</title>
-  <meta name="description" content="gpt-image-1 API 图像生成调用工具（需自备 API KEY）">
+  <title>gpt-image-1图像生成API调用工具 - 天天发蛋糕的工具箱</title>
+  <meta name="description" content="gpt-image-1图像生成API调用工具（需自备 API KEY）">
   <meta name="keywords" content="gpt-image-1, 图像生成, API, 工具">
   <link rel="stylesheet" href="../../assets/css/styles.css">
   <!-- Google tag (gtag.js) -->
@@ -34,9 +34,11 @@
           <li class="nav-item dropdown">
             <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
             <ul class="dropdown-menu">
-              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a></li>
+              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a>
+              </li>
               <li><a href="/tools/card-translate/" class="dropdown-item">游戏王卡牌日中对照文本生成器</a></li>
               <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+              <li><a href="/tools/image-generation/" class="dropdown-item">gpt-image-1图像生成API调用工具</a></li>
               <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                   class="dropdown-item">恢复关闭的标签页</a></li>
             </ul>
@@ -54,9 +56,11 @@
           <li class="drawer-item">
             <a href="#" class="drawer-link">工具</a>
             <ul class="drawer-submenu">
-              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a></li>
+              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a>
+              </li>
               <li><a href="/tools/card-translate/" class="drawer-subitem">游戏王卡牌日中对照文本生成器</a></li>
               <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+              <li><a href="/tools/image-generation/" class="drawer-subitem">gpt-image-1图像生成API调用工具</a></li>
               <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                   class="drawer-subitem">恢复关闭的标签页</a></li>
             </ul>
@@ -69,7 +73,7 @@
 
   <!-- 主内容区域 -->
   <main class="container">
-    <h1 class="mt-0 mb-3">gpt-image-1 API 图像生成调用工具</h1>
+    <h1 class="mt-0 mb-3">gpt-image-1图像生成API调用工具</h1>
     <div class="card card--elevated">
       <div class="form-group mt-2">
         <label for="apiKey">API Key</label>
@@ -111,28 +115,28 @@
         <button id="downloadMaskBtn" class="btn btn--secondary hidden" type="button">下载遮罩</button>
         <p class="text-muted mt-3">提示：遮罩区域(红色/透明区域)表示需要AI修改的部分，非遮罩区域（不透明）将被保留不被修改。绘制遮罩请在绘制后下载上传以应用</p>
         <div id="maskToolbox" class="hidden mt-3 flex">
-            <div class="tool-buttons flex gap-1">
-              <button id="brushModeBtn" class="btn btn--toggle active" type="button" title="画笔">
-                🖌️
-              </button>
-              <button id="eraserModeBtn" class="btn btn--toggle" type="button" title="橡皮擦">
-                🧽
-              </button>
-              <button id="circleBrushBtn" class="btn btn--toggle active" type="button" title="圆形画笔">
-                ⚪
-              </button>
-              <button id="squareBrushBtn" class="btn btn--toggle" type="button" title="方形画笔">
-                ⬜
-              </button>
-            </div>
-            <div class="brush-size-control">
-              <label>画笔大小:
-                <input type="range" id="maskBrushSize" min="5" max="100" value="30">
-                <span id="maskBrushSizeVal">30</span>px
-              </label>
-            </div>
+          <div class="tool-buttons flex gap-1">
+            <button id="brushModeBtn" class="btn btn--toggle active" type="button" title="画笔">
+              🖌️
+            </button>
+            <button id="eraserModeBtn" class="btn btn--toggle" type="button" title="橡皮擦">
+              🧽
+            </button>
+            <button id="circleBrushBtn" class="btn btn--toggle active" type="button" title="圆形画笔">
+              ⚪
+            </button>
+            <button id="squareBrushBtn" class="btn btn--toggle" type="button" title="方形画笔">
+              ⬜
+            </button>
           </div>
-          <div id="maskCanvasContainer" class="hidden relative-position mt-3 flex">
+          <div class="brush-size-control">
+            <label>画笔大小:
+              <input type="range" id="maskBrushSize" min="5" max="100" value="30">
+              <span id="maskBrushSizeVal">30</span>px
+            </label>
+          </div>
+        </div>
+        <div id="maskCanvasContainer" class="hidden relative-position mt-3 flex">
           <!-- 画布和预览光标canvas都放这里 -->
         </div>
       </div>
@@ -338,20 +342,20 @@
       return new Promise((resolve, reject) => {
         const img = new Image();
         const reader = new FileReader();
-        
+
         reader.onload = (e) => {
           img.onload = () => {
             const canvas = document.createElement('canvas');
             // 如果指定了目标尺寸则使用，否则使用原图尺寸
             canvas.width = targetWidth > 0 ? targetWidth : img.width;
             canvas.height = targetHeight > 0 ? targetHeight : img.height;
-            
+
             const ctx = canvas.getContext('2d');
             // 高质量缩放
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
+
             canvas.toBlob((blob) => {
               if (blob) {
                 resolve(blob);
@@ -839,7 +843,7 @@
       img.src = await fileToDataURL(file);
       await new Promise(res => { img.onload = res; });
       maskBaseImage = img;
-      
+
       // 计算绘制画布尺寸 (最大高度768，最大宽度1532)
       let drawWidth = img.width, drawHeight = img.height;
       if (img.height > 768 || img.width > 1532) {
@@ -847,7 +851,7 @@
         drawWidth = Math.round(img.width * scale);
         drawHeight = Math.round(img.height * scale);
       }
-      
+
       // 设置画布实际尺寸为绘制尺寸
       maskCanvas.width = drawWidth;
       maskCanvas.height = drawHeight;
