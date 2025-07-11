@@ -1,0 +1,312 @@
+/* =====================================================
+    游戏王概率计算器专用样式定义
+    本文件包含计算器各组件的布局及设计标准。
+   ===================================================== */
+
+/* 卡组管理面板样式 */
+.deck-management {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--space-md);
+    align-items: end;
+}
+
+/* 卡组操作按钮布局 */
+.deck-actions {
+    display: flex;
+    gap: var(--space-md);
+}
+
+/* 统一控件尺寸（下拉框、文本框、按钮） */
+.deck-management select,
+.deck-management input[type="text"],
+.deck-management .btn {
+    height: calc(var(--space-md) * 2 + 1rem);
+    width: 100%;
+}
+
+/* 主页面内容区域布局 */
+.main-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-lg);
+}
+
+.form-control {
+    font-size: 0.7em;
+}
+
+/* 卡牌输入网格布局样式 */
+.card-input-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4em, 1fr));
+    gap: var(--space-xxs);
+}
+
+/* 右侧信息显示区整体布局 */
+.right-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.Pie-composition {
+    height: 100%;
+}
+
+/* 饼图展示容器样式 */
+.chart-section {
+    height: calc(100% - 55px);
+}
+
+/* 饼图 canvas 自适应样式 */
+#deckPieChart {
+    width: auto;
+    height: 0px;
+    max-width: 100%;
+    max-height: 500px;
+}
+
+.draw-inputs {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.draw-inputs .form-group {
+    width: 100%;
+}
+
+/* 条件构建器基础组件样式 */
+.condition-builder {
+    border: 1px solid var(--color-border);
+    padding: var(--space-xxs);
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.condition-builder.condition-single {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+/* 构建器组标题样式 */
+.builder-group-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xs);
+}
+
+/* 构建器子项整体布局 */
+.builder-group-children {
+    margin-left: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+/* 构建器操作按钮组样式 */
+.builder-buttons {
+    display: flex;
+    gap: var(--space-xs);
+    margin-top: var(--space-xs);
+}
+
+/* 构建器卡牌输入行布局 */
+.builder-card-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    justify-content: flex-end;
+    margin: var(--space-xxs);
+}
+
+#builderConditionInput .btn {
+    padding: 2px 10px;
+    min-width: auto;
+}
+
+#builderConditionInput input[type="text"],
+#builderConditionInput input[type="number"],
+#builderConditionInput select {
+    padding: 2px 6px;
+    width: 80px;
+    height: 32px;
+}
+
+/* 保持自定义输入框与下拉选择框一致宽度 */
+#builderConditionInput .builder-card-input {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+}
+
+/* 按钮尺寸统一调整（“选择”和“自定义”按钮） */
+#builderConditionInput .btn {
+    height: 32px;
+    padding: 0 12px;
+    min-width: 50px;
+    width: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#builderConditionInput input[type="text"]:focus,
+#builderConditionInput select:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+#builderConditionInput {
+    margin-bottom: var(--space-xs);
+}
+
+.condition-mode {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.builder-card-input {
+    width: 80px;
+}
+
+/* 计算操作按钮区域布局设置 */
+.calculation-actions {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.calculation-actions button {
+    width: 100%;
+}
+
+/* 计算结果展示网格布局 */
+.result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+}
+
+#calculationProgress {
+    width: 100%;
+}
+
+.source-info {
+    text-align: right;
+}
+
+/* 响应式设计：移动设备样式适配 */
+
+@media (max-width: 1024px) {
+    .draw-inputs {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .deck-management {
+        grid-template-columns: 1fr;
+    }
+
+    .deck-actions {
+        grid-column: 1;
+        justify-content: space-between;
+    }
+
+    .chart-section {
+        height: 80%;
+    }    
+
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    .result-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: var(--space-sm);
+    }
+
+    .draw-inputs {
+        flex-wrap: nowrap;
+    }
+
+    .condition-builder,
+    #builderConditionInput {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .builder-card-row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+#builderConditionInput .btn.btn--auto-width {
+    width: auto !important;
+    min-width: auto !important;
+}
+
+/* 新增：左右分栏布局样式 */
+.condition-results-container {
+    display: flex;
+    gap: var(--space-lg);
+}
+
+.condition-column {
+    flex: 1.5 1 100px;
+    min-width: 0;
+}
+
+.calculation-column {
+    flex: 1 1 100px;
+    min-width: 0;
+}
+
+@media (max-width: 1024px) {
+    .condition-results-container {
+        flex-direction: column;
+    }
+}
+
+/* 新增：输入说明响应式显示 */
+.operator-help-mobile {
+    display: none;
+}
+
+.operator-help-desktop {
+    display: block;
+}
+
+@media (max-width: 1024px) {
+    .operator-help-mobile {
+        display: block;
+    }
+
+    .operator-help-desktop {
+        display: none;
+    }
+}
+
+.condition-results-container .condition-column {
+    display: flex;
+    flex-direction: column;
+}
+
+#manualConditionInput {
+    height: 100%;
+}
+
+#manualConditionInput textarea {
+    height: 100%;
+}
