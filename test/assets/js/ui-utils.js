@@ -32,7 +32,12 @@
             '#FF7F50', '#87CEEB', '#FFD700', '#7B68EE', '#FF69B4',
             '#00CED1', '#FF4500', '#8A2BE2', '#20B2AA', '#FF6347',
             '#7FFF00', '#DC143C', '#00BFFF', '#FF8C00', '#9932CC',
-            '#FFA07A', '#00FA9A', '#8B008B', '#FF1493', '#1E90FF'
+            '#FFA07A', '#00FA9A', '#8B008B', '#FF1493', '#1E90FF',
+            '#B22222', '#228B22', '#FFB6C1', '#00FF7F', '#4682B4',
+            '#FFDAB9', '#8FBC8F', '#483D8B', '#E9967A', '#00BFFF',
+            '#A0522D', '#7CFC00', '#BA55D3', '#CD5C5C', '#40E0D0',
+            '#F08080', '#6A5ACD', '#BDB76B', '#00FF00', '#8B4513',
+            '#E6E6FA', '#A9A9A9'
         ];
         return colors[index % colors.length];
     }
