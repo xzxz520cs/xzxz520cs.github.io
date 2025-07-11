@@ -958,6 +958,10 @@ tr:nth-child(even) td {
 }
 
 /* 间距工具类 */
+.gap-0 {
+  gap: 0;
+}
+
 .gap-1 {
   gap: var(--space-xs);
 }

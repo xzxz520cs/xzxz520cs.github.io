@@ -43,6 +43,10 @@
     gap: var(--space-xxs);
 }
 
+.card-input-grid label {
+    text-align: center;
+}
+
 /* 右侧信息显示区整体布局 */
 .right-section {
     display: flex;
@@ -219,7 +223,7 @@
 
     .chart-section {
         height: 80%;
-    }    
+    }
 
     .main-content {
         grid-template-columns: 1fr;

@@ -110,7 +110,7 @@
                                     if (i < 26) label = String.fromCharCode(65 + i) + '类卡';
                                     else label = 'A' + String.fromCharCode(65 + i - 26) + '类卡';
                                     document.write(`
-                        <div class="form-group">
+                        <div class="form-group${i >= 26 ? ' hidden' : ''}">
                             <label>${label}</label>
                             <input type="number" id="card${i}" placeholder="数量" min="0" class="form-control card-count" onchange="updateTotalDeck()">
                             <input type="text" id="cardName${i}" class="form-control mt-1" placeholder="卡名">
@@ -119,6 +119,17 @@
                                 }
                             })();
                         </script>
+                        <!-- 显示更多/显示更少按钮 -->
+                        <div class="form-group flex flex--column gap-0">
+                            <label>显示更少</label>
+                            <button id="toggleMoreCardsBtn" type="button"
+                                class="btn btn--outline full-width full-height">➖</button>
+                        </div>
+                        <div class="form-group flex flex--column gap-0">
+                            <label>显示更多</label>
+                            <button id="toggleMoreCardsBtn" type="button"
+                                class="btn btn--outline full-width full-height">➕</button>
+                        </div>
                     </div>
                 </div>
 
