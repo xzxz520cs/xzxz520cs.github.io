@@ -143,6 +143,55 @@
         }, true);
     }
 
+    /**
+     * 初始化卡片显示控制功能（显示更多/显示更少按钮）
+     */
+    function initCardVisibilityControls() {
+            const showMoreBtn = document.getElementById('showMoreCardsBtn');
+            const showLessBtn = document.getElementById('showLessCardsBtn');
+            showLessBtn.disabled = true;
+
+            // 显示更多按钮点击事件
+            showMoreBtn.addEventListener('click', function() {
+                const hiddenCards = document.querySelectorAll('.form-group.hidden');
+                const toShow = Math.min(6, hiddenCards.length);
+                
+                for (let i = 0; i < toShow; i++) {
+                    hiddenCards[i].classList.remove('hidden');
+                }
+
+                // 更新按钮状态
+                showLessBtn.disabled = false;
+                if (hiddenCards.length <= 6) {
+                    showMoreBtn.disabled = true;
+                }
+            });
+
+            // 显示更少按钮点击事件
+            showLessBtn.addEventListener('click', function() {
+                const allVisibleCards = Array.from(document.querySelectorAll('.form-group:not(.hidden)'));
+                const aaAzCards = allVisibleCards.filter(el => {
+                    const input = el.querySelector('input[type="number"]');
+                    if (!input || !input.id) return false;
+                    const num = parseInt(input.id.replace('card',''));
+                    return num >= 26 && num <= 51;
+                });
+
+                if (aaAzCards.length === 0) {
+                    showLessBtn.disabled = true;
+                    return;
+                }
+
+                const toHide = Math.min(6, aaAzCards.length);
+                for (let i = aaAzCards.length - 1; i >= Math.max(0, aaAzCards.length - toHide); i--) {
+                    aaAzCards[i].classList.add('hidden');
+                }
+
+                showMoreBtn.disabled = false;
+                showLessBtn.disabled = (aaAzCards.length - toHide) <= 0;
+            });
+        }
+
     // 对外暴露的工具方法集合
     global.UIUtils = {
         escapeRegExp,
@@ -152,6 +201,7 @@
         getElapsedSeconds,
         updateTotalDeck,
         updatePieChart,
-        setupCardNameInputListener
+        setupCardNameInputListener,
+        initCardVisibilityControls
     };
 })(window);
