@@ -1,4 +1,4 @@
-(function(global) {
+(function (global) {
     /**
      * 对字符串进行正则转义，防止特殊字符影响正则表达式
      */
@@ -66,7 +66,7 @@
         const data = [];
         const backgroundColors = [];
 
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 52; i++) {
             const count = parseInt(document.getElementById(`card${i}`).value) || 0;
             const name = document.getElementById(`cardName${i}`).value.trim() || getCardLabel(i);
             if (count > 0) {

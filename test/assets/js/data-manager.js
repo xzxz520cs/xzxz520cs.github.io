@@ -1,4 +1,4 @@
-(function(global) {
+(function (global) {
     // localStorage最大存储空间（约5MB，防止超限）
     const MAX_STORAGE_SIZE = 5 * 1024 * 1024;
 
@@ -15,7 +15,7 @@
         }
         let cardNames = [];
         let duplicateNames = new Set();
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 52; i++) {
             const name = document.getElementById(`cardName${i}`).value.trim();
             if (name) {
                 if (cardNames.includes(name)) { duplicateNames.add(name); }
@@ -39,7 +39,7 @@
             conditionInputMode,
             builderConditionData
         };
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 52; i++) {
             deck.cards.push({
                 count: document.getElementById(`card${i}`).value,
                 name: document.getElementById(`cardName${i}`).value
@@ -152,7 +152,7 @@
             totalCombinations: errorMessage ? '计算错误' : (result.total !== undefined ? result.total.toString() : '0'),
             condition,
             calculationMethod: result.calculationMethod || "精确计算",
-            cards: Array.from({ length: 30 }).map((_, i) => {
+            cards: Array.from({ length: 52 }).map((_, i) => {
                 const inputName = document.getElementById(`cardName${i}`).value.trim();
                 return {
                     name: inputName || (window.UIUtils.getCardLabel(i) + '类卡'),
@@ -185,7 +185,7 @@
         }
         const headers = [
             '日期', '概率', '卡组总数', '抽卡数', '满足条件的组合数', '总组合数', '逻辑判断条件', '计算方式',
-            ...Array.from({ length: 30 }).flatMap((_, i) => [
+            ...Array.from({ length: 52 }).flatMap((_, i) => [
                 `${getExportCardLabel(i)}卡名`,
                 `${getExportCardLabel(i)}数量`
             ])
@@ -208,7 +208,7 @@
             csvEscape(record.totalCombinations),
             csvEscape(record.condition),
             csvEscape(record.calculationMethod),
-            ...Array.from({ length: 30 }).flatMap((_, i) => {
+            ...Array.from({ length: 52 }).flatMap((_, i) => {
                 const card = record.cards && record.cards[i] ? record.cards[i] : { name: '', count: '' };
                 return [csvEscape(card.name), csvEscape(card.count)];
             })

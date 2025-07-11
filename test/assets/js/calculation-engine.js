@@ -1,5 +1,5 @@
 // 精确概率与蒙特卡洛模拟计算引擎
-(function(global) {
+(function (global) {
     // 计算相关状态变量
     let calculationWorker = null; // 当前精确计算的Web Worker实例
     let isCalculating = false;    // 是否正在计算
@@ -22,7 +22,7 @@
             // 检查卡名是否有重复
             let cardNames = [];
             let duplicateNames = new Set();
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 52; i++) {
                 const name = document.getElementById(`cardName${i}`).value.trim();
                 if (name) { if (cardNames.includes(name)) { duplicateNames.add(name); } cardNames.push(name); }
             }
@@ -50,7 +50,7 @@
             document.getElementById('totalCombinations').value = '计算中...';
             // 读取卡牌数量
             const cardCounts = [];
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 52; i++) {
                 cardCounts.push(parseInt(document.getElementById(`card${i}`).value) || 0);
             }
             const draws = parseInt(document.getElementById('draws').value);
@@ -65,7 +65,7 @@
             // 卡名映射为变量名
             const cardNameMap = {};
             const sortedNames = [];
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 52; i++) {
                 const name = document.getElementById(`cardName${i}`).value.trim();
                 if (name) { cardNameMap[name] = global.UIUtils.getVarName(i); sortedNames.push(name); }
             }
@@ -99,7 +99,7 @@
                     const lc = varName.toLowerCase();
                     if (lc === 'true' || lc === 'false') return lc;
                     if (lc.length === 1) { let code = lc.charCodeAt(0) - 97; if (code >= 0 && code < 26) return code; }
-                    if (lc.length === 2 && lc[0] === 'a') { let code = lc.charCodeAt(1) - 97; if (code >= 0 && code < 4) return 26 + code; }
+                    if (lc.length === 2 && lc[0] === 'a') { let code = lc.charCodeAt(1) - 97; if (code >= 0 && code < 26) return 26 + code; }
                     throw new Error(\`无效的卡名称: \${varName}\`);
                 }
                 function gcd(a, b) { return b ? gcd(b, a % b) : a; }
@@ -281,7 +281,7 @@
             // 检查卡名重复
             let cardNames = [];
             let duplicateNames = new Set();
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 52; i++) {
                 const name = document.getElementById(`cardName${i}`).value.trim();
                 if (name) { if (cardNames.includes(name)) { duplicateNames.add(name); } cardNames.push(name); }
             }
@@ -290,7 +290,7 @@
             }
             // 读取卡牌数量
             const cardCounts = [];
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 52; i++) {
                 cardCounts.push(parseInt(document.getElementById(`card${i}`).value) || 0);
             }
             const draws = parseInt(document.getElementById('draws').value);
@@ -303,7 +303,7 @@
             // 卡名映射为变量名
             const cardNameMap = {};
             const sortedNames = [];
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 52; i++) {
                 const name = document.getElementById(`cardName${i}`).value.trim();
                 if (name) { cardNameMap[name] = global.UIUtils.getVarName(i); sortedNames.push(name); }
             }
@@ -323,11 +323,11 @@
                     const lc = varName.toLowerCase();
                     if (lc === 'true' || lc === 'false') return lc;
                     if (lc.length === 1) { let code = lc.charCodeAt(0) - 97; if (code >= 0 && code < 26) return code; }
-                    if (lc.length === 2 && lc[0] === 'a') { let code = lc.charCodeAt(1) - 97; if (code >= 0 && code < 4) return 26 + code; }
+                    if (lc.length === 2 && lc[0] === 'a') { let code = lc.charCodeAt(1) - 97; if (code >= 0 && code < 26) return 26 + code; }
                     throw new Error("无效的卡名称: " + varName);
                 }
                 function drawCards(shuffledDeck, draws) {
-                    let counts = Array(30).fill(0);
+                    let counts = Array(52).fill(0);
                     const drawn = shuffledDeck.slice(0, draws);
                     drawn.forEach(idx => { counts[idx]++; });
                     return counts;
