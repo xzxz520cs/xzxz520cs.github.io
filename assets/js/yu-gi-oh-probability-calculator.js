@@ -571,7 +571,7 @@ function finalizeCalculation(result) {
         `计算完成: 100%  计算用时: ${elapsedSeconds}秒`;
 
     saveCalculationRecord(result, document.getElementById('condition').value);
-    
+
     // 新增：若复选框勾选，则将抽卡数加1
     if (document.getElementById('autoIncrementDraws')?.checked) {
         const drawsInput = document.getElementById('draws');
@@ -781,7 +781,7 @@ function monteCarloCalculate() {
                 document.getElementById('progressText').textContent =
                     `蒙特卡洛模拟完成: 100% 用时: ${elapsedSeconds}秒`;
                 saveCalculationRecord(e.data, document.getElementById('condition').value);
-                
+
                 // 新增：若复选框勾选，则将抽卡数加1
                 if (document.getElementById('autoIncrementDraws')?.checked) {
                     const drawsInput = document.getElementById('draws');

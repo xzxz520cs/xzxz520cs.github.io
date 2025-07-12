@@ -8,7 +8,7 @@
     <meta name="description" content="游戏王概率计算器测试版 - 专业的卡组概率分析工具，支持自定义条件判断，精确计算启动率和上手率等概率。帮您优化卡组构筑。">
     <meta name="keywords" content="游戏王, 概率计算, 卡组工具">
     <link rel="stylesheet" href="../../assets/css/styles.css">
-    <link rel="stylesheet" href="../../assets/css/yu-gi-oh-probability-calculator.css">
+    <link rel="stylesheet" href="../assets/css/yu-gi-oh-probability-calculator.css">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYJXFSRHF5"></script>
     <script>
@@ -21,7 +21,7 @@
 </head>
 
 <body>
-    <!-- 新增：模板页头 -->
+    <!-- 模板页头 -->
     <header class="site-header">
         <div class="container">
             <div class="site-title">
@@ -39,6 +39,7 @@
                             </li>
                             <li><a href="/tools/card-translate/" class="dropdown-item">游戏王卡牌日中对照文本生成器</a></li>
                             <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="/tools/image-generation/" class="dropdown-item">gpt-image-1图像生成API调用工具</a></li>
                             <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                                     class="dropdown-item">恢复关闭的标签页</a></li>
                         </ul>
@@ -60,6 +61,8 @@
                             </li>
                             <li><a href="/tools/card-translate/" class="drawer-subitem">游戏王卡牌日中对照文本生成器</a></li>
                             <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="/tools/image-generation/" class="drawer-subitem">gpt-image-1图像生成API调用工具</a>
+                            </li>
                             <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                                     class="drawer-subitem">恢复关闭的标签页</a></li>
                         </ul>
@@ -98,186 +101,34 @@
                 <div class="card-input-section">
                     <h2 class="mt-1 mb-2">卡牌输入</h2>
                     <div id="cardInputs" class="card-input-grid">
-                        <!-- 静态卡牌输入项 -->
-                        <div class="form-group">
-                            <label>A类卡</label>
-                            <input type="number" id="card0" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName0" class="form-control mt-1" placeholder="卡名">
+                        <!-- 静态卡牌输入项，自动生成A-AZ共52项 -->
+                        <script>
+                            (function () {
+                                const labels = [];
+                                for (let i = 0; i < 52; i++) {
+                                    let label = '';
+                                    if (i < 26) label = String.fromCharCode(65 + i) + '类卡';
+                                    else label = 'A' + String.fromCharCode(65 + i - 26) + '类卡';
+                                    document.write(`
+                        <div class="form-group${i >= 26 ? ' hidden' : ''}">
+                            <label>${label}</label>
+                            <input type="number" id="card${i}" placeholder="数量" min="0" class="form-control card-count" onchange="updateTotalDeck()">
+                            <input type="text" id="cardName${i}" class="form-control mt-1" placeholder="卡名">
                         </div>
-                        <div class="form-group">
-                            <label>B类卡</label>
-                            <input type="number" id="card1" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName1" class="form-control mt-1" placeholder="卡名">
+                                `);
+                                }
+                            })();
+                        </script>
+                        <!-- 显示更多/显示更少按钮 -->
+                        <div class="form-group flex flex--column gap-0">
+                            <label>显示更少</label>
+                            <button id="showLessCardsBtn" type="button"
+                                class="btn btn--outline full-width full-height">➖</button>
                         </div>
-                        <div class="form-group">
-                            <label>C类卡</label>
-                            <input type="number" id="card2" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName2" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>D类卡</label>
-                            <input type="number" id="card3" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName3" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>E类卡</label>
-                            <input type="number" id="card4" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName4" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>F类卡</label>
-                            <input type="number" id="card5" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName5" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>G类卡</label>
-                            <input type="number" id="card6" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName6" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>H类卡</label>
-                            <input type="number" id="card7" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName7" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>I类卡</label>
-                            <input type="number" id="card8" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName8" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>J类卡</label>
-                            <input type="number" id="card9" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName9" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>K类卡</label>
-                            <input type="number" id="card10" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName10" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>L类卡</label>
-                            <input type="number" id="card11" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName11" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>M类卡</label>
-                            <input type="number" id="card12" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName12" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>N类卡</label>
-                            <input type="number" id="card13" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName13" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>O类卡</label>
-                            <input type="number" id="card14" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName14" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>P类卡</label>
-                            <input type="number" id="card15" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName15" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>Q类卡</label>
-                            <input type="number" id="card16" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName16" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>R类卡</label>
-                            <input type="number" id="card17" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName17" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>S类卡</label>
-                            <input type="number" id="card18" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName18" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>T类卡</label>
-                            <input type="number" id="card19" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName19" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>U类卡</label>
-                            <input type="number" id="card20" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName20" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>V类卡</label>
-                            <input type="number" id="card21" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName21" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>W类卡</label>
-                            <input type="number" id="card22" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName22" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>X类卡</label>
-                            <input type="number" id="card23" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName23" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>Y类卡</label>
-                            <input type="number" id="card24" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName24" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>Z类卡</label>
-                            <input type="number" id="card25" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName25" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>AA类卡</label>
-                            <input type="number" id="card26" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName26" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>AB类卡</label>
-                            <input type="number" id="card27" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName27" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>AC类卡</label>
-                            <input type="number" id="card28" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName28" class="form-control mt-1" placeholder="卡名">
-                        </div>
-                        <div class="form-group">
-                            <label>AD类卡</label>
-                            <input type="number" id="card29" placeholder="数量" min="0" class="form-control card-count"
-                                onchange="updateTotalDeck()">
-                            <input type="text" id="cardName29" class="form-control mt-1" placeholder="卡名">
+                        <div class="form-group flex flex--column gap-0">
+                            <label>显示更多</label>
+                            <button id="showMoreCardsBtn" type="button"
+                                class="btn btn--outline full-width full-height">➕</button>
                         </div>
                     </div>
                 </div>
@@ -362,7 +213,7 @@ a + b >= 3 && PROB(64)  // A和B类卡合计至少3张，且64%概率满足条�
                         <strong>概率函数功能（测试中）：</strong>使用 <code>PROB(n)</code>
                         表示n%的概率满足条件，n必须是1-99的整数。此功能可以用来模拟一些具有概率性的卡片效果，例如：<br>
                         - <code>PROB(50) && a >= 1</code> 表示：有50%的概率满足条件，并且需要至少1张A类卡<br>
-                        - <code>a + b >= 3 && PROB(64)</code> 表示：A和B类卡合计至少3张，且有64%的概率满足条件<br>
+                        - <code>a + b >= 3 && PROB(64)</code> 表示：A和B类卡合计至少3张，且64%概率满足条件<br>
                         此功能目前处于测试阶段，您的使用反馈对我们很重要。如发现问题，请通过页面底部的邮箱联系我们。<br>
                         <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。<br>
                         <strong>注意：</strong>当卡种类和抽卡数较高时，计算时间会呈指数级上升，此时推荐使用快速估算。
@@ -471,7 +322,8 @@ a + b >= 3 && PROB(64)  // A和B类卡合计至少3张，且64%概率满足条�
         </div>
     </footer>
 
-    <script async src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script async src="../../assets/js/chart.umd.min.js"></script>
+    <!-- <script async src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script> -->
     <script src="../assets/js/ui-utils.js"></script>
     <script src="../assets/js/data-manager.js"></script>
     <script src="../assets/js/condition-builder.js"></script>

@@ -34,9 +34,11 @@
           <li class="nav-item dropdown">
             <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
             <ul class="dropdown-menu">
-              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a></li>
+              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a>
+              </li>
               <li><a href="/tools/card-translate/" class="dropdown-item">游戏王卡牌日中对照文本生成器</a></li>
               <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+              <li><a href="/tools/image-generation/" class="dropdown-item">gpt-image-1图像生成API调用工具</a></li>
               <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                   class="dropdown-item">恢复关闭的标签页</a></li>
             </ul>
@@ -54,9 +56,11 @@
           <li class="drawer-item">
             <a href="#" class="drawer-link">工具</a>
             <ul class="drawer-submenu">
-              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a></li>
+              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a>
+              </li>
               <li><a href="/tools/card-translate/" class="drawer-subitem">游戏王卡牌日中对照文本生成器</a></li>
               <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+              <li><a href="/tools/image-generation/" class="drawer-subitem">gpt-image-1图像生成API调用工具</a></li>
               <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                   class="drawer-subitem">恢复关闭的标签页</a></li>
             </ul>
@@ -132,14 +136,15 @@
 情感：真诚、耐心、乐于助人
 发音：清晰准确，重点词汇略加强调
 停顿：在关键信息前后适当停顿以便理解" class="form-control" rows="4"></textarea>
-        
+
         <!-- 添加详细说明 -->
         <div class="mt-2">
           <details>
             <summary style="cursor: pointer; color: #666; font-size: 14px;">📝 语音指令编写指南</summary>
-            <div style="margin-top: 10px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; font-size: 14px; line-height: 1.6;">
+            <div
+              style="margin-top: 10px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; font-size: 14px; line-height: 1.6;">
               <h4 style="margin-top: 0; color: #333;">语音指令可以控制以下特性：</h4>
-              
+
               <div style="margin-bottom: 15px;">
                 <strong>🎭 语音风格 (Voice Affect)：</strong>
                 <div style="margin-left: 15px; color: #666;">
@@ -195,7 +200,7 @@
               </div>
 
               <h4 style="color: #333; margin-top: 20px;">💡 常用场景模板：</h4>
-              
+
               <div style="margin-bottom: 10px;">
                 <strong>📚 教育讲解：</strong><br>
                 <span style="color: #666; font-style: italic;">"语音风格：清晰专业，语调：耐心友好，语速：中等偏慢，情感：鼓励支持，停顿：在重点概念后适当停顿"</span>
@@ -213,7 +218,8 @@
 
               <div style="margin-bottom: 10px;">
                 <strong>🎭 故事叙述：</strong><br>
-                <span style="color: #666; font-style: italic;">"语音风格：富有表现力，语调：神秘悬疑，语速：根据情节变化，情感：紧张刺激，停顿：在关键情节处制造悬念"</span>
+                <span
+                  style="color: #666; font-style: italic;">"语音风格：富有表现力，语调：神秘悬疑，语速：根据情节变化，情感：紧张刺激，停顿：在关键情节处制造悬念"</span>
               </div>
 
               <div style="margin-bottom: 10px;">
@@ -227,7 +233,7 @@
             </div>
           </details>
         </div>
-        
+
         <small class="text-muted">通过自然语言描述来控制语音的风格、语调、语速、情感、发音和停顿等特性</small>
       </div>
       <div class="form-group mt-2">
@@ -268,7 +274,7 @@
     function toggleControlsByModel(model) {
       const speedControl = document.getElementById("speedControl");
       const instructionsControl = document.getElementById("instructionsControl");
-      
+
       if (model === "gpt-4o-mini-tts") {
         speedControl.classList.add("hidden");
         instructionsControl.classList.remove("hidden");
@@ -293,7 +299,7 @@
       const voiceSelect = document.getElementById("voice");
       const responseFormatSelect = document.getElementById("responseFormat");
       const instructionsInput = document.getElementById("instructions");
-      
+
       if (localStorage.getItem("model")) {
         modelSelect.value = localStorage.getItem("model");
       }
@@ -306,10 +312,10 @@
       if (localStorage.getItem("instructions")) {
         instructionsInput.value = localStorage.getItem("instructions");
       }
-      
+
       // 初始化控件显示状态
       toggleControlsByModel(modelSelect.value);
-      
+
       apiKeyInput.addEventListener("input", () => {
         localStorage.setItem("tts_apiKey", apiKeyInput.value.trim());
       });

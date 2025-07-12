@@ -21,7 +21,7 @@
 </head>
 
 <body>
-    <!-- 新增：模板页头 -->
+    <!-- 模板页头 -->
     <header class="site-header">
         <div class="container">
             <div class="site-title">
@@ -39,6 +39,7 @@
                             </li>
                             <li><a href="/tools/card-translate/" class="dropdown-item">游戏王卡牌日中对照文本生成器</a></li>
                             <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="/tools/image-generation/" class="dropdown-item">gpt-image-1图像生成API调用工具</a></li>
                             <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                                     class="dropdown-item">恢复关闭的标签页</a></li>
                         </ul>
@@ -60,6 +61,8 @@
                             </li>
                             <li><a href="/tools/card-translate/" class="drawer-subitem">游戏王卡牌日中对照文本生成器</a></li>
                             <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+                            <li><a href="/tools/image-generation/" class="drawer-subitem">gpt-image-1图像生成API调用工具</a>
+                            </li>
                             <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                                     class="drawer-subitem">恢复关闭的标签页</a></li>
                         </ul>
@@ -355,7 +358,9 @@ a + b >= 3  // A和B类卡合计至少3张
                         A类卡, B类卡, ...,
                         Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
                         <strong>使用提示：</strong>计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易与逻辑判断条件混淆的名称(如a>1)。建议使用纯中文名。<br>
-                        <strong>概率函数功能（测试中）：</strong>使用 <code>PROB(n)</code> 表示n%的概率满足条件，n必须是1-99的整数。比如 <code>PROB(64)</code> 表示64%概率满足。允许使用多个概率条件。此功能正在测试阶段，欢迎您在<a href="/test/yu-gi-oh-probability-calculator/">测试版本</a>中尝试并提供反馈。<br>
+                        <strong>概率函数功能（测试中）：</strong>使用 <code>PROB(n)</code> 表示n%的概率满足条件，n必须是1-99的整数。比如
+                        <code>PROB(64)</code> 表示64%概率满足。允许使用多个概率条件。此功能正在测试阶段，欢迎您在<a
+                            href="/test/yu-gi-oh-probability-calculator/">测试版本</a>中尝试并提供反馈。<br>
                         <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。<br>
                         <strong>注意：</strong>当卡种类和抽卡数较高时，计算时间会呈指数级上升，此时推荐使用快速估算。
                     </div>
@@ -420,7 +425,9 @@ a + b >= 3  // A和B类卡合计至少3张
                 A类卡, B类卡, ...,
                 Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
                 <strong>使用提示：</strong>计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易与逻辑判断条件混淆的名称(如a>1)。建议使用纯中文名。<br>
-                <strong>概率函数功能（测试中）：</strong>使用 <code>PROB(n)</code> 表示n%的概率满足条件，n必须是1-99的整数。比如 <code>PROB(64)</code> 表示64%概率满足。允许使用多个概率条件。此功能正在测试阶段，欢迎您在<a href="/test/yu-gi-oh-probability-calculator/">测试版本</a>中尝试并提供反馈。<br>
+                <strong>概率函数功能（测试中）：</strong>使用 <code>PROB(n)</code> 表示n%的概率满足条件，n必须是1-99的整数。比如 <code>PROB(64)</code>
+                表示64%概率满足。允许使用多个概率条件。此功能正在测试阶段，欢迎您在<a
+                    href="/test/yu-gi-oh-probability-calculator/">测试版本</a>中尝试并提供反馈。<br>
                 <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。<br>
                 <strong>注意：</strong>当卡种类和抽卡数较高时，计算时间会呈指数级上升，此时推荐使用快速估算。
             </div>
@@ -459,7 +466,8 @@ a + b >= 3  // A和B类卡合计至少3张
         </div>
     </footer>
 
-    <script async src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script async src="../../assets/js/chart.umd.min.js"></script>
+    <!-- <script async src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script> -->
     <script src="../../assets/js/yu-gi-oh-probability-calculator.js"></script>
 </body>
 

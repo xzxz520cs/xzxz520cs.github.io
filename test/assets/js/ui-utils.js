@@ -1,4 +1,4 @@
-(function(global) {
+(function (global) {
     /**
      * 对字符串进行正则转义，防止特殊字符影响正则表达式
      */
@@ -32,7 +32,12 @@
             '#FF7F50', '#87CEEB', '#FFD700', '#7B68EE', '#FF69B4',
             '#00CED1', '#FF4500', '#8A2BE2', '#20B2AA', '#FF6347',
             '#7FFF00', '#DC143C', '#00BFFF', '#FF8C00', '#9932CC',
-            '#FFA07A', '#00FA9A', '#8B008B', '#FF1493', '#1E90FF'
+            '#FFA07A', '#00FA9A', '#8B008B', '#FF1493', '#1E90FF',
+            '#B22222', '#228B22', '#FFB6C1', '#00FF7F', '#4682B4',
+            '#FFDAB9', '#8FBC8F', '#483D8B', '#E9967A', '#00BFFF',
+            '#A0522D', '#7CFC00', '#BA55D3', '#CD5C5C', '#40E0D0',
+            '#F08080', '#6A5ACD', '#BDB76B', '#00FF00', '#8B4513',
+            '#E6E6FA', '#A9A9A9'
         ];
         return colors[index % colors.length];
     }
@@ -66,7 +71,7 @@
         const data = [];
         const backgroundColors = [];
 
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 52; i++) {
             const count = parseInt(document.getElementById(`card${i}`).value) || 0;
             const name = document.getElementById(`cardName${i}`).value.trim() || getCardLabel(i);
             if (count > 0) {
@@ -138,6 +143,66 @@
         }, true);
     }
 
+    /**
+     * 显示一个隐藏的卡牌
+     * @returns {boolean} 是否还有更多卡牌可显示
+     */
+    function showOneCard() {
+        const hiddenCards = document.querySelectorAll('.form-group.hidden');
+        if (hiddenCards.length === 0) return false;
+        
+        hiddenCards[0].classList.remove('hidden');
+        return hiddenCards.length > 1;
+    }
+
+    /**
+     * 隐藏一个AA-AZ卡牌
+     * @returns {boolean} 是否还有更多卡牌可隐藏
+     */
+    function hideOneCard() {
+        const allVisibleCards = Array.from(document.querySelectorAll('.form-group:not(.hidden)'));
+        const aaAzCards = allVisibleCards.filter(el => {
+            const input = el.querySelector('input[type="number"]');
+            if (!input || !input.id) return false;
+            const num = parseInt(input.id.replace('card',''));
+            return num >= 26 && num <= 51;
+        });
+
+        if (aaAzCards.length === 0) return false;
+        
+        aaAzCards[aaAzCards.length - 1].classList.add('hidden');
+        return aaAzCards.length > 1;
+    }
+
+    /**
+     * 初始化卡片显示控制功能（显示更多/显示更少按钮）
+     */
+    function initCardVisibilityControls() {
+        const showMoreBtn = document.getElementById('showMoreCardsBtn');
+        const showLessBtn = document.getElementById('showLessCardsBtn');
+        showLessBtn.disabled = true;
+
+        // 显示更多按钮点击事件 - 执行6次"显示一个"
+        showMoreBtn.addEventListener('click', function() {
+            let hasMore = true;
+            for (let i = 0; i < 6 && hasMore; i++) {
+                hasMore = showOneCard();
+            }
+            showLessBtn.disabled = false;
+            showMoreBtn.disabled = !hasMore;
+        });
+
+        // 显示更少按钮点击事件 - 执行6次"隐藏一个"
+        showLessBtn.addEventListener('click', function() {
+            let hasMore = true;
+            for (let i = 0; i < 6 && hasMore; i++) {
+                hasMore = hideOneCard();
+            }
+            showMoreBtn.disabled = false;
+            showLessBtn.disabled = !hasMore;
+        });
+    }
+
     // 对外暴露的工具方法集合
     global.UIUtils = {
         escapeRegExp,
@@ -147,6 +212,7 @@
         getElapsedSeconds,
         updateTotalDeck,
         updatePieChart,
-        setupCardNameInputListener
+        setupCardNameInputListener,
+        initCardVisibilityControls
     };
 })(window);

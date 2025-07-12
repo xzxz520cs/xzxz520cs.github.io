@@ -335,7 +335,7 @@ img {
   list-style: none;
   padding: var(--space-sm) 0;
   z-index: 1000;
-  min-width: 260px;
+  min-width: 300px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -958,6 +958,10 @@ tr:nth-child(even) td {
 }
 
 /* 间距工具类 */
+.gap-0 {
+  gap: 0;
+}
+
 .gap-1 {
   gap: var(--space-xs);
 }

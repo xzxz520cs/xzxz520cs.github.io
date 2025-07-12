@@ -74,6 +74,9 @@ window.onload = function () {
     if (window.ConditionBuilder && window.ConditionBuilder.init) {
         window.ConditionBuilder.init();
     }
+
+    // 初始化卡片显示控制功能
+    window.UIUtils.initCardVisibilityControls();
 };
 
 // 条件构建器相关接口代理，便于外部调用

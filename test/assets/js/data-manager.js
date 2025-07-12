@@ -1,4 +1,4 @@
-(function(global) {
+(function (global) {
     // localStorage最大存储空间（约5MB，防止超限）
     const MAX_STORAGE_SIZE = 5 * 1024 * 1024;
 
@@ -15,7 +15,7 @@
         }
         let cardNames = [];
         let duplicateNames = new Set();
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 52; i++) {
             const name = document.getElementById(`cardName${i}`).value.trim();
             if (name) {
                 if (cardNames.includes(name)) { duplicateNames.add(name); }
@@ -39,7 +39,7 @@
             conditionInputMode,
             builderConditionData
         };
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 52; i++) {
             deck.cards.push({
                 count: document.getElementById(`card${i}`).value,
                 name: document.getElementById(`cardName${i}`).value
@@ -71,11 +71,31 @@
         const deck = decks.find(d => d.id === deckId);
         if (!deck) return;
 
+        // 加载卡牌数据
         deck.cards.forEach((card, i) => {
             document.getElementById(`card${i}`).value = card.count;
             document.getElementById(`cardName${i}`).value = card.name;
         });
         document.getElementById('condition').value = deck.condition || '';
+
+        // 检查AZ-AA卡类是否有被隐藏的
+        let lastHiddenIndex = -1;
+        // 倒序检查AZ-AA卡类(索引26-51)
+        for (let i = 51; i >= 26; i--) {
+            const cardGroup = document.querySelector(`#cardInputs .form-group[data-index="${i}"]`);
+            if (cardGroup && cardGroup.classList.contains('hidden')) {
+                lastHiddenIndex = i;
+                break;
+            }
+        }
+
+        // 如果有被隐藏的卡类，从AA(26)开始正序显示直到最后一个被隐藏的卡类
+        if (lastHiddenIndex !== -1) {
+            for (let i = 26; i <= lastHiddenIndex; i++) {
+                const cardGroup = document.querySelector(`#cardInputs .form-group[data-index="${i}"]`);
+                if (cardGroup) cardGroup.classList.remove('hidden');
+            }
+        }
 
         if (deck.conditionInputMode === 'builder') {
             document.querySelector('input[name="conditionInputMode"][value="builder"]').checked = true;
@@ -152,7 +172,7 @@
             totalCombinations: errorMessage ? '计算错误' : (result.total !== undefined ? result.total.toString() : '0'),
             condition,
             calculationMethod: result.calculationMethod || "精确计算",
-            cards: Array.from({ length: 30 }).map((_, i) => {
+            cards: Array.from({ length: 52 }).map((_, i) => {
                 const inputName = document.getElementById(`cardName${i}`).value.trim();
                 return {
                     name: inputName || (window.UIUtils.getCardLabel(i) + '类卡'),
@@ -185,7 +205,7 @@
         }
         const headers = [
             '日期', '概率', '卡组总数', '抽卡数', '满足条件的组合数', '总组合数', '逻辑判断条件', '计算方式',
-            ...Array.from({ length: 30 }).flatMap((_, i) => [
+            ...Array.from({ length: 52 }).flatMap((_, i) => [
                 `${getExportCardLabel(i)}卡名`,
                 `${getExportCardLabel(i)}数量`
             ])
@@ -208,7 +228,7 @@
             csvEscape(record.totalCombinations),
             csvEscape(record.condition),
             csvEscape(record.calculationMethod),
-            ...Array.from({ length: 30 }).flatMap((_, i) => {
+            ...Array.from({ length: 52 }).flatMap((_, i) => {
                 const card = record.cards && record.cards[i] ? record.cards[i] : { name: '', count: '' };
                 return [csvEscape(card.name), csvEscape(card.count)];
             })

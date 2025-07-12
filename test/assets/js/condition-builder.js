@@ -1,5 +1,5 @@
 // 条件构建器模块
-(function(global) {
+(function (global) {
     // ====== 数据结构与工具 ======
     // 构建器的根条件对象
     let builderRootCondition = null;
@@ -21,19 +21,24 @@
     // 获取所有卡名（变量名和自定义名）
     function getAllCardNames() {
         const varNames = [];
-        for (let i = 0; i < 30; i++) {
-            if (i < 26) {
-                varNames.push(String.fromCharCode(97 + i));
-            } else {
-                varNames.push('a' + String.fromCharCode(97 + i - 26));
+        for (let i = 0; i < 52; i++) {
+            const count = document.getElementById(`card${i}`)?.value;
+            const name = document.getElementById(`cardName${i}`)?.value.trim();
+            if ((count && parseInt(count) > 0) || (name && name !== '')) {
+                if (i < 26) {
+                    varNames.push(String.fromCharCode(97 + i));
+                } else {
+                    varNames.push('a' + String.fromCharCode(97 + i - 26));
+                }
             }
         }
         const customNames = [];
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 52; i++) {
             const name = document.getElementById(`cardName${i}`)?.value.trim();
             if (name && !varNames.includes(name) && !customNames.includes(name)) customNames.push(name);
         }
-        return [...varNames, ...customNames];
+        const allNames = [...varNames, ...customNames];
+        return allNames.length > 0 ? allNames : ['请先输入数量或卡名'];
     }
 
     // 创建条件节点对象（单条件或条件组）
@@ -476,11 +481,12 @@
         if (window.UIUtils && window.UIUtils.setupCardNameInputListener) {
             window.UIUtils.setupCardNameInputListener();
         }
-        // 监听卡名输入变化，实时刷新条件构建器下拉
+        // 监听卡名和数量输入变化，实时刷新条件构建器下拉
         const cardInputs = document.getElementById('cardInputs');
         if (cardInputs) {
             cardInputs.addEventListener('input', function (e) {
-                if (e.target && e.target.id && e.target.id.startsWith('cardName')) {
+                if (e.target && e.target.id &&
+                    (e.target.id.startsWith('cardName') || e.target.id.startsWith('card'))) {
                     builderRender();
                 }
             });
@@ -499,13 +505,13 @@
     // 提供初始化、获取/设置条件等接口
     global.ConditionBuilder = {
         init,
-        getConditionInputMode: function() {
+        getConditionInputMode: function () {
             return document.querySelector('input[name="conditionInputMode"]:checked')?.value || 'manual';
         },
-        getBuilderConditionData: function() {
+        getBuilderConditionData: function () {
             return builderRootCondition ? JSON.stringify(builderRootCondition) : '';
         },
-        setBuilderConditionData: function(json) {
+        setBuilderConditionData: function (json) {
             try {
                 builderRootCondition = JSON.parse(json);
                 builderRender();
