@@ -71,11 +71,31 @@
         const deck = decks.find(d => d.id === deckId);
         if (!deck) return;
 
+        // 加载卡牌数据
         deck.cards.forEach((card, i) => {
             document.getElementById(`card${i}`).value = card.count;
             document.getElementById(`cardName${i}`).value = card.name;
         });
         document.getElementById('condition').value = deck.condition || '';
+
+        // 检查AZ-AA卡类是否有被隐藏的
+        let lastHiddenIndex = -1;
+        // 倒序检查AZ-AA卡类(索引26-51)
+        for (let i = 51; i >= 26; i--) {
+            const cardGroup = document.querySelector(`#cardInputs .form-group[data-index="${i}"]`);
+            if (cardGroup && cardGroup.classList.contains('hidden')) {
+                lastHiddenIndex = i;
+                break;
+            }
+        }
+
+        // 如果有被隐藏的卡类，从AA(26)开始正序显示直到最后一个被隐藏的卡类
+        if (lastHiddenIndex !== -1) {
+            for (let i = 26; i <= lastHiddenIndex; i++) {
+                const cardGroup = document.querySelector(`#cardInputs .form-group[data-index="${i}"]`);
+                if (cardGroup) cardGroup.classList.remove('hidden');
+            }
+        }
 
         if (deck.conditionInputMode === 'builder') {
             document.querySelector('input[name="conditionInputMode"][value="builder"]').checked = true;

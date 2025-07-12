@@ -144,53 +144,64 @@
     }
 
     /**
+     * 显示一个隐藏的卡牌
+     * @returns {boolean} 是否还有更多卡牌可显示
+     */
+    function showOneCard() {
+        const hiddenCards = document.querySelectorAll('.form-group.hidden');
+        if (hiddenCards.length === 0) return false;
+        
+        hiddenCards[0].classList.remove('hidden');
+        return hiddenCards.length > 1;
+    }
+
+    /**
+     * 隐藏一个AA-AZ卡牌
+     * @returns {boolean} 是否还有更多卡牌可隐藏
+     */
+    function hideOneCard() {
+        const allVisibleCards = Array.from(document.querySelectorAll('.form-group:not(.hidden)'));
+        const aaAzCards = allVisibleCards.filter(el => {
+            const input = el.querySelector('input[type="number"]');
+            if (!input || !input.id) return false;
+            const num = parseInt(input.id.replace('card',''));
+            return num >= 26 && num <= 51;
+        });
+
+        if (aaAzCards.length === 0) return false;
+        
+        aaAzCards[aaAzCards.length - 1].classList.add('hidden');
+        return aaAzCards.length > 1;
+    }
+
+    /**
      * 初始化卡片显示控制功能（显示更多/显示更少按钮）
      */
     function initCardVisibilityControls() {
-            const showMoreBtn = document.getElementById('showMoreCardsBtn');
-            const showLessBtn = document.getElementById('showLessCardsBtn');
-            showLessBtn.disabled = true;
+        const showMoreBtn = document.getElementById('showMoreCardsBtn');
+        const showLessBtn = document.getElementById('showLessCardsBtn');
+        showLessBtn.disabled = true;
 
-            // 显示更多按钮点击事件
-            showMoreBtn.addEventListener('click', function() {
-                const hiddenCards = document.querySelectorAll('.form-group.hidden');
-                const toShow = Math.min(6, hiddenCards.length);
-                
-                for (let i = 0; i < toShow; i++) {
-                    hiddenCards[i].classList.remove('hidden');
-                }
+        // 显示更多按钮点击事件 - 执行6次"显示一个"
+        showMoreBtn.addEventListener('click', function() {
+            let hasMore = true;
+            for (let i = 0; i < 6 && hasMore; i++) {
+                hasMore = showOneCard();
+            }
+            showLessBtn.disabled = false;
+            showMoreBtn.disabled = !hasMore;
+        });
 
-                // 更新按钮状态
-                showLessBtn.disabled = false;
-                if (hiddenCards.length <= 6) {
-                    showMoreBtn.disabled = true;
-                }
-            });
-
-            // 显示更少按钮点击事件
-            showLessBtn.addEventListener('click', function() {
-                const allVisibleCards = Array.from(document.querySelectorAll('.form-group:not(.hidden)'));
-                const aaAzCards = allVisibleCards.filter(el => {
-                    const input = el.querySelector('input[type="number"]');
-                    if (!input || !input.id) return false;
-                    const num = parseInt(input.id.replace('card',''));
-                    return num >= 26 && num <= 51;
-                });
-
-                if (aaAzCards.length === 0) {
-                    showLessBtn.disabled = true;
-                    return;
-                }
-
-                const toHide = Math.min(6, aaAzCards.length);
-                for (let i = aaAzCards.length - 1; i >= Math.max(0, aaAzCards.length - toHide); i--) {
-                    aaAzCards[i].classList.add('hidden');
-                }
-
-                showMoreBtn.disabled = false;
-                showLessBtn.disabled = (aaAzCards.length - toHide) <= 0;
-            });
-        }
+        // 显示更少按钮点击事件 - 执行6次"隐藏一个"
+        showLessBtn.addEventListener('click', function() {
+            let hasMore = true;
+            for (let i = 0; i < 6 && hasMore; i++) {
+                hasMore = hideOneCard();
+            }
+            showMoreBtn.disabled = false;
+            showLessBtn.disabled = !hasMore;
+        });
+    }
 
     // 对外暴露的工具方法集合
     global.UIUtils = {
