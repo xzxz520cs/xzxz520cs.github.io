@@ -298,12 +298,7 @@
                 progressText.textContent = (i + 1) + '/' + numbers.length;
                 await sleep(50); // 100ms延迟
             }
-            // 按cid排序，未找到/出错的排在最后
-            cardList.sort((a, b) => {
-                if (a.notFound || a.fetchError) return 1;
-                if (b.notFound || b.fetchError) return -1;
-                return (a.cid || 0) - (b.cid || 0);
-            });
+            // 保持原始输入顺序
             let results = [];
             for (const card of cardList) {
                 if (card.notFound) {
