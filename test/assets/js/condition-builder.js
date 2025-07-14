@@ -222,9 +222,11 @@
     // 更新条件表达式文本框和预览
     function builderUpdateOutput() {
         builderConditionText = builderRootCondition ? builderGenerateConditionText(builderRootCondition) : '';
-        document.getElementById('condition').value = builderConditionText;
-        const preview = document.getElementById('builderConditionPreview');
-        if (preview) preview.value = builderConditionText;
+        if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
+            document.getElementById('condition').value = builderConditionText;
+            const preview = document.getElementById('builderConditionPreview');
+            if (preview) preview.value = builderConditionText;
+        }
     }
     // 生成条件表达式字符串，支持prob类型
     function builderGenerateConditionText(condition) {
@@ -487,7 +489,9 @@
             cardInputs.addEventListener('input', function (e) {
                 if (e.target && e.target.id &&
                     (e.target.id.startsWith('cardName') || e.target.id.startsWith('card'))) {
-                    builderRender();
+                    if (document.querySelector('input[name="conditionInputMode"]:checked')?.value === 'builder') {
+                        builderRender();
+                    }
                 }
             });
         }
