@@ -83,11 +83,15 @@
         let lastHiddenIndex = -1;
         
         // 先找出最后一个有内容的卡类索引
-        for (let i = 51; i >= 26; i--) {
-            const card = deck.cards[i];
-            if ((card.count && parseInt(card.count) > 0) || card.name.trim()) {
-                lastContentIndex = i;
-                break;
+        if (deck.cards && deck.cards.length >= 52) {
+            for (let i = 51; i >= 26; i--) {
+                const card = deck.cards[i] || {};
+                const hasCount = card.count && parseInt(card.count) > 0;
+                const hasName = card.name && card.name.trim();
+                if (hasCount || hasName) {
+                    lastContentIndex = i;
+                    break;
+                }
             }
         }
         
