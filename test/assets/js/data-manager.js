@@ -78,38 +78,21 @@
         });
         document.getElementById('condition').value = deck.condition || '';
 
-        // 检查AZ-AA卡类是否有被隐藏的且有内容的
-        let lastContentIndex = -1;
+        // 检查AZ-AA卡类是否有被隐藏的
         let lastHiddenIndex = -1;
-        
-        // 先找出最后一个有内容的卡类索引
+        // 倒序检查AZ-AA卡类(索引26-51)
         for (let i = 51; i >= 26; i--) {
-            const card = deck.cards[i];
-            if ((card.count && parseInt(card.count) > 0) || card.name.trim()) {
-                lastContentIndex = i;
+            const cardGroup = document.querySelector(`#cardInputs .form-group[data-index="${i}"]`);
+            if (cardGroup && cardGroup.classList.contains('hidden')) {
+                lastHiddenIndex = i;
                 break;
             }
         }
-        
-        // 如果找到有内容的卡类，检查是否有被隐藏的
-        if (lastContentIndex !== -1) {
-            for (let i = lastContentIndex; i >= 26; i--) {
-                const cardInput = document.getElementById(`card${i}`);
-                if (!cardInput) continue;
-                const cardGroup = cardInput.closest('.form-group');
-                if (cardGroup && cardGroup.classList.contains('hidden')) {
-                    lastHiddenIndex = i;
-                    break;
-                }
-            }
-        }
 
-        // 如果有被隐藏的卡类，从AA(26)开始正序显示直到最后一个有内容且被隐藏的卡类
+        // 如果有被隐藏的卡类，从AA(26)开始正序显示直到最后一个被隐藏的卡类
         if (lastHiddenIndex !== -1) {
             for (let i = 26; i <= lastHiddenIndex; i++) {
-                const cardInput = document.getElementById(`card${i}`);
-                if (!cardInput) continue;
-                const cardGroup = cardInput.closest('.form-group');
+                const cardGroup = document.querySelector(`#cardInputs .form-group[data-index="${i}"]`);
                 if (cardGroup) cardGroup.classList.remove('hidden');
             }
         }
