@@ -84,24 +84,35 @@
         });
         document.getElementById('condition').value = deck.condition || '';
 
-        // 检查AZ-AA卡类是否有被隐藏的
-        let lastHiddenIndex = -1;
-        // 倒序检查AZ-AA卡类(索引26-51)
+        checkAndShowHiddenCardGroups();
+
+    /**
+     * 检查AZ-AA卡类是否有被隐藏的，如果有则从AA开始正序显示
+     * @returns {void}
+     */
+    function checkAndShowHiddenCardGroups() {
+        // 倒序检查AZ-AA卡类(索引26-51)是否有被隐藏且包含数据的卡类
         for (let i = 51; i >= 26; i--) {
-            const cardGroup = document.querySelector(`#cardInputs .form-group[data-index="${i}"]`);
-            if (cardGroup && cardGroup.classList.contains('hidden')) {
-                lastHiddenIndex = i;
+            const count = parseInt(document.getElementById(`card${i}`).value) || 0;
+            const name = document.getElementById(`cardName${i}`).value.trim();
+            if ((count > 0 || name) &&
+                document.getElementById(`card${i}`).closest('.form-group').classList.contains('hidden')) {
+                
+                // 简单直接地调用showOneCard()直到显示目标卡类
+                let shown = false;
+                if (window.UIUtils && window.UIUtils.showOneCard) {
+                    while (!shown && window.UIUtils.showOneCard()) {
+                        const currentCount = document.getElementById(`card${i}`).value;
+                        shown = !document.getElementById(`card${i}`).closest('.form-group').classList.contains('hidden');
+                    }
+                }
                 break;
             }
         }
-
-        // 如果有被隐藏的卡类，从AA(26)开始正序显示直到最后一个被隐藏的卡类
-        if (lastHiddenIndex !== -1) {
-            for (let i = 26; i <= lastHiddenIndex; i++) {
-                const cardGroup = document.querySelector(`#cardInputs .form-group[data-index="${i}"]`);
-                if (cardGroup) cardGroup.classList.remove('hidden');
-            }
-        }
+    }
+    if (window.UIUtils && window.UIUtils.updateCardVisibilityButtons) {
+        window.UIUtils.updateCardVisibilityButtons();
+    }
 
         if (deck.conditionInputMode === 'builder') {
             document.querySelector('input[name="conditionInputMode"][value="builder"]').checked = true;
