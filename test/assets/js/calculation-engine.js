@@ -106,13 +106,13 @@
                 function processCondition(cond) {
                     let probMappings = [];
                     let probIndex = 0;
-                    let processed = cond.replace(/PROB\\((\\d+)\\)/g, function(match, nStr) {
-                        let n = parseInt(nStr);
+                    let processed = cond.replace(/PROB\\((\\d+(?:\\.\\d+)?)\\)/g, function(match, nStr) {
+                        let n = Math.round(parseFloat(nStr) * 100);
                         if (n <= 0) return '(false)';
-                        if (n >= 100) return '(true)';
-                        let d = gcd(n, 100);
+                        if (n >= 10000) return '(true)';
+                        let d = gcd(n, 10000);
                         let num = n / d;
-                        let denom = 100 / d;
+                        let denom = 10000 / d;
                         probMappings.push({num, denom});
                         return \`(__prob\${probIndex++}__)\`;
                     });
@@ -216,9 +216,10 @@
         clearInterval(progressUpdateInterval);
         progressUpdateInterval = null;
         cleanupCalculation();
-        const probability = (Number(result.valid) / Number(result.total)) * 100;
+        // 使用BigInt进行精确百分比计算
+        const probability = Number(BigInt(result.valid) * (10n ** 20n) / BigInt(result.total)) / (10 ** 20);
         const elapsedSeconds = getElapsedSeconds();
-        document.getElementById('probability').value = `${probability.toFixed(20)}%`;
+        document.getElementById('probability').value = `${probability.toFixed(15)}%`;
         document.getElementById('validCombinations').value = result.valid.toString();
         document.getElementById('totalCombinations').value = result.total.toString();
         document.getElementById('calculationProgress').value = 100;
@@ -353,7 +354,7 @@
                     const totalSimulations = 500000;
                     let valid = 0;
                     const replacedCondition = condition
-                        .replace(/PROB\\((\\d+)\\)/g, "(Math.random() < ($1/100))")
+                        .replace(/PROB\\((\\d+(?:\\.\\d+)?)\\)/g, "(Math.random() < ($1/10000))")
                         .replace(/\\b([a-z]{1,2})\\b/g, function(m) {
                             return (m === 'true' || m === 'false') ? m : "counts[" + varToIndex(m) + "]";
                         });
@@ -388,9 +389,10 @@
                     clearInterval(progressUpdateInterval);
                     progressUpdateInterval = null;
                     cleanupCalculation();
-                    const probability = (Number(e.data.valid) / Number(e.data.total)) * 100;
+                    // 使用BigInt进行精确百分比计算
+                    const probability = Number(BigInt(e.data.valid) * (10n ** 20n) / BigInt(e.data.total)) / (10 ** 20);
                     const elapsedSeconds = getElapsedSeconds();
-                    document.getElementById('probability').value = `${probability.toFixed(20)}%`;
+                    document.getElementById('probability').value = `${probability.toFixed(15)}%`;
                     document.getElementById('validCombinations').value = e.data.valid.toString();
                     document.getElementById('totalCombinations').value = e.data.total.toString();
                     document.getElementById('calculationProgress').value = 100;
