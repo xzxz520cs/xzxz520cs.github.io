@@ -71,12 +71,6 @@
         const deck = decks.find(d => d.id === deckId);
         if (!deck) return;
 
-        // 先清空所有卡牌输入框
-        for (let i = 0; i < 52; i++) {
-            document.getElementById(`card${i}`).value = '';
-            document.getElementById(`cardName${i}`).value = '';
-        }
-        
         // 加载卡牌数据
         deck.cards.forEach((card, i) => {
             document.getElementById(`card${i}`).value = card.count;
