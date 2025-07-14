@@ -71,12 +71,6 @@
         const deck = decks.find(d => d.id === deckId);
         if (!deck) return;
 
-        // 先清空所有卡牌输入框
-        for (let i = 0; i < 52; i++) {
-            document.getElementById(`card${i}`).value = '';
-            document.getElementById(`cardName${i}`).value = '';
-        }
-        
         // 加载卡牌数据
         deck.cards.forEach((card, i) => {
             document.getElementById(`card${i}`).value = card.count;
@@ -144,6 +138,18 @@
         }
 
         if (window.UIUtils && window.UIUtils.updateTotalDeck) window.UIUtils.updateTotalDeck();
+        // 清空所有卡牌输入框（放在最后确保不影响条件判断）
+        for (let i = 0; i < 52; i++) {
+            document.getElementById(`card${i}`).value = '';
+            document.getElementById(`cardName${i}`).value = '';
+        }
+        
+        // 重新加载卡牌数据以确保显示正确
+        deck.cards.forEach((card, i) => {
+            document.getElementById(`card${i}`).value = card.count;
+            document.getElementById(`cardName${i}`).value = card.name;
+        });
+        
         alert("卡组加载成功！");
     }
 
