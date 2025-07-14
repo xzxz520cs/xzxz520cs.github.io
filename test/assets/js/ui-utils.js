@@ -148,7 +148,7 @@
      * @returns {boolean} 是否还有更多卡牌可显示
      */
     function showOneCard() {
-        const hiddenCards = document.querySelectorAll('.form-group.hidden');
+        const hiddenCards = document.querySelectorAll('#cardInputs .form-group.hidden');
         if (hiddenCards.length === 0) return false;
         
         hiddenCards[0].classList.remove('hidden');
@@ -160,7 +160,7 @@
      * @returns {boolean} 是否还有更多卡牌可隐藏
      */
     function hideOneCard() {
-        const allVisibleCards = Array.from(document.querySelectorAll('.form-group:not(.hidden)'));
+        const allVisibleCards = Array.from(document.querySelectorAll('#cardInputs .form-group:not(.hidden)'));
         const aaAzCards = allVisibleCards.filter(el => {
             const input = el.querySelector('input[type="number"]');
             if (!input || !input.id) return false;
