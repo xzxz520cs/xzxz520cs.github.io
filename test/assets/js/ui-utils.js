@@ -203,6 +203,28 @@
         });
     }
 
+    /**
+     * 根据当前显示的卡类更新按钮状态
+     */
+    function updateCardVisibilityButtons() {
+        const showMoreBtn = document.getElementById('showMoreCardsBtn');
+        const showLessBtn = document.getElementById('showLessCardsBtn');
+        
+        // 检查是否还有隐藏的卡类
+        const hasHiddenCards = document.querySelectorAll('#cardInputs .form-group.hidden').length > 0;
+        showMoreBtn.disabled = !hasHiddenCards;
+
+        // 检查AA-AZ卡类中是否有显示的
+        const allVisibleCards = Array.from(document.querySelectorAll('#cardInputs .form-group:not(.hidden)'));
+        const hasVisibleAaAzCards = allVisibleCards.some(el => {
+            const input = el.querySelector('input[type="number"]');
+            if (!input || !input.id) return false;
+            const num = parseInt(input.id.replace('card',''));
+            return num >= 26 && num <= 51;
+        });
+        showLessBtn.disabled = !hasVisibleAaAzCards;
+    }
+
     // 对外暴露的工具方法集合
     global.UIUtils = {
         escapeRegExp,
@@ -213,6 +235,9 @@
         updateTotalDeck,
         updatePieChart,
         setupCardNameInputListener,
-        initCardVisibilityControls
+        initCardVisibilityControls,
+        showOneCard,
+        hideOneCard,
+        updateCardVisibilityButtons
     };
 })(window);
