@@ -217,7 +217,7 @@
         progressUpdateInterval = null;
         cleanupCalculation();
         // 使用BigInt进行精确百分比计算
-        const probability = Number(BigInt(result.valid) * (10n ** 20n) / BigInt(result.total)) / (10 ** 20);
+        const probability = Number(BigInt(result.valid) * (10n ** 22n) / BigInt(result.total)) / (10 ** 20);
         const elapsedSeconds = getElapsedSeconds();
         document.getElementById('probability').value = `${probability.toFixed(15)}%`;
         document.getElementById('validCombinations').value = result.valid.toString();
@@ -390,7 +390,7 @@
                     progressUpdateInterval = null;
                     cleanupCalculation();
                     // 使用BigInt进行精确百分比计算
-                    const probability = Number(BigInt(e.data.valid) * (10n ** 20n) / BigInt(e.data.total)) / (10 ** 20);
+                    const probability = Number(BigInt(e.data.valid) * (10n ** 22n) / BigInt(e.data.total)) / (10 ** 20);
                     const elapsedSeconds = getElapsedSeconds();
                     document.getElementById('probability').value = `${probability.toFixed(15)}%`;
                     document.getElementById('validCombinations').value = e.data.valid.toString();
