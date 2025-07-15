@@ -354,7 +354,7 @@
                     const totalSimulations = 500000;
                     let valid = 0;
                     const replacedCondition = condition
-                        .replace(/PROB\\((\\d+(?:\\.\\d+)?)\\)/g, "(Math.random() < ($1/10000))")
+                        .replace(/PROB\\((\\d+(?:\\.\\d+)?)\\)/g, "(Math.random() < ($1/100))")
                         .replace(/\\b([a-z]{1,2})\\b/g, function(m) {
                             return (m === 'true' || m === 'false') ? m : "counts[" + varToIndex(m) + "]";
                         });
