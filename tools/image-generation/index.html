@@ -498,8 +498,18 @@
         }
       }
 
-      const baseUrl = apiUrl.replace(/\/+$/, "");
-      const generationUrl = baseUrl + "/v1/images/generations";
+      // 确保API URL格式正确，不拼接本地路径
+      let generationUrl;
+      try {
+        const parsedUrl = new URL(apiUrl);
+        generationUrl = `${parsedUrl.protocol}//${parsedUrl.host}/v1/images/generations`;
+      } catch (e) {
+        console.error("API URL格式错误:", e);
+        previewItem.textContent = "API URL格式错误，请检查输入";
+        generateBtn.disabled = false;
+        generateBtn.classList.remove('disabled');
+        return;
+      }
 
       try {
         const response = await fetch(generationUrl, {
@@ -682,8 +692,18 @@
         const maskPngBlob = await fileToPngBlob(maskInput.files[0], targetWidth, targetHeight);
         formData.append("mask", maskPngBlob, "mask.png");
       }
-      const baseUrl = apiUrl.replace(/\/+/g, "");
-      const editUrl = baseUrl + "/v1/images/edits";
+      // 确保API URL格式正确，不拼接本地路径
+      let editUrl;
+      try {
+        const parsedUrl = new URL(apiUrl);
+        editUrl = `${parsedUrl.protocol}//${parsedUrl.host}/v1/images/edits`;
+      } catch (e) {
+        console.error("API URL格式错误:", e);
+        previewItem.textContent = "API URL格式错误，请检查输入";
+        editBtn.disabled = false;
+        editBtn.classList.remove('disabled');
+        return;
+      }
       const previewContainer = document.getElementById("previewContainer");
       const previewItem = document.createElement("div");
       previewItem.className = "image-item mb-2 separator-horizontal";
