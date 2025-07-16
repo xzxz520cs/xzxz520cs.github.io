@@ -53,9 +53,11 @@
 
     // 创建概率函数节点
     function builderCreateProbCondition(value = 50) {
+        // 支持小数后两位精度，四舍五入
+        const roundedValue = Math.round(parseFloat(value) * 100) / 100;
         return {
             type: 'prob',
-            value: value
+            value: roundedValue
         };
     }
 
@@ -156,15 +158,30 @@
         const valueInput = document.createElement('input');
         valueInput.type = 'number';
         valueInput.value = condition.value;
-        valueInput.min = 1;
-        valueInput.max = 99;
-        valueInput.addEventListener('input', e => {
-            let value = parseInt(e.target.value);
-            if (isNaN(value) || value < 1) value = 1;
-            if (value > 99) value = 99;
+        valueInput.min = 0.01;
+        valueInput.max = 100;
+        valueInput.step = 0.01;
+        
+        // 只在失去焦点时进行完整验证
+        valueInput.addEventListener('blur', e => {
+            let value = parseFloat(e.target.value);
+            if (isNaN(value)) value = 0.01;
+            if (value < 0.01) value = 0.01;
+            if (value > 100) value = 100;
+            // 四舍五入到小数点后两位
+            value = Math.round(value * 100) / 100;
             condition.value = value;
             e.target.value = value;
             builderUpdateOutput();
+        });
+
+        // 输入时只做基本验证，不更新condition值
+        valueInput.addEventListener('input', e => {
+            if (e.target.value === '' || e.target.value === '.') return;
+            let value = parseFloat(e.target.value);
+            if (isNaN(value)) {
+                e.target.value = condition.value;
+            }
         });
         container.appendChild(valueInput);
         container.appendChild(document.createTextNode('% 的概率满足此条件'));
