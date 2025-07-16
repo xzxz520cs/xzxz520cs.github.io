@@ -51,6 +51,7 @@ function getElapsedSeconds() {
 
 // 精确概率计算入口，调用 CalculationEngine
 function calculate() {
+    window.CalculationEngine.clearMonteCarloCache();
     window.CalculationEngine.calculate();
 }
 

@@ -271,11 +271,30 @@
         calculationWorker = null;
     }
 
+    // 蒙特卡洛模拟缓存状态
+    let monteCarloCache = {
+        params: null,
+        valid: 0n,
+        total: 0n
+    };
+
     // 蒙特卡洛模拟主入口，负责参数校验、进度显示、worker启动
     function monteCarloCalculate() {
         if (isCalculating) {
             if (!confirm("当前计算正在进行，是否取消并使用蒙特卡洛模拟计算？")) return;
             cancelCalculation();
+        }
+        
+        // 获取当前参数
+        const currentParams = getCurrentParams();
+        
+        // 检查参数是否变化
+        if (monteCarloCache.params && !areParamsEqual(monteCarloCache.params, currentParams)) {
+            monteCarloCache = {
+                params: null,
+                valid: 0n,
+                total: 0n
+            };
         }
         try {
             calculationStartTime = Date.now();
@@ -320,6 +339,8 @@
             // 创建Web Worker执行蒙特卡洛模拟
             const simulationWorker = new Worker(URL.createObjectURL(new Blob([`
                 // Worker内部：蒙特卡洛抽卡模拟与条件判定
+                let cachedValid = ${monteCarloCache.valid.toString()};
+                let cachedTotal = ${monteCarloCache.total.toString()};
                 function varToIndex(varName) {
                     const lc = varName.toLowerCase();
                     if (lc === 'true' || lc === 'false') return lc;
@@ -376,7 +397,12 @@
                         if (iter < totalSimulations) {
                             setTimeout(runChunk, 0);
                         } else {
-                            postMessage({ type: 'result', valid, total: totalSimulations, calculationMethod: "蒙特卡洛模拟" });
+                            postMessage({
+                                type: 'result',
+                                valid: valid + cachedValid,
+                                total: totalSimulations + cachedTotal,
+                                calculationMethod: "蒙特卡洛模拟"
+                            });
                         }
                     }
                     runChunk();
@@ -395,6 +421,13 @@
                     document.getElementById('probability').value = `${probability.toFixed(15)}%`;
                     document.getElementById('validCombinations').value = e.data.valid.toString();
                     document.getElementById('totalCombinations').value = e.data.total.toString();
+                    
+                    // 更新缓存
+                    monteCarloCache = {
+                        params: currentParams,
+                        valid: BigInt(e.data.valid),
+                        total: BigInt(e.data.total)
+                    };
                     document.getElementById('calculationProgress').value = 100;
                     document.getElementById('progressText').textContent =
                         `蒙特卡洛模拟完成: 100% 用时: ${elapsedSeconds}秒`;
@@ -417,11 +450,40 @@
         }
     }
 
+    // 辅助函数：获取当前参数
+    function getCurrentParams() {
+        const cardCounts = [];
+        for (let i = 0; i < 52; i++) {
+            cardCounts.push(parseInt(document.getElementById(`card${i}`).value) || 0);
+        }
+        return {
+            cardCounts,
+            draws: parseInt(document.getElementById('draws').value),
+            condition: document.getElementById('condition').value.trim()
+        };
+    }
+
+    // 辅助函数：比较参数是否相同
+    function areParamsEqual(a, b) {
+        if (a.draws !== b.draws || a.condition !== b.condition) return false;
+        for (let i = 0; i < 52; i++) {
+            if (a.cardCounts[i] !== b.cardCounts[i]) return false;
+        }
+        return true;
+    }
+
     // 导出接口
     global.CalculationEngine = {
         calculate,              // 精确组合概率计算
         monteCarloCalculate,    // 蒙特卡洛模拟计算
         cancelCalculation,      // 取消计算
-        getElapsedSeconds       // 获取已用秒数
+        getElapsedSeconds,      // 获取已用秒数
+        clearMonteCarloCache: () => {  // 清除蒙特卡洛缓存
+            monteCarloCache = {
+                params: null,
+                valid: 0n,
+                total: 0n
+            };
+        }
     };
 })(window);
