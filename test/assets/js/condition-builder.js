@@ -52,12 +52,10 @@
     }
 
     // 创建概率函数节点
-    function builderCreateProbCondition(value = 50) {
-        // 支持小数后两位精度，四舍五入
-        const roundedValue = Math.round(parseFloat(value) * 100) / 100;
+    function builderCreateProbCondition(value = "50") {
         return {
             type: 'prob',
-            value: roundedValue
+            value: String(value) // 保持原始字符串值
         };
     }
 
@@ -158,18 +156,14 @@
         const valueInput = document.createElement('input');
         valueInput.type = 'number';
         valueInput.value = condition.value;
-        valueInput.min = 0.01;
+        valueInput.min = 0;
         valueInput.max = 100;
         valueInput.step = 0.01;
         
         // 只在失去焦点时进行完整验证
         valueInput.addEventListener('blur', e => {
             let value = parseFloat(e.target.value);
-            if (isNaN(value)) value = 0.01;
-            if (value < 0.01) value = 0.01;
             if (value > 100) value = 100;
-            // 四舍五入到小数点后两位
-            value = Math.round(value * 100) / 100;
             condition.value = value;
             e.target.value = value;
             builderUpdateOutput();
@@ -253,7 +247,7 @@
             const operator = builderOperators[condition.symbol] || condition.symbol || '';
             return `(${cardsText}) ${operator} ${condition.num}`;
         } else if (condition.type === 'prob') {
-            return `PROB(${condition.value})`;
+            return `PROB(${condition.value})`; // 直接输出原始值
         }
         const childrenText = condition.children.map(builderGenerateConditionText).filter(Boolean);
         return childrenText.length > 1
@@ -388,11 +382,11 @@
             parser.consume('PROB');
             parser.consume('(');
             const value = parser.consume();
-            if (!/^\d+$/.test(value) || parseInt(value) < 1 || parseInt(value) > 99) {
-                throw new Error("PROB函数参数必须是1-99的整数");
+            if (!/^\d+(\.\d+)?$/.test(value)) {
+                throw new Error("PROB函数参数必须是数字");
             }
             parser.consume(')');
-            return { type: "prob", value: parseInt(value) };
+            return { type: "prob", value: value }; // 保持原始字符串值
         }
         let items = [];
         items.push(parser.consume());
