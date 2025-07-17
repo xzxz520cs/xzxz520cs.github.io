@@ -306,8 +306,15 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
         </div>
 
         <!-- 计算历史记录表格 -->
-        <div class="card card--elevated hidden">
+        <div class="card card--elevated hidden" id="historyTable">
 
+        </div>
+
+        <!-- 计算历史记录表格控制按钮 -->
+        <div class="form-group flex flex--column gap-0">
+            <button id="showHistoryBtn" type="button" class="btn btn--outline full-width full-height">显示历史记录</button>
+            <button id="hideHistoryBtn" type="button"
+                class="btn btn--outline full-width full-height hidden">隐藏历史记录</button>
         </div>
     </main>
 

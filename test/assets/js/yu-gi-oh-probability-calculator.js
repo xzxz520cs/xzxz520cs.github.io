@@ -78,6 +78,19 @@ window.onload = function () {
 
     // 初始化卡片显示控制功能
     window.UIUtils.initCardVisibilityControls();
+
+    // 初始化历史记录显示控制功能
+    document.getElementById('showHistoryBtn').addEventListener('click', function() {
+        document.getElementById('historyTable').classList.remove('hidden');
+        document.getElementById('showHistoryBtn').classList.add('hidden');
+        document.getElementById('hideHistoryBtn').classList.remove('hidden');
+    });
+
+    document.getElementById('hideHistoryBtn').addEventListener('click', function() {
+        document.getElementById('historyTable').classList.add('hidden');
+        document.getElementById('showHistoryBtn').classList.remove('hidden');
+        document.getElementById('hideHistoryBtn').classList.add('hidden');
+    });
 };
 
 // 条件构建器相关接口代理，便于外部调用
