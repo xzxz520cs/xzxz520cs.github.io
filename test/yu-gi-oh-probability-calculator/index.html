@@ -199,24 +199,25 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
                     <!-- 移动端输入说明 -->
                     <div class="operator-help-mobile">
                         <strong>输入说明：</strong><br>
-                        <strong>运算符（优先级从高到低）:</strong><code>()</code> - 明确运算优先级；<code>!</code> - 逻辑非；<code>*</code>
-                        -
-                        乘；<code>/</code> - 除；<code>%</code> - 取模；<code>+</code> - 加；<code>-</code> -
-                        减；<strong>比较运算符：</strong><code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code>
-                        -
-                        小于；<code>&lt;=</code> - 小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> -
-                        逻辑与；<code>||</code> - 逻辑或；<br>
-                        <strong>变量名:</strong><code>a</code>,<code>b</code>,<code>c</code>,...,<code>z</code>,<code>aa</code>,<code>ab</code>,...对应
-                        A类卡, B类卡, ...,
-                        Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
-                        <strong>使用提示：</strong>计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易与逻辑判断条件混淆的名称(如a>1)。建议使用纯中文名。<br>
-                        <strong>概率函数功能：</strong>使用 <code>PROB(n)</code>
-                        表示n%的概率满足条件，n是0-100的任意数。此功能可以用来模拟一些具有概率性的卡片效果，例如：<br>
-                        - <code>PROB(50) && a >= 1</code> 表示：有50%的概率满足条件，并且需要至少1张A类卡<br>
-                        - <code>a + b >= 3 && PROB(34.68)</code> 表示：A和B类卡合计至少3张，与34.68%概率满足条件<br>
-                        n支持0-100的数值。精确计算时<code>PROB(n)</code>精度为小数点后两位，超过时会自动四舍五入，多个高精度的<code>PROB(n)</code>合并判断会导致精确计算时长指数级上升。快速估算时会使用实际输入的百分比进行计算。<br>
-                        <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。<br>
-                        <strong>注意：</strong>当卡种类和抽卡数较高时，计算时间会呈指数级上升，此时推荐使用快速估算。
+                        <strong>运算符（优先级从高到低）：</strong>
+                        <code>()</code> - 明确运算优先级；<code>!</code> - 逻辑非；<code>*</code> - 乘；<code>/</code> -
+                        除；<code>%</code> -
+                        取模；<code>+</code> - 加；<code>-</code> - 减；
+                        <strong>比较运算符：</strong>
+                        <code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code> - 小于；<code>&lt;=</code> -
+                        小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> - 逻辑与；<code>||</code> - 逻辑或；<br>
+                        <strong>变量名：</strong>
+                        <code>a</code>,<code>b</code>,<code>c</code>,...,<code>z</code>,<code>aa</code>,<code>ab</code>,...对应A类卡，B类卡，...,Z类卡，AA类卡，AB类卡，等等...。<br>
+                        <strong>自定义卡名：</strong>
+                        可以直接使用您输入的自定卡名作为变量名。计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易混淆的名称（如纯英文字母、数字等）。建议使用纯中文名。<br>
+                        <strong>概率函数功能：</strong>
+                        <code>PROB(n)</code>表示n%的概率满足条件，n是0-100的任意数。此功能可以用来模拟一些具有概率性的卡片效果，例如：<br>
+                        - <code>PROB(50) && a >= 1</code> 表示：50%概率满足且至少1张A类卡<br>
+                        - <code>a + b >= 3 && PROB(34.68)</code> 表示：A+B类卡≥3张且34.68%概率满足<br>
+                        精度说明：n支持0-100的数值。精确计算时精度最高为小数点后两位（计算时自动四舍五入），多个高精度的<code>PROB(n)</code>合并判断会导致精确计算时长指数级上升。快速估算时会使用实际输入的百分比进行计算。<br>
+                        <strong>注意事项：</strong>
+                        在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。<br>
+                        - 当卡种类和抽卡数较高时，计算时间会呈指数级上升，此时推荐使用快速估算。
                     </div>
                     <!-- 条件构建器区域 -->
                     <div id="builderConditionInput" class="form-group hidden">
@@ -270,24 +271,24 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
             <!-- 新增：桌面端输入说明，显示在条件与计算操作/结果下面 -->
             <div class="operator-help-desktop">
                 <strong>输入说明：</strong><br>
-                <strong>运算符（优先级从高到低）:</strong><code>()</code> - 明确运算优先级；<code>!</code> - 逻辑非；<code>*</code>
-                -
-                乘；<code>/</code> - 除；<code>%</code> - 取模；<code>+</code> - 加；<code>-</code> -
-                减；<strong>比较运算符：</strong><code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code>
-                -
-                小于；<code>&lt;=</code> - 小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> -
-                逻辑与；<code>||</code> - 逻辑或；<br>
-                <strong>变量名:</strong><code>a</code>,<code>b</code>,<code>c</code>,...,<code>z</code>,<code>aa</code>,<code>ab</code>,...对应
-                A类卡, B类卡, ...,
-                Z类卡, AA类卡, AB类卡, ...。也可以直接使用您输入的自定卡名。<br>
-                <strong>使用提示：</strong>计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易与逻辑判断条件混淆的名称(如a>1)。建议使用纯中文名。<br>
-                <strong>概率函数功能：</strong>使用 <code>PROB(n)</code>
-                表示n%的概率满足条件，n是0-100的任意数。此功能可以用来模拟一些具有概率性的卡片效果，例如：<br>
-                - <code>PROB(50) && a >= 1</code> 表示：有50%的概率满足条件，并且需要至少1张A类卡<br>
-                - <code>a + b >= 3 && PROB(34.68)</code> 表示：A和B类卡合计至少3张，与34.68%概率满足条件<br>
-                n支持0-100的数值。精确计算时<code>PROB(n)</code>精度为小数点后两位，超过时会自动四舍五入，多个高精度的<code>PROB(n)</code>合并判断会导致精确计算时长指数级上升。快速估算时会使用实际输入的百分比进行计算。<br>
-                <strong>注意：</strong>在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。<br>
-                <strong>注意：</strong>当卡种类和抽卡数较高时，计算时间会呈指数级上升，此时推荐使用快速估算。
+                <strong>运算符（优先级从高到低）：</strong>
+                <code>()</code> - 明确运算优先级；<code>!</code> - 逻辑非；<code>*</code> - 乘；<code>/</code> - 除；<code>%</code> -
+                取模；<code>+</code> - 加；<code>-</code> - 减；
+                <strong>比较运算符：</strong>
+                <code>&gt;</code> - 大于；<code>&gt;=</code> - 大于等于；<code>&lt;</code> - 小于；<code>&lt;=</code> -
+                小于等于；<code>==</code> - 等于；<code>!=</code> - 不等；<code>&&</code> - 逻辑与；<code>||</code> - 逻辑或；<br>
+                <strong>变量名：</strong>
+                <code>a</code>,<code>b</code>,<code>c</code>,...,<code>z</code>,<code>aa</code>,<code>ab</code>,...对应A类卡，B类卡，...,Z类卡，AA类卡，AB类卡，等等...。<br>
+                <strong>自定义卡名：</strong>
+                可以直接使用您输入的自定卡名作为变量名。计算器会帮您将自定卡名替换为对应的变量名，所以自定卡名建议避免使用容易混淆的名称（如纯英文字母、数字等）。建议使用纯中文名。<br>
+                <strong>概率函数功能：</strong>
+                <code>PROB(n)</code>表示n%的概率满足条件，n是0-100的任意数。此功能可以用来模拟一些具有概率性的卡片效果，例如：<br>
+                - <code>PROB(50) && a >= 1</code> 表示：50%概率满足且至少1张A类卡<br>
+                - <code>a + b >= 3 && PROB(34.68)</code> 表示：A+B类卡≥3张且34.68%概率满足<br>
+                精度说明：n支持0-100的数值。精确计算时精度最高为小数点后两位（计算时自动四舍五入），多个高精度的<code>PROB(n)</code>合并判断会导致精确计算时长指数级上升。快速估算时会使用实际输入的百分比进行计算。<br>
+                <strong>注意事项：</strong>
+                在条件表达式中，<code>=</code>是赋值运算符。如果您要判断相等，请使用<code>==</code>或<code>===</code>。注意不要使用中文标点符号来书写运算符（例如中文括号）。<br>
+                - 当卡种类和抽卡数较高时，计算时间会呈指数级上升，此时推荐使用快速估算。
             </div>
             <div class="source-info mb-1 mt-6">
                 <div>
