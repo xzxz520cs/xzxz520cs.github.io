@@ -113,7 +113,9 @@
       <div class="form-group mt-2" id="drawMaskGroup">
         <button id="drawMaskBtn" class="btn btn--secondary disabled" type="button">绘制遮罩</button>
         <button id="downloadMaskBtn" class="btn btn--secondary hidden" type="button">下载遮罩</button>
-        <p class="text-muted mt-3">提示：遮罩区域(红色/透明区域)表示需要AI修改的部分，非遮罩区域（不透明）将被保留不被修改。绘制遮罩请在绘制后下载上传以应用</p>
+        <p class="text-muted mt-3">提示：用该工具绘制时遮罩区域(红色半透明区域)表示需要AI修改的部分，非遮罩区域将尽量保留不被修改。<br>
+        上传遮罩文件时，透明区域表示需要AI修改的部分，不透明区域将尽量保留不被修改。<br>
+        </p>
         <div id="maskToolbox" class="hidden mt-3 flex">
           <div class="tool-buttons flex gap-1">
             <button id="brushModeBtn" class="btn btn--toggle active" type="button" title="画笔">
@@ -578,8 +580,25 @@
       const size = document.getElementById("size").value || "1024x1024";
       const quality = document.getElementById("quality").value || "auto";
       const maskInput = document.getElementById("maskImage");
-      // 新增：遮罩绘制模式判断
-      const isDrawingMask = document.getElementById('drawMaskBtn').textContent === '放弃绘制';
+      
+      // 统一使用全局状态变量
+      const isDrawingMask = !!window.isDrawingMask;
+      console.log('编辑模式状态检查:', {
+        isDrawingMask: !!window.isDrawingMask,
+        hasMaskCanvas: !!window.maskCanvas,
+        hasMaskImageData: !!window.maskImageData,
+        drawMaskBtnText: document.getElementById('drawMaskBtn').textContent,
+        windowVars: {
+          maskCanvas: !!window.maskCanvas,
+          maskImageData: !!window.maskImageData,
+          maskBaseImage: !!window.maskBaseImage
+        }
+      });
+
+      // 强制同步状态
+      if (document.getElementById('drawMaskBtn').textContent === '放弃绘制') {
+        window.isDrawingMask = true;
+      }
       if (!apiKey || !apiUrl || !prompt) {
         alert("请输入 API Key、API URL 和提示语！");
         return;
@@ -642,50 +661,56 @@
 
       // 遮罩处理：优先用绘制的遮罩
       if (isDrawingMask && window.maskImageData && window.maskCanvas) {
-        // 复用“下载遮罩”按钮的导出逻辑，确保上传和下载一致
-        const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = maskBaseImage.width;
-        exportCanvas.height = maskBaseImage.height;
-        const exportCtx = exportCanvas.getContext('2d');
-        // 先将遮罩绘制到临时画布
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = window.maskImageData.width;
-        tempCanvas.height = window.maskImageData.height;
-        const tempCtx = tempCanvas.getContext('2d');
-        // 直接拷贝maskImageData，不做alpha反转
-        tempCtx.putImageData(window.maskImageData, 0, 0);
-        // 将临时画布拉伸到原图尺寸
-        exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
-        // 拉伸后再严格二值化所有通道，确保只有0/255
-        const exportImgData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
-        for (let i = 0; i < exportImgData.data.length; i += 4) {
-          if (exportImgData.data[i + 3] > 127) {
-            // 保留区域：白色不透明
-            exportImgData.data[i] = 255;
-            exportImgData.data[i + 1] = 255;
-            exportImgData.data[i + 2] = 255;
-            exportImgData.data[i + 3] = 255;
-          } else {
-            // 可编辑区域：黑色透明
-            exportImgData.data[i] = 0;
-            exportImgData.data[i + 1] = 0;
-            exportImgData.data[i + 2] = 0;
-            exportImgData.data[i + 3] = 0;
+        try {
+          console.log('开始导出绘制遮罩...');
+          // 创建与原图尺寸相同的导出画布
+          const exportCanvas = document.createElement('canvas');
+          exportCanvas.width = maskBaseImage.width;
+          exportCanvas.height = maskBaseImage.height;
+          const exportCtx = exportCanvas.getContext('2d');
+          
+          // 创建临时画布处理遮罩数据
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = window.maskImageData.width;
+          tempCanvas.height = window.maskImageData.height;
+          const tempCtx = tempCanvas.getContext('2d');
+          
+          // 直接拷贝maskImageData，保留原始alpha值
+          tempCtx.putImageData(window.maskImageData, 0, 0);
+          
+          // 将临时画布拉伸到原图尺寸
+          exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
+          
+          // 仅处理alpha通道，不修改RGB值
+          const exportImgData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
+          for (let i = 0; i < exportImgData.data.length; i += 4) {
+            // 保留RGB通道不变，仅使用alpha通道
+            exportImgData.data[i] = 255;   // R
+            exportImgData.data[i + 1] = 255; // G
+            exportImgData.data[i + 2] = 255; // B
+            // alpha通道保持不变（0表示可编辑区域）
           }
+          exportCtx.putImageData(exportImgData, 0, 0);
+          
+          // 导出为PNG
+          await new Promise((resolve, reject) => {
+            exportCanvas.toBlob(blob => {
+              if (blob) {
+                console.log('遮罩Blob创建成功，大小:', blob.size);
+                formData.append("mask", blob, "mask.png");
+                console.log('遮罩已添加到FormData');
+                resolve();
+              } else {
+                console.error('遮罩Blob创建失败');
+                alert("遮罩导出失败");
+                reject();
+              }
+            }, 'image/png');
+          });
+        } catch (e) {
+          console.error('遮罩导出过程中出错:', e);
+          throw e;
         }
-        exportCtx.putImageData(exportImgData, 0, 0);
-        // toBlob为异步
-        await new Promise((resolve, reject) => {
-          exportCanvas.toBlob(blob => {
-            if (blob) {
-              formData.append("mask", blob, "mask.png");
-              resolve();
-            } else {
-              alert("遮罩导出失败");
-              reject();
-            }
-          }, 'image/png');
-        });
       } else if (maskInput.files && maskInput.files.length > 0) {
         // 遮罩上传也转为 PNG 且尺寸与第一张图一致
         // 不再反转alpha，直接导出
@@ -711,6 +736,20 @@
       previewContainer.insertBefore(previewItem, previewContainer.firstChild);
       previewContainer.classList.remove("hidden");
       try {
+        // 调试：检查FormData内容
+        console.log('--- FormData内容验证 ---');
+        let hasMask = false;
+        for (const [key, value] of formData.entries()) {
+          console.log(`FormData key: ${key}, size: ${value.size || value.length || 'N/A'}`);
+          if (key === 'mask') hasMask = true;
+        }
+        
+        if (!hasMask && (isDrawingMask || maskInput.files.length > 0)) {
+          console.error('错误：FormData缺少遮罩数据');
+          throw new Error('遮罩数据未正确添加');
+        }
+
+        console.log('--- 发起API请求 ---');
         const response = await fetch(editUrl, {
           method: "POST",
           headers: {
@@ -719,6 +758,9 @@
           },
           body: formData
         });
+
+        // 调试：检查响应状态
+        console.log('API响应状态:', response.status);
         if (response.ok) {
           const result = await response.json();
           const formatVal = document.getElementById("format").value;
@@ -766,16 +808,17 @@
     const downloadMaskBtn = document.getElementById("downloadMaskBtn");
     const firstInputImage = document.getElementById("firstInputImage");
     const multiInputImage = document.getElementById("multiInputImage");
-    let maskCanvas = null;
-    let maskCtx = null;
-    let drawing = false;
-    let brushShape = 'circle';
+    // 使用window对象确保全局访问
+    window.maskCanvas = null;
+    window.maskCtx = null;
+    window.drawing = false;
+    window.brushShape = 'circle';
     // 默认画笔大小
-    let brushSize = 30; // 直径/边长
-    let maskImageData = null;
-    let maskBaseImage = null;
-    let isDrawingMask = false;
-    let maskCursorOverlay = null;
+    window.brushSize = 30; // 直径/边长
+    window.maskImageData = null;
+    window.maskBaseImage = null;
+    window.isDrawingMask = false;
+    window.maskCursorOverlay = null;
 
     function getMaskTargetFile() {
       // 优先使用firstInputImage，否则multiInputImage的第一张
@@ -799,12 +842,17 @@
     }
 
     function exitDrawMaskMode() {
+      window.isDrawingMask = false;
       isDrawingMask = false;
       drawMaskBtn.textContent = '绘制遮罩';
       maskUploadGroup.classList.remove("hidden");
       maskCanvasContainer.classList.add("hidden");
       maskToolbox.classList.add("hidden");
       downloadMaskBtn.classList.add("hidden");
+      console.log('退出绘制模式，设置isDrawingMask=false', {
+        windowState: window.isDrawingMask,
+        btnText: drawMaskBtn.textContent
+      });
       if (maskCanvasContainer.firstChild) maskCanvasContainer.removeChild(maskCanvasContainer.firstChild);
       maskCanvas = null;
       maskCtx = null;
@@ -827,12 +875,21 @@
 
     // 绘制遮罩按钮逻辑
     drawMaskBtn.addEventListener('click', async () => {
-      if (!isDrawingMask) {
+      if (!window.isDrawingMask) {
         // 进入绘制模式
+        window.isDrawingMask = true;
         isDrawingMask = true;
         drawMaskBtn.textContent = '放弃绘制';
         maskUploadGroup.classList.add("hidden");
         maskCanvasContainer.classList.remove("hidden");
+        
+        // 异步状态验证
+        await new Promise(resolve => setTimeout(resolve, 0));
+        console.log('异步状态验证:', {
+          windowState: window.isDrawingMask,
+          localState: isDrawingMask,
+          btnText: drawMaskBtn.textContent
+        });
         maskToolbox.classList.remove("hidden");
         downloadMaskBtn.classList.remove("hidden");
         // 初始化画布
@@ -845,11 +902,57 @@
 
     // 初始化遮罩画布
     async function setupMaskCanvas() {
-      // 清空容器
-      maskCanvasContainer.innerHTML = '';
-      maskCanvas = document.createElement('canvas');
-      maskCanvas.style.border = '1px solid #ccc';
-      maskCanvas.style.display = 'block';
+      try {
+        console.log('开始初始化遮罩画布...');
+        // 清空容器
+        maskCanvasContainer.innerHTML = '';
+        maskCanvas = document.createElement('canvas');
+        if (!maskCanvas) throw new Error('画布创建失败');
+        
+        maskCanvas.style.border = '1px solid #ccc';
+        maskCanvas.style.display = 'block';
+        maskCanvas.style.position = 'relative';
+        maskCanvasContainer.appendChild(maskCanvas);
+        
+        // 获取画布上下文
+        maskCtx = maskCanvas.getContext('2d');
+        if (!maskCtx) throw new Error('无法获取画布上下文');
+
+        // 明确使用firstInputImage或multiInputImage的第一张
+        const file = getMaskTargetFile();
+        if (!file) throw new Error("请先上传图片！");
+
+        // 加载图片
+        const img = new window.Image();
+        img.src = await fileToDataURL(file);
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          setTimeout(() => reject(new Error('图片加载超时')), 5000);
+        });
+
+        // 设置画布尺寸
+        maskCanvas.width = img.width;
+        maskCanvas.height = img.height;
+        maskBaseImage = img;
+
+        // 创建遮罩图像数据
+        maskImageData = maskCtx.createImageData(maskCanvas.width, maskCanvas.height);
+        for (let i = 0; i < maskImageData.data.length; i += 4) {
+          maskImageData.data[i + 3] = 255; // 初始全不透明
+        }
+
+        console.log('遮罩画布初始化完成', {
+          width: maskCanvas.width,
+          height: maskCanvas.height,
+          hasImageData: !!maskImageData
+        });
+
+      } catch (error) {
+        console.error('遮罩画布初始化失败:', error);
+        exitDrawMaskMode();
+        throw error;
+      }
       maskCanvas.style.position = 'relative';
       maskCanvasContainer.appendChild(maskCanvas);
       // 明确使用firstInputImage或multiInputImage的第一张
