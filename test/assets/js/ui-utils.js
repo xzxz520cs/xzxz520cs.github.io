@@ -275,8 +275,8 @@
         const data = records.map(r => parseFloat(r.probability.replace('%', '')) || 0).reverse();
 
         // 计算动态y轴范围
-        const minValue = Math.max(0, Math.min(...data) * 0.98); // 最小值留2%空间
-        const maxValue = Math.min(100, Math.max(...data) * 1.02); // 最大值留2%空间
+        const minValue = Math.max(0, Math.min(...data) * 1); // 最小值留0.1%空间
+        const maxValue = Math.min(100, Math.max(...data) * 1); // 最大值留0.1%空间
 
         if (window.historyChart) {
             window.historyChart.destroy();
