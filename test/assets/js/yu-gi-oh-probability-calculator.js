@@ -1,3 +1,9 @@
+/**
+ * 游戏王概率计算器主模块
+ * 功能：整合所有模块功能，提供全局接口
+ * 核心方法：各按钮点击事件处理函数
+ * 依赖：所有其他功能模块
+ */
 // 工具常量：localStorage最大存储空间（字节）
 const MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -65,6 +71,27 @@ function cancelCalculation() {
     window.CalculationEngine.cancelCalculation();
 }
 
+// 字符串换行工具函数(确保返回数组)
+function wrapText(text, maxLength = 50) {
+    if (!text || typeof text !== 'string') return [''];
+    
+    const words = text.split(' ');
+    let lines = [];
+    let currentLine = words[0] || '';
+
+    for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        if (currentLine.length + word.length + 1 <= maxLength) {
+            currentLine += ' ' + word;
+        } else {
+            lines.push(currentLine);
+            currentLine = word;
+        }
+    }
+    lines.push(currentLine);
+    return lines;
+}
+
 // 页面加载时初始化：刷新卡组、绑定输入事件、初始化条件构建器
 window.onload = function () {
     updateDeckList();
@@ -80,14 +107,14 @@ window.onload = function () {
     window.UIUtils.initCardVisibilityControls();
 
     // 初始化历史记录显示控制功能
-    document.getElementById('showHistoryBtn').addEventListener('click', function() {
+    document.getElementById('showHistoryBtn').addEventListener('click', function () {
         document.getElementById('historyTable').classList.remove('hidden');
         document.getElementById('showHistoryBtn').classList.add('hidden');
         document.getElementById('hideHistoryBtn').classList.remove('hidden');
         window.HistoryManager.loadHistoryRecords();
     });
 
-    document.getElementById('hideHistoryBtn').addEventListener('click', function() {
+    document.getElementById('hideHistoryBtn').addEventListener('click', function () {
         document.getElementById('historyTable').classList.add('hidden');
         document.getElementById('showHistoryBtn').classList.remove('hidden');
         document.getElementById('hideHistoryBtn').classList.add('hidden');
@@ -99,10 +126,10 @@ window.onload = function () {
          * 从localStorage加载最近25条计算记录
          * 并渲染图表
          */
-        loadHistoryRecords: function() {
+        loadHistoryRecords: function () {
             const records = JSON.parse(localStorage.getItem('calculationRecords') || '[]');
             const recentRecords = records.slice(-25); // 获取最近25条
-            
+
             this.renderHistoryChart(recentRecords);
         },
 
@@ -110,12 +137,12 @@ window.onload = function () {
          * 渲染历史概率折线图
          * @param {Array} records - 计算记录数组
          */
-        renderHistoryChart: function(records) {
+        renderHistoryChart: function (records) {
             const ctx = document.getElementById('historyLineChart').getContext('2d');
             // 显示时间+抽卡数
             const labels = records.map(r => `${r.date.split(' ')[1]}\n抽${r.draws}张`).reverse();
-            const data = records.map(r => parseFloat(r.probability.replace('%','')) || 0).reverse();
-            
+            const data = records.map(r => parseFloat(r.probability.replace('%', '')) || 0).reverse();
+
             // 计算动态y轴范围
             const minValue = Math.max(0, Math.min(...data) * 0.98); // 最小值留2%空间
             const maxValue = Math.min(100, Math.max(...data) * 1.02); // 最大值留2%空间
@@ -123,7 +150,7 @@ window.onload = function () {
             if (window.historyChart) {
                 window.historyChart.destroy();
             }
-            
+
             window.historyChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -155,55 +182,33 @@ window.onload = function () {
                     },
                     plugins: {
                         tooltip: {
-                            enabled: false,
-                            external: function(context) {
-                                // Tooltip元素
-                                const {chart, tooltip} = context;
-                                let tooltipEl = chart.canvas.parentNode.querySelector('.chart-tooltip');
-                                
-                                if (!tooltipEl) {
-                                    tooltipEl = document.createElement('div');
-                                    tooltipEl.className = 'chart-tooltip';
-                                    tooltipEl.style.background = 'var(--color-bg-alt)';
-                                    tooltipEl.style.border = '1px solid var(--color-border)';
-                                    tooltipEl.style.borderRadius = 'var(--radius-md)';
-                                    tooltipEl.style.color = 'var(--color-text)';
-                                    tooltipEl.style.padding = 'var(--space-sm)';
-                                    tooltipEl.style.pointerEvents = 'none';
-                                    tooltipEl.style.position = 'absolute';
-                                    tooltipEl.style.maxWidth = '400px';
-                                    tooltipEl.style.fontSize = '0.8rem';
-                                    tooltipEl.style.lineHeight = '1.5';
-                                    tooltipEl.style.boxShadow = 'var(--shadow-md)';
-                                    tooltipEl.style.opacity = '0.9';
-                                    tooltipEl.style.zIndex = '1000';
-                                    chart.canvas.parentNode.appendChild(tooltipEl);
-                                }
-                                
-                                // 隐藏工具提示
-                                if (tooltip.opacity === 0) {
-                                    tooltipEl.style.opacity = 0;
-                                    return;
-                                }
-                                
-                                // 设置内容
-                                if (tooltip.dataPoints) {
-                                    const reversedIndex = records.length - 1 - tooltip.dataPoints[0].dataIndex;
+                            enabled: true,
+                            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--color-bg-alt').trim() || '#f3f5f7',
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-border').trim() || '#94a3b8',
+                            borderWidth: 1,
+                            borderRadius: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--radius-md').trim().replace('px', '')) || 8,
+                            titleColor: getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#1e293b',
+                            bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#1e293b',
+                            padding: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--space-sm').trim().replace('rem', '')) * 16 || 12,
+                            boxShadow: getComputedStyle(document.documentElement).getPropertyValue('--shadow-md').trim() || '0 4px 6px rgba(15, 23, 42, 0.1)',
+                            callbacks: {
+                                label: function (context) {
+                                    const reversedIndex = records.length - 1 - context.dataIndex;
                                     const record = records[reversedIndex];
-                                    tooltipEl.innerHTML = `
-                                        <div><strong>时间:</strong> ${record.date.split(' ')[1]}</div>
-                                        <div><strong>抽卡数:</strong> ${record.draws}张</div>
-                                        <div><strong>计算方式:</strong> ${record.calculationMethod}</div>
-                                        <div><strong>概率:</strong> ${record.probability}</div>
-                                        <div><strong>条件:</strong>\n${record.condition}</div>
-                                    `;
+                                    const condition = record.condition || '';
+                                    const conditionLines = wrapText(condition);
+                                    const result = [`概率: ${record.probability}`];
+                                    
+                                    if (conditionLines.length === 1) {
+                                        result.push(`条件: ${conditionLines[0]}`);
+                                    } else {
+                                        result.push('条件:');
+                                        result.push(...conditionLines);
+                                    }
+                                    
+                                    result.push(`计算方式: ${record.calculationMethod}`);
+                                    return result;
                                 }
-                                
-                                // 定位工具提示
-                                const {offsetLeft: positionX, offsetTop: positionY} = chart.canvas;
-                                tooltipEl.style.left = positionX + tooltip.caretX + 'px';
-                                tooltipEl.style.top = positionY + tooltip.caretY + 'px';
-                                tooltipEl.style.opacity = 1;
                             }
                         }
                     },

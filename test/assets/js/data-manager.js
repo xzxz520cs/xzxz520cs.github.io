@@ -1,3 +1,9 @@
+/**
+ * 数据管理模块
+ * 功能：处理卡组保存/加载、计算记录管理
+ * 核心方法：saveDeck(), loadDeck(), saveCalculationRecord()
+ * 被主模块调用，不直接依赖其他模块
+ */
 (function (global) {
     // localStorage最大存储空间（约5MB，防止超限）
     const MAX_STORAGE_SIZE = 5 * 1024 * 1024;
