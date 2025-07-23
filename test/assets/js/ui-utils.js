@@ -6,6 +6,29 @@
  */
 (function (global) {
     /**
+     * 字符串换行工具函数(确保返回数组)
+     */
+    function wrapText(text, maxLength = 50) {
+        if (!text || typeof text !== 'string') return [''];
+        
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = words[0] || '';
+
+        for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            if (currentLine.length + word.length + 1 <= maxLength) {
+                currentLine += ' ' + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        lines.push(currentLine);
+        return lines;
+    }
+
+    /**
      * 对字符串进行正则转义，防止特殊字符影响正则表达式
      */
     function escapeRegExp(string) {
@@ -232,6 +255,103 @@
     }
 
     // 对外暴露的工具方法集合
+    /**
+     * 从localStorage加载最近25条计算记录并渲染图表
+     */
+    function loadHistoryRecords() {
+        const records = JSON.parse(localStorage.getItem('calculationRecords') || '[]');
+        const recentRecords = records.slice(-25); // 获取最近25条
+        renderHistoryChart(recentRecords);
+    }
+
+    /**
+     * 渲染历史概率折线图
+     * @param {Array} records - 计算记录数组
+     */
+    function renderHistoryChart(records) {
+        const ctx = document.getElementById('historyLineChart').getContext('2d');
+        // 显示时间+抽卡数
+        const labels = records.map(r => `${r.date.split(' ')[1]}\n抽${r.draws}张`).reverse();
+        const data = records.map(r => parseFloat(r.probability.replace('%', '')) || 0).reverse();
+
+        // 计算动态y轴范围
+        const minValue = Math.max(0, Math.min(...data) * 0.98); // 最小值留2%空间
+        const maxValue = Math.min(100, Math.max(...data) * 1.02); // 最大值留2%空间
+
+        if (window.historyChart) {
+            window.historyChart.destroy();
+        }
+
+        window.historyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '概率(%)',
+                    data: data,
+                    tension: 0.1,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointHitRadius: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        suggestedMin: minValue,
+                        suggestedMax: maxValue
+                    },
+                    x: {
+                        reverse: true, // x轴反向显示
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--color-bg-alt').trim() || '#f3f5f7',
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-border').trim() || '#94a3b8',
+                        borderWidth: 1,
+                        borderRadius: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--radius-md').trim().replace('px', '')) || 8,
+                        titleColor: getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#1e293b',
+                        bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#1e293b',
+                        padding: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--space-sm').trim().replace('rem', '')) * 16 || 12,
+                        boxShadow: getComputedStyle(document.documentElement).getPropertyValue('--shadow-md').trim() || '0 4px 6px rgba(15, 23, 42, 0.1)',
+                        callbacks: {
+                            label: function (context) {
+                                const reversedIndex = records.length - 1 - context.dataIndex;
+                                const record = records[reversedIndex];
+                                const condition = record.condition || '';
+                                const conditionLines = wrapText(condition);
+                                const result = [`概率: ${record.probability}`];
+                                
+                                if (conditionLines.length === 1) {
+                                    result.push(`条件: ${conditionLines[0]}`);
+                                } else {
+                                    result.push('条件:');
+                                    result.push(...conditionLines);
+                                }
+                                
+                                result.push(`计算方式: ${record.calculationMethod}`);
+                                return result;
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    }
+
     global.UIUtils = {
         escapeRegExp,
         getVarName,
@@ -244,6 +364,9 @@
         initCardVisibilityControls,
         showOneCard,
         hideOneCard,
-        updateCardVisibilityButtons
+        updateCardVisibilityButtons,
+        wrapText,
+        loadHistoryRecords,
+        renderHistoryChart
     };
 })(window);

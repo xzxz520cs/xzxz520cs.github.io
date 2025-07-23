@@ -214,8 +214,8 @@
         // 如果历史记录区域可见，则更新折线图
         const historyTable = document.getElementById('historyTable');
         if (historyTable && !historyTable.classList.contains('hidden') &&
-            window.HistoryManager && window.HistoryManager.loadHistoryRecords) {
-            window.HistoryManager.loadHistoryRecords();
+            window.UIUtils && window.UIUtils.loadHistoryRecords) {
+            window.UIUtils.loadHistoryRecords();
         }
     }
 
@@ -283,6 +283,13 @@
         if (confirm('确定删除所有计算记录吗？')) {
             localStorage.removeItem('calculationRecords');
             alert('计算记录已删除。');
+            
+            // 如果历史记录区域可见，则更新折线图
+            const historyTable = document.getElementById('historyTable');
+            if (historyTable && !historyTable.classList.contains('hidden') &&
+                window.UIUtils && window.UIUtils.loadHistoryRecords) {
+                window.UIUtils.loadHistoryRecords();
+            }
         }
     }
 
