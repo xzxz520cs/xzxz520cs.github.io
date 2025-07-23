@@ -210,6 +210,13 @@
         }
         records.push(record);
         localStorage.setItem('calculationRecords', JSON.stringify(records));
+        
+        // 如果历史记录区域可见，则更新折线图
+        const historyTable = document.getElementById('historyTable');
+        if (historyTable && !historyTable.classList.contains('hidden') &&
+            window.HistoryManager && window.HistoryManager.loadHistoryRecords) {
+            window.HistoryManager.loadHistoryRecords();
+        }
     }
 
     /**
