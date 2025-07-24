@@ -194,7 +194,7 @@
             validCombinations: errorMessage ? '计算错误' : (result.valid !== undefined ? result.valid.toString() : '0'),
             totalCombinations: errorMessage ? '计算错误' : (result.total !== undefined ? result.total.toString() : '0'),
             condition,
-            calculationMethod: result.calculationMethod || "精确计算",
+            calculationMethod: result.calculationMethod || (errorMessage ? "未知方法" : "精确计算"),
             cards: Array.from({ length: 52 }).map((_, i) => {
                 const inputName = document.getElementById(`cardName${i}`).value.trim();
                 return {

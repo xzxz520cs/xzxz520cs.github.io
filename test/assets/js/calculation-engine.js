@@ -81,9 +81,9 @@
                 condition = condition.replace(regex, cardNameMap[name]);
             }
             // 检查条件表达式是否误用赋值运算符
-            const conditionWithoutOperators = condition.replace(/==|<=|>=|!=/g, '');
+            const conditionWithoutOperators = condition.replace(/===?|<=|>=|!=/g, '');
             if (conditionWithoutOperators.includes('=')) {
-                alert("提示：条件表达式中建议使用 '==' 或 '===' 判断相等，请检查是否正确。");
+                alert("提示：条件表达式中应当使用 '==' 或 '===' 判断相等，请检查是否正确。");
             }
             // 创建Web Worker执行精确组合枚举计算
             calculationWorker = new Worker(URL.createObjectURL(new Blob([`
@@ -205,7 +205,7 @@
             isCalculating = true;
             document.getElementById('cancelBtn').classList.remove('hidden');
         } catch (error) {
-            showError(error.message);
+            showError(error.message, "精确计算");
         }
     }
 
@@ -239,7 +239,7 @@
     }
 
     // 显示错误信息并重置界面
-    function showError(message) {
+    function showError(message, method) {
         clearInterval(progressUpdateInterval);
         progressUpdateInterval = null;
         cleanupCalculation();
@@ -251,7 +251,8 @@
         document.getElementById('progressText').textContent =
             `计算错误  计算用时: ${elapsedSeconds}秒`;
         alert(`计算错误: ${message}`);
-        global.DataManager.saveCalculationRecord({}, document.getElementById('condition').value, message);
+        const calcMethod = method || (isCalculating ? "精确计算" : "蒙特卡洛模拟");
+        global.DataManager.saveCalculationRecord({calculationMethod: calcMethod}, document.getElementById('condition').value, message);
     }
 
     // 取消当前计算，终止worker并重置界面
@@ -268,6 +269,11 @@
             `计算已取消  计算用时: ${elapsedSeconds}秒`;
         cleanupCalculation();
         alert("计算已取消");
+        global.DataManager.saveCalculationRecord(
+            {calculationMethod: isCalculating ? "精确计算" : "蒙特卡洛模拟"},
+            document.getElementById('condition').value,
+            "计算已取消"
+        );
     }
 
     // 清理计算相关状态
@@ -452,7 +458,7 @@
                     `蒙特卡洛模拟计算中: ${progress}% 用时: ${elapsedSeconds}秒`;
             }, 1000);
         } catch (error) {
-            showError(error.message);
+            showError(error.message, "蒙特卡洛模拟");
         }
     }
 
