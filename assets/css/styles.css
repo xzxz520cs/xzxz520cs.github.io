@@ -432,6 +432,18 @@ img {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
 }
 
+.grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 680px), 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 435px), 1fr));
+}
+
+.grid-4 {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+}
+
 /* 卡片组件样式设置 */
 .card {
   background-color: var(--color-bg-alt);
