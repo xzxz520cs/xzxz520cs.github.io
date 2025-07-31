@@ -831,6 +831,10 @@ tr:nth-child(even) td {
 }
 
 /* 边距辅助类：上下间距设置 */
+.mt-0 {
+  margin-top: 0;
+}
+
 .mt-1 {
   margin-top: var(--space-xxs);
 }
@@ -853,6 +857,10 @@ tr:nth-child(even) td {
 
 .mt-6 {
   margin-top: var(--space-xl);
+}
+
+.mb-0 {
+  margin-bottom: 0;
 }
 
 .mb-1 {

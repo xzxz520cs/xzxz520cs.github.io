@@ -1,7 +1,7 @@
 /* =====================================================
-    游戏王概率计算器专用样式定义
-    本文件包含计算器各组件的布局及设计标准。
-   ===================================================== */
+     游戏王概率计算器专用样式定义
+     本文件包含计算器各组件的布局及设计标准。
+    ===================================================== */
 
 /* 卡组管理面板样式 */
 .deck-management {
@@ -313,4 +313,30 @@
 
 #manualConditionInput textarea {
     height: 100%;
+}
+
+/* 概率网格布局 */
+.probability-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+}
+
+.probability {
+    padding: var(--space-xs);
+    text-align: center;
+    border-radius: var(--radius-sm);
+}
+
+.probability-header {
+    font-weight: 600;
+    background-color: var(--color-primary);
+    color: var(--color-text-light);
+}
+
+.probability-cell {
+    background: transparent;
+    border: 2px solid currentColor;
+    color: var(--color-secondary);
+    padding: calc(var(--space-xs) - 2px);
 }
