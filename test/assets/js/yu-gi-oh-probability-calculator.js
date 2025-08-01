@@ -101,6 +101,15 @@ window.onload = function () {
     });
 };
 
+// 组合生成代理函数
+function generateCombinations() {
+    if (window.CombinationGenerator && window.CombinationGenerator.generateCombinations) {
+        window.CombinationGenerator.generateCombinations();
+    } else {
+        alert("组合生成功能未加载");
+    }
+}
+
 // 条件构建器相关接口代理，便于外部调用
 window.getConditionInputMode = function () {
     return window.ConditionBuilder.getConditionInputMode();
