@@ -234,7 +234,8 @@
         global.DataManager.saveCalculationRecord(result, document.getElementById('condition').value);
         if (document.getElementById('autoIncrementDraws')?.checked) {
             const drawsInput = document.getElementById('draws');
-            drawsInput.value = parseInt(drawsInput.value) + 1;
+            const incrementValue = parseInt(document.getElementById('incrementValue').value) || 1;
+            drawsInput.value = parseInt(drawsInput.value) + incrementValue;
         }
     }
 
@@ -446,7 +447,8 @@
                     global.DataManager.saveCalculationRecord(e.data, document.getElementById('condition').value);
                     if (document.getElementById('autoIncrementDraws')?.checked) {
                         const drawsInput = document.getElementById('draws');
-                        drawsInput.value = parseInt(drawsInput.value) + 1;
+                        const incrementValue = parseInt(document.getElementById('incrementValue').value) || 1;
+                        drawsInput.value = parseInt(drawsInput.value) + incrementValue;
                     }
                 }
             };
