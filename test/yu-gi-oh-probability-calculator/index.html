@@ -377,7 +377,7 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
                             <label for="combinationCount">生成数量</label>
                             <input type="number" id="combinationCount" class="form-control auto-width" min="1" value="10">
                         </div>
-                        <button class="btn btn--primary">生成组合</button>
+                        <button class="btn btn--primary" onclick="generateCombinations()">生成组合</button>
                     </div>
                     <div class="form-group">
                         <label for="combinationResults">结果</label>
@@ -412,15 +412,13 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
     <script src="../assets/js/data-manager.js"></script>
     <script src="../assets/js/condition-builder.js"></script>
     <script src="../assets/js/calculation-engine.js"></script>
-
+    <script src="../assets/js/probability-adversary-calculator.js"></script>
     <!-- 游戏王概率计算器主模块 -->
     <script src="../assets/js/yu-gi-oh-probability-calculator.js"></script>
 
     <!-- 实际组合生成器 -->
     <script src="../assets/js/combination-generator.js"></script>
 
-    <!-- 概率对抗计算器 -->
-    <script src="../assets/js/probability-adversary-calculator.js"></script>
 </body>
 
 </html>
