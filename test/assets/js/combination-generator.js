@@ -114,13 +114,32 @@
                     }
                     // 构建卡名数组
                     this.cardNames = cardNames;
-                    // 构建条件函数
-                    const replacedCondition = condition
-                        .replace(/PROB\\((\\d+(?:\\.\\d+)?)\\)/g, "(Math.random() < ($1/100))")
+                    // 处理PROB函数
+                    const probMatches = condition.match(/PROB\\((\\d+(?:\\.\\d+)?)\\)/g) || [];
+                    const probValues = probMatches.map(m => parseFloat(m.match(/PROB\\((\\d+(?:\\.\\d+)?)\\)/)[1]));
+                    
+                    // 构建基础条件函数
+                    const baseCondition = condition
+                        .replace(/PROB\\((\\d+(?:\\.\\d+)?)\\)/g, "__PROB__")
                         .replace(/\\b([a-z]{1,2})\\b/g, function(m) {
                             return (m === 'true' || m === 'false') ? m : "counts[" + varToIndex(m) + "]";
                         });
-                    conditionFunc = new Function("counts", "return " + replacedCondition);
+
+                    // 创建条件验证函数
+                    conditionFunc = function(counts) {
+                        // 递归处理所有PROB组合
+                        function evaluate(index, currentCondition) {
+                            if (index >= probValues.length) {
+                                return eval(currentCondition);
+                            }
+                            // 计算PROB(0)和PROB(100)两种情况
+                            const prob0 = currentCondition.replace('__PROB__', 'false');
+                            const prob100 = currentCondition.replace('__PROB__', 'true');
+                            return evaluate(index + 1, prob0) || evaluate(index + 1, prob100);
+                        }
+                        return evaluate(0, baseCondition);
+                    };
+                    
                     combinationType = type;
                     maxCombinations = count;
                 }
@@ -189,6 +208,7 @@
                     const combinationText = formatCombination(e.data.counts, cardNames);
                     const resultsTextarea = document.getElementById('combinationResults');
                     resultsTextarea.value += combinationText + '\n';
+                    resultsTextarea.scrollTop = resultsTextarea.scrollHeight;
                 } else if (e.data.type === 'complete') {
                     finalizeGeneration();
                 }
