@@ -985,6 +985,11 @@ tr:nth-child(even) td {
   width: 100%;
 }
 
+/* 宽度工具类：设置元素宽度为自动 */
+.auto-width {
+  width: auto  !important;
+}
+
 /* 间距工具类 */
 .gap-0 {
   gap: 0;
