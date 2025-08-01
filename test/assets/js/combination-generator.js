@@ -335,13 +335,3 @@
         cancelGeneration
     };
 })(window);
-
-// 绑定生成按钮事件
-document.addEventListener('DOMContentLoaded', function() {
-    const generateBtn = document.querySelector('.combination-options button.btn--primary');
-    if (generateBtn) {
-        generateBtn.addEventListener('click', function() {
-            window.CombinationGenerator.generateCombinations();
-        });
-    }
-});
