@@ -362,8 +362,8 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
             <div class="card card--elevated">
                 <div class="flex--column flex full-height">
                     <h2 class="mt-0">实际组合生成器</h2>
-                    <div class="combination-options">
-                        <div class="form-group">
+                    <div class="flex flex--column">
+                        <div class="condition-mode">
                             <label>
                                 <input type="radio" name="combinationType" value="valid" checked>
                                 符合条件的组合
@@ -373,9 +373,9 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
                                 不符合条件的组合
                             </label>
                         </div>
-                        <div class="form-group">
+                        <div class="condition-mode">
                             <label for="combinationCount">生成数量</label>
-                            <input type="number" id="combinationCount" class="form-control" min="1" value="10">
+                            <input type="number" id="combinationCount" class="form-control auto-width" min="1" value="10">
                         </div>
                         <button class="btn btn--primary">生成组合</button>
                     </div>
