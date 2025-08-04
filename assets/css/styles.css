@@ -815,6 +815,10 @@ tr:nth-child(even) td {
   justify-content: space-between;
 }
 
+.align-center {
+  align-items: center;
+}
+
 .text-center {
   text-align: center;
 }
