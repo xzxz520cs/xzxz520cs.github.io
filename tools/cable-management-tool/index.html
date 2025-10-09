@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>接线理线 — 力导向原型</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 0; display: flex; height: 100vh; }
+    #left { flex: 1; position: relative; background: #fafafa; }
+    #right { width: 320px; border-left: 1px solid #ddd; padding: 10px; box-sizing: border-box; background: #fff; overflow: auto; }
+    .toolbar { padding: 8px; display:flex; gap:6px; flex-wrap:wrap; }
+    button { padding:6px 10px; cursor:pointer; }
+    svg { width:100%; height:100%; display:block; }
+    .link { stroke: #999; stroke-opacity: 0.9; }
+    .link.selected { stroke: orange; stroke-opacity:1; }
+    .node circle { fill: #eee; stroke: #666; stroke-width:1.5px; cursor: pointer; }
+    .node.selected circle { stroke: orange; stroke-width:3px; }
+    .node text { font-size: 12px; pointer-events: none; user-select: none; }
+    .rect-select { fill: rgba(0,0,255,0.06); stroke: rgba(0,0,255,0.5); stroke-dasharray:4 2; }
+    label { display:block; margin-top:8px; font-weight:600; }
+    input[type="text"], input[type="number"] { width:100%; box-sizing:border-box; padding:6px; margin-top:4px; }
+    .info { font-size:12px; color:#666; margin-top:6px; }
+    .small { font-size:12px; padding:4px 8px; }
+  </style>
+</head>
+<body>
+  <div id="left">
+    <div class="toolbar" style="position:absolute; top:8px; left:8px; z-index:2;">
+      <button id="btnAddNode">添加节点</button>
+      <button id="btnAddLink">添加连线（点击两个节点）</button>
+      <button id="btnGroup">分组选中节点</button>
+      <button id="btnZip">扎带选中连线</button>
+      <button id="btnDelete">删除选中</button>
+      <button id="btnSave">保存 JSON</button>
+      <input id="loadFile" type="file" style="display:none" />
+      <button id="btnLoad">加载 JSON</button>
+    </div>
+    <svg id="svgCanvas"></svg>
+  </div>
+
+  <div id="right">
+    <h3>属性面板</h3>
+    <div id="propArea">
+      <div class="info">请选择一个节点或连线来编辑属性，或框选/Shift+点击多选。</div>
+    </div>
+    <div style="margin-top:12px;">
+      <div class="info">提示：</div>
+      <ul style="padding-left:18px; margin-top:6px;">
+        <li>拖动节点可改变位置。</li>
+        <li>空白处按下并拖动可矩形选区。</li>
+        <li>添加连线时，先按按钮再点击两个节点。</li>
+      </ul>
+    </div>
+  </div>
+
+<script>
+// ==== 基本配置 ====
+const WIDTH = window.innerWidth - 320; // left area approx
+const HEIGHT = window.innerHeight;
+const DEFAULT_LINK_LENGTH = 160;
+const BASE_LINK_WIDTH = 4;
+const NEUTRAL_COLOR = '#999';
+const STRETCH_COLOR = '#ff3b3b'; // red
+const COMPRESS_COLOR = '#2b8cff'; // blue
+
+// 数据
+let nodes = [
+  { id: 'pc', name: '电脑', radius: 20, type: 'device', x: 200, y: 200 },
+  { id: 'monitor', name: '显示器', radius: 16, type: 'device', x: 360, y: 220 },
+  { id: 'speaker', name: '音响', radius: 12, type: 'device', x: 220, y: 380 }
+];
+let links = [
+  { id: 'l1', source: 'pc', target: 'monitor', name: '视频线', targetLength: 160 },
+  { id: 'l2', source: 'pc', target: 'speaker', name: '音频线', targetLength: 130 }
+];
+
+// 选中集合（id）
+let selectedNodeIds = new Set();
+let selectedLinkIds = new Set();
+
+// 状态
+let addLinkMode = false;
+let pendingLinkSource = null;
+let isRectSelecting = false;
+let rectStart = null;
+let rectEl = null;
+
+// D3 基本元素
+const svg = d3.select('#svgCanvas')
+  .attr('width', '100%').attr('height', '100%')
+  .style('touch-action', 'none');
+
+const gLinks = svg.append('g');
+const gNodes = svg.append('g');
+
+// simulation
+const simulation = d3.forceSimulation()
+  .force('charge', d3.forceManyBody().strength(-300))
+  .force('center', d3.forceCenter(WIDTH/2, HEIGHT/2))
+  .force('collide', d3.forceCollide().radius(d => d.radius + 6))
+  .on('tick', ticked);
+
+// link force will be created in initForce()
+let linkForce = d3.forceLink()
+  .id(d => d.id)
+  .distance(d => d.targetLength || DEFAULT_LINK_LENGTH)
+  .strength(linkStrengthFn);
+
+// apply link force
+simulation.force('link', linkForce);
+
+// utility
+function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
+
+// ==== 更新图形绑定 ====
+function updateGraph() {
+  // bind links
+  const linkSel = gLinks.selectAll('line.link').data(links, d=>d.id);
+  linkSel.exit().remove();
+  const linkEnter = linkSel.enter().append('line')
+    .attr('class', 'link')
+    .on('click', (event,d) => { event.stopPropagation(); handleLinkClick(event, d); });
+  linkEnter.append('title');
+  // merge
+  const linkAll = linkEnter.merge(linkSel);
+  linkAll.select('title').text(d => d.name || '');
+  // bind nodes
+  const nodeSel = gNodes.selectAll('g.node').data(nodes, d=>d.id);
+  nodeSel.exit().remove();
+  const nodeEnter = nodeSel.enter().append('g').attr('class','node')
+    .call(d3.drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended))
+    .on('click', (event,d) => { event.stopPropagation(); handleNodeClick(event,d); });
+
+  nodeEnter.append('circle').attr('r', d => d.radius);
+  nodeEnter.append('text').attr('dy', '0.35em').attr('x', d => d.radius + 6).text(d => d.name);
+
+  const nodeAll = nodeEnter.merge(nodeSel);
+  nodeAll.select('circle').attr('r', d => d.radius);
+  nodeAll.select('text').text(d => d.name);
+
+  // restart simulation
+  simulation.nodes(nodes);
+  simulation.force('link').links(links);
+  simulation.alpha(0.6).restart();
+
+  applySelectionStyles();
+  updatePropertyPanel();
+}
+
+// ==== 选中样式 ====
+function applySelectionStyles() {
+  gNodes.selectAll('g.node').classed('selected', d => selectedNodeIds.has(d.id));
+  gLinks.selectAll('line.link').classed('selected', d => selectedLinkIds.has(d.id));
+}
+
+// ==== 交互处理 ====
+function handleNodeClick(event, d) {
+  if (addLinkMode) {
+    if (!pendingLinkSource) {
+      pendingLinkSource = d;
+      d3.select(event.currentTarget).select('circle').attr('stroke','#00a').attr('stroke-width',3);
+      return;
+    } else if (pendingLinkSource.id === d.id) {
+      // click same node -> cancel
+      pendingLinkSource = null;
+      addLinkMode = false;
+      d3.selectAll('g.node circle').attr('stroke','#666').attr('stroke-width',1.5);
+      d3.select('#btnAddLink').text('添加连线（点击两个节点）');
+      return;
+    } else {
+      // create link
+      const newLink = { id: uid('link'), source: pendingLinkSource.id, target: d.id, name: '线缆', targetLength: DEFAULT_LINK_LENGTH };
+      links.push(newLink);
+      pendingLinkSource = null;
+      addLinkMode = false;
+      d3.selectAll('g.node circle').attr('stroke','#666').attr('stroke-width',1.5);
+      d3.select('#btnAddLink').text('添加连线（点击两个节点）');
+      updateGraph();
+      return;
+    }
+  }
+
+  if (event.shiftKey) {
+    // toggle
+    if (selectedNodeIds.has(d.id)) selectedNodeIds.delete(d.id);
+    else selectedNodeIds.add(d.id);
+  } else {
+    selectedNodeIds.clear();
+    selectedLinkIds.clear();
+    selectedNodeIds.add(d.id);
+  }
+  applySelectionStyles();
+  updatePropertyPanel();
+}
+
+function handleLinkClick(event, d) {
+  if (event.shiftKey) {
+    if (selectedLinkIds.has(d.id)) selectedLinkIds.delete(d.id);
+    else selectedLinkIds.add(d.id);
+  } else {
+    selectedNodeIds.clear();
+    selectedLinkIds.clear();
+    selectedLinkIds.add(d.id);
+  }
+  applySelectionStyles();
+  updatePropertyPanel();
+}
+
+// 背景点击用于清除选择 / 矩形框选起点
+svg.on('mousedown', (event) => {
+  if (event.target === svg.node()) {
+    if (event.shiftKey) return; // allow shift for other uses
+    rectStart = d3.pointer(event, svg.node());
+    isRectSelecting = true;
+    if (rectEl) rectEl.remove();
+    rectEl = svg.append('rect').attr('class','rect-select').attr('x',rectStart[0]).attr('y',rectStart[1]).attr('width',0).attr('height',0);
+  }
+});
+svg.on('mousemove', (event) => {
+  if (!isRectSelecting) return;
+  const [mx,my] = d3.pointer(event, svg.node());
+  const x = Math.min(rectStart[0], mx), y = Math.min(rectStart[1], my);
+  const w = Math.abs(rectStart[0] - mx), h = Math.abs(rectStart[1] - my);
+  rectEl.attr('x', x).attr('y', y).attr('width', w).attr('height', h);
+});
+svg.on('mouseup', (event) => {
+  if (!isRectSelecting) return;
+  isRectSelecting = false;
+  const rect = rectEl.node().getBBox();
+  rectEl.remove();
+  rectEl = null;
+  // select nodes whose center inside rect
+  selectedNodeIds.clear();
+  selectedLinkIds.clear();
+  nodes.forEach(n => {
+    if (n.x >= rect.x && n.x <= rect.x + rect.width && n.y >= rect.y && n.y <= rect.y + rect.height) {
+      selectedNodeIds.add(n.id);
+    }
+  });
+  applySelectionStyles();
+  updatePropertyPanel();
+});
+
+// 拖动
+function dragstarted(event, d) {
+  if (!event.active) simulation.alphaTarget(0.3).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+}
+function dragged(event, d) {
+  d.fx = event.x;
+  d.fy = event.y;
+}
+function dragended(event, d) {
+  if (!event.active) simulation.alphaTarget(0);
+  d.fx = null;
+  d.fy = null;
+}
+
+// 工具按钮逻辑
+document.getElementById('btnAddNode').addEventListener('click', () => {
+  const id = uid('n');
+  const node = { id, name: '设备 ' + id.slice(-3), radius: 14, type: 'device', x: WIDTH/2 + (Math.random()-0.5)*80, y: HEIGHT/2 + (Math.random()-0.5)*80 };
+  nodes.push(node);
+  updateGraph();
+});
+
+document.getElementById('btnAddLink').addEventListener('click', () => {
+  addLinkMode = !addLinkMode;
+  pendingLinkSource = null;
+  document.getElementById('btnAddLink').textContent = addLinkMode ? '正在添加连线：点击两个节点' : '添加连线（点击两个节点）';
+});
+
+document.getElementById('btnGroup').addEventListener('click', () => {
+  groupSelectedNodes();
+});
+
+document.getElementById('btnZip').addEventListener('click', () => {
+  zipTieSelectedLinks();
+});
+
+document.getElementById('btnDelete').addEventListener('click', () => {
+  deleteSelected();
+});
+
+document.getElementById('btnSave').addEventListener('click', () => {
+  saveToJson();
+});
+
+document.getElementById('btnLoad').addEventListener('click', () => {
+  document.getElementById('loadFile').click();
+});
+document.getElementById('loadFile').addEventListener('change', (evt) => {
+  const f = evt.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      loadFromJson(data);
+    } catch(err) {
+      alert('读取失败：' + err);
+    }
+  };
+  reader.readAsText(f);
+});
+
+// ==== 复杂操作：分组 & 扎带 & 删除 ====
+function groupSelectedNodes() {
+  if (selectedNodeIds.size < 2) { alert('请先选中至少两个节点再分组。'); return; }
+  const sel = nodes.filter(n => selectedNodeIds.has(n.id));
+  const centroid = { x: d3.mean(sel, d=>d.x), y: d3.mean(sel, d=>d.y) };
+  const gid = uid('group');
+  const groupNode = { id: gid, name: 'Group', radius: Math.max(24, sel.length*6), type: 'group', x: centroid.x, y: centroid.y };
+  nodes.push(groupNode);
+  // connect each selected node to group node with short strong links
+  sel.forEach(n => {
+    links.push({ id: uid('link'), source: n.id, target: gid, name: '属组', targetLength: 60 });
+  });
+  // clear selection and select only the new group
+  selectedNodeIds.clear();
+  selectedLinkIds.clear();
+  selectedNodeIds.add(gid);
+  updateGraph();
+}
+
+function zipTieSelectedLinks() {
+  if (selectedLinkIds.size < 1) { alert('请先选中至少一条连线再扎带。'); return; }
+  const selLinks = links.filter(l => selectedLinkIds.has(l.id));
+  // compute average midpoint
+  const midpoints = selLinks.map(l => {
+    const s = (typeof l.source === 'object') ? l.source : nodes.find(n=>n.id===l.source);
+    const t = (typeof l.target === 'object') ? l.target : nodes.find(n=>n.id===l.target);
+    return { x: (s.x + t.x)/2, y: (s.y + t.y)/2 };
+  });
+  const bundlePos = { x: d3.mean(midpoints, m=>m.x), y: d3.mean(midpoints, m=>m.y) };
+  const bid = uid('bundle');
+  const bundleNode = { id: bid, name: '扎带', radius: 10, type: 'bundle', x: bundlePos.x, y: bundlePos.y };
+  nodes.push(bundleNode);
+
+  // For each selected link: remove it and replace with two links via bundleNode
+  const newLinks = [];
+  const remainingLinks = [];
+  links.forEach(l => {
+    if (selectedLinkIds.has(l.id)) {
+      // decompose
+      const originalLength = l.targetLength || DEFAULT_LINK_LENGTH;
+      // ensure we refer to source/target ids
+      const srcId = (typeof l.source === 'object') ? l.source.id : l.source;
+      const tgtId = (typeof l.target === 'object') ? l.target.id : l.target;
+      newLinks.push({ id: uid('link'), source: srcId, target: bid, name: l.name + ' (1/2)', targetLength: Math.max(30, originalLength * 0.5) });
+      newLinks.push({ id: uid('link'), source: bid, target: tgtId, name: l.name + ' (2/2)', targetLength: Math.max(30, originalLength * 0.5) });
+    } else {
+      remainingLinks.push(l);
+    }
+  });
+  links = remainingLinks.concat(newLinks);
+  // update selection to the new bundle
+  selectedNodeIds.clear();
+  selectedLinkIds.clear();
+  selectedNodeIds.add(bid);
+  updateGraph();
+}
+
+function deleteSelected() {
+  if (selectedNodeIds.size === 0 && selectedLinkIds.size === 0) return;
+  // remove nodes
+  nodes = nodes.filter(n => !selectedNodeIds.has(n.id));
+  // remove links that involve deleted nodes or are selected
+  links = links.filter(l => {
+    const s = (typeof l.source === 'object') ? l.source.id : l.source;
+    const t = (typeof l.target === 'object') ? l.target.id : l.target;
+    if (selectedLinkIds.has(l.id)) return false;
+    if (selectedNodeIds.has(s) || selectedNodeIds.has(t)) return false;
+    return true;
+  });
+  selectedNodeIds.clear();
+  selectedLinkIds.clear();
+  updateGraph();
+}
+
+// ==== 保存加载 ====
+function saveToJson() {
+  // convert links source/target to ids if objects
+  const nodesOut = nodes.map(n => ({ id:n.id, name:n.name, radius:n.radius, type:n.type, x:n.x, y:n.y }));
+  const linksOut = links.map(l => ({
+    id: l.id,
+    source: (typeof l.source === 'object') ? l.source.id : l.source,
+    target: (typeof l.target === 'object') ? l.target.id : l.target,
+    name: l.name,
+    targetLength: l.targetLength
+  }));
+  const data = { nodes: nodesOut, links: linksOut };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'wiring_graph.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function loadFromJson(data) {
+  if (!data.nodes || !data.links) { alert('格式错误：需要 nodes 和 links'); return; }
+  nodes = data.nodes.map(n => Object.assign({}, n));
+  links = data.links.map(l => Object.assign({}, l));
+  // ensure link source/target are ids for force.link to resolve
+  updateGraph();
+}
+
+// ==== 力学/视觉计算 ====
+function linkStrengthFn(l) {
+  // Called by d3.forceLink each tick; compute dynamic strength based on current deformation
+  const s = (typeof l.source === 'object') ? l.source : nodes.find(n => n.id === l.source);
+  const t = (typeof l.target === 'object') ? l.target : nodes.find(n => n.id === l.target);
+  if (!s || !t) return 0.2;
+  const dx = s.x - t.x, dy = s.y - t.y;
+  const cur = Math.hypot(dx, dy);
+  const target = (l.targetLength || DEFAULT_LINK_LENGTH);
+  const ratio = (cur - target) / target; // >0 stretched, <0 compressed
+  const base = 0.6;
+  const stretchFactor = 0.6;
+  const compressFactor = -0.3;
+  let strength = base;
+  if (ratio > 0) strength = base + Math.min(1, ratio) * stretchFactor;
+  else strength = Math.max(0.05, base + Math.max(-1, ratio) * compressFactor);
+  // ensure in range 0.01..1
+  return Math.max(0.01, Math.min(1, strength));
+}
+
+function computeLinkStyle(cur, target) {
+  const ratio = (cur - target) / target; // -inf..inf
+  const clipped = Math.max(-1, Math.min(1, ratio));
+  let color = NEUTRAL_COLOR;
+  let width = BASE_LINK_WIDTH;
+  if (clipped > 0) {
+    // stretched -> towards red, thinner
+    const t = clipped; // 0..1
+    color = d3.interpolateRgb(NEUTRAL_COLOR, STRETCH_COLOR)(t);
+    width = BASE_LINK_WIDTH * (1 - t * 0.65);
+  } else {
+    // compressed -> towards blue, thicker
+    const t = -clipped; // 0..1
+    color = d3.interpolateRgb(NEUTRAL_COLOR, COMPRESS_COLOR)(t);
+    width = BASE_LINK_WIDTH * (1 + t * 1.1);
+  }
+  width = Math.max(0.6, Math.min(12, width));
+  return { color, width };
+}
+
+function ticked() {
+  // update lines
+  gLinks.selectAll('line.link').each(function(d) {
+    const s = (typeof d.source === 'object') ? d.source : nodes.find(n => n.id === d.source);
+    const t = (typeof d.target === 'object') ? d.target : nodes.find(n => n.id === d.target);
+    if (!s || !t) return;
+    const x1 = s.x, y1 = s.y, x2 = t.x, y2 = t.y;
+    d3.select(this).attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2);
+    const cur = Math.hypot(x2 - x1, y2 - y1);
+    const target = d.targetLength || DEFAULT_LINK_LENGTH;
+    const st = computeLinkStyle(cur, target);
+    d3.select(this).attr('stroke', st.color).attr('stroke-width', st.width);
+    d3.select(this).select('title').text(d.name || '');
+  });
+
+  // update nodes (group transform)
+  gNodes.selectAll('g.node').attr('transform', d => `translate(${d.x},${d.y})`);
+}
+
+// ==== 属性面板 ====
+function updatePropertyPanel() {
+  const area = d3.select('#propArea');
+  area.html('');
+  if (selectedNodeIds.size === 1 && selectedLinkIds.size === 0) {
+    const id = Array.from(selectedNodeIds)[0];
+    const node = nodes.find(n => n.id === id);
+    if (!node) return;
+    area.append('label').text('节点名称');
+    const nameIn = area.append('input').attr('type','text').node();
+    nameIn.value = node.name || '';
+    area.append('label').text('节点半径 (像素)');
+    const rIn = area.append('input').attr('type','number').node();
+    rIn.value = node.radius || 12;
+    area.append('div').attr('class','info').text('类型：' + (node.type || 'device'));
+    const btnApply = area.append('button').attr('class','small').text('应用').node();
+    btnApply.onclick = () => {
+      node.name = nameIn.value || node.name;
+      node.radius = Math.max(4, Number(rIn.value) || node.radius);
+      updateGraph();
+    };
+    const btnUnGroup = area.append('button').attr('class','small').style('margin-left','6px').text('取消分组（若为群组）').node();
+    btnUnGroup.onclick = () => {
+      if (node.type !== 'group') { alert('仅群组节点可取消分组（手动删除或拆分）。'); return; }
+      // 删除与该群组的链接，保留成员节点
+      links = links.filter(l => !( (l.source === node.id) || (l.target === node.id) ));
+      nodes = nodes.filter(n => n.id !== node.id);
+      selectedNodeIds.clear();
+      updateGraph();
+    };
+  } else if (selectedLinkIds.size === 1 && selectedNodeIds.size === 0) {
+    const id = Array.from(selectedLinkIds)[0];
+    const link = links.find(l => l.id === id);
+    if (!link) return;
+    area.append('label').text('线名称');
+    const nameIn = area.append('input').attr('type','text').node();
+    nameIn.value = link.name || '';
+    area.append('label').text('目标长度 (像素)');
+    const lenIn = area.append('input').attr('type','number').node();
+    lenIn.value = link.targetLength || DEFAULT_LINK_LENGTH;
+    area.append('div').attr('class','info').text('源: ' + ((typeof link.source === 'object') ? link.source.id : link.source) + ' → 目标: ' + ((typeof link.target === 'object') ? link.target.id : link.target));
+    const btnApply = area.append('button').attr('class','small').text('应用').node();
+    btnApply.onclick = () => {
+      link.name = nameIn.value || link.name;
+      link.targetLength = Math.max(10, Number(lenIn.value) || link.targetLength);
+      updateGraph();
+    };
+  } else if (selectedNodeIds.size === 0 && selectedLinkIds.size === 0) {
+    area.append('div').attr('class','info').text('未选中任何元素。');
+  } else {
+    area.append('div').attr('class','info').text(`多选：${selectedNodeIds.size} 个节点，${selectedLinkIds.size} 条连线。`);
+    // 可以扩展批量编辑
+  }
+}
+
+// 初始渲染
+updateGraph();
+
+</script>
+</body>
+</html>
