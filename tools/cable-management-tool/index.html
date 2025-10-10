@@ -26,8 +26,10 @@
 <body>
   <div id="left">
     <div class="toolbar" style="position:absolute; top:8px; left:8px; z-index:2;">
+      <button id="btnUndo" title="Ctrl+Z" disabled>撤销</button>
+      <button id="btnRedo" title="Ctrl+Y" disabled>恢复</button>
       <button id="btnAddNode">添加节点</button>
-      <button id="btnAddLink">添加连线（点击两个节点）</button>
+      <button id="btnAddLink">连接选中节点</button>
       <button id="btnGroup">分组选中节点</button>
       <button id="btnZip">扎带选中连线</button>
       <button id="btnDelete">删除选中</button>
@@ -48,7 +50,7 @@
       <ul style="padding-left:18px; margin-top:6px;">
         <li>拖动节点可改变位置。</li>
         <li>空白处按下并拖动可矩形选区。</li>
-        <li>添加连线时，先按按钮再点击两个节点。</li>
+        <li>添加连线时，先选择多个节点再点击"连接选中节点"按钮。</li>
       </ul>
     </div>
   </div>
@@ -79,11 +81,14 @@ let selectedNodeIds = new Set();
 let selectedLinkIds = new Set();
 
 // 状态
-let addLinkMode = false;
-let pendingLinkSource = null;
 let isRectSelecting = false;
 let rectStart = null;
 let rectEl = null;
+
+// 撤销/恢复历史记录
+let history = [];
+let historyIndex = -1;
+const MAX_HISTORY = 50;
 
 // D3 基本元素
 const svg = d3.select('#svgCanvas')
@@ -112,8 +117,136 @@ simulation.force('link', linkForce);
 // utility
 function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
 
+// 深拷贝对象
+function deepCopy(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+// 保存历史状态 - 重构版本，像保存JSON一样保存完整状态
+function saveHistory() {
+  // 如果当前不在历史记录的最新位置，则删除后面的记录
+  if (historyIndex < history.length - 1) {
+    history = history.slice(0, historyIndex + 1);
+  }
+  
+  // 像保存JSON一样保存完整状态
+  const nodesOut = nodes.map(n => ({ id:n.id, name:n.name, radius:n.radius, type:n.type, x:n.x, y:n.y }));
+  const linksOut = links.map(l => ({
+    id: l.id,
+    source: (typeof l.source === 'object') ? l.source.id : l.source,
+    target: (typeof l.target === 'object') ? l.target.id : l.target,
+    name: l.name,
+    targetLength: l.targetLength
+  }));
+  
+  const state = {
+    nodes: nodesOut,
+    links: linksOut,
+    selectedNodeIds: Array.from(selectedNodeIds),
+    selectedLinkIds: Array.from(selectedLinkIds)
+  };
+  
+  history.push(state);
+  historyIndex++;
+  
+  // 限制历史记录数量
+  if (history.length > MAX_HISTORY) {
+    history.shift();
+    historyIndex--;
+  }
+  
+  updateUndoRedoButtons();
+}
+
+// 从历史记录加载状态
+function loadFromHistory(state) {
+  nodes = state.nodes.map(n => Object.assign({}, n));
+  links = state.links.map(l => Object.assign({}, l));
+  selectedNodeIds = new Set(state.selectedNodeIds);
+  selectedLinkIds = new Set(state.selectedLinkIds);
+  
+  // 确保连线引用正确
+  fixLinkReferences();
+  updateGraph();
+}
+
+// 修复连线引用，将source/target从id转换为节点对象
+function fixLinkReferences() {
+  links.forEach(link => {
+    // 如果source是字符串id，则查找对应的节点对象
+    if (typeof link.source === 'string') {
+      const sourceNode = nodes.find(n => n.id === link.source);
+      if (sourceNode) {
+        link.source = sourceNode;
+      }
+    }
+    // 如果target是字符串id，则查找对应的节点对象
+    if (typeof link.target === 'string') {
+      const targetNode = nodes.find(n => n.id === link.target);
+      if (targetNode) {
+        link.target = targetNode;
+      }
+    }
+  });
+}
+
+// 撤销操作
+function undo() {
+  if (historyIndex <= 0) return;
+  
+  historyIndex--;
+  const state = history[historyIndex];
+  loadFromHistory(state);
+  updateUndoRedoButtons();
+}
+
+// 恢复操作
+function redo() {
+  if (historyIndex >= history.length - 1) return;
+  
+  historyIndex++;
+  const state = history[historyIndex];
+  loadFromHistory(state);
+  updateUndoRedoButtons();
+}
+
+// 更新撤销/恢复按钮状态
+function updateUndoRedoButtons() {
+  const btnUndo = document.getElementById('btnUndo');
+  const btnRedo = document.getElementById('btnRedo');
+  
+  btnUndo.disabled = historyIndex <= 0;
+  btnRedo.disabled = historyIndex >= history.length - 1;
+}
+
+// 更新所有按钮状态
+function updateAllButtonStates() {
+  updateUndoRedoButtons();
+  
+  // 更新其他按钮状态
+  const btnAddLink = document.getElementById('btnAddLink');
+  const btnGroup = document.getElementById('btnGroup');
+  const btnZip = document.getElementById('btnZip');
+  const btnDelete = document.getElementById('btnDelete');
+  
+  // 连接按钮：至少选中2个节点
+  btnAddLink.disabled = selectedNodeIds.size < 2;
+  
+  // 分组按钮：至少选中2个节点
+  btnGroup.disabled = selectedNodeIds.size < 2;
+  
+  // 扎带按钮：至少选中1条连线
+  btnZip.disabled = selectedLinkIds.size < 1;
+  
+  // 删除按钮：至少选中1个节点或1条连线
+  btnDelete.disabled = selectedNodeIds.size === 0 && selectedLinkIds.size === 0;
+}
+
 // ==== 更新图形绑定 ====
 function updateGraph() {
+  // 确保连线引用正确
+  fixLinkReferences();
+  
   // bind links
   const linkSel = gLinks.selectAll('line.link').data(links, d=>d.id);
   linkSel.exit().remove();
@@ -124,6 +257,7 @@ function updateGraph() {
   // merge
   const linkAll = linkEnter.merge(linkSel);
   linkAll.select('title').text(d => d.name || '');
+  
   // bind nodes
   const nodeSel = gNodes.selectAll('g.node').data(nodes, d=>d.id);
   nodeSel.exit().remove();
@@ -141,13 +275,14 @@ function updateGraph() {
   nodeAll.select('circle').attr('r', d => d.radius);
   nodeAll.select('text').text(d => d.name);
 
-  // restart simulation
+  // 重新设置力导向图
   simulation.nodes(nodes);
   simulation.force('link').links(links);
   simulation.alpha(0.6).restart();
 
   applySelectionStyles();
   updatePropertyPanel();
+  updateAllButtonStates();
 }
 
 // ==== 选中样式 ====
@@ -158,31 +293,6 @@ function applySelectionStyles() {
 
 // ==== 交互处理 ====
 function handleNodeClick(event, d) {
-  if (addLinkMode) {
-    if (!pendingLinkSource) {
-      pendingLinkSource = d;
-      d3.select(event.currentTarget).select('circle').attr('stroke','#00a').attr('stroke-width',3);
-      return;
-    } else if (pendingLinkSource.id === d.id) {
-      // click same node -> cancel
-      pendingLinkSource = null;
-      addLinkMode = false;
-      d3.selectAll('g.node circle').attr('stroke','#666').attr('stroke-width',1.5);
-      d3.select('#btnAddLink').text('添加连线（点击两个节点）');
-      return;
-    } else {
-      // create link
-      const newLink = { id: uid('link'), source: pendingLinkSource.id, target: d.id, name: '线缆', targetLength: DEFAULT_LINK_LENGTH };
-      links.push(newLink);
-      pendingLinkSource = null;
-      addLinkMode = false;
-      d3.selectAll('g.node circle').attr('stroke','#666').attr('stroke-width',1.5);
-      d3.select('#btnAddLink').text('添加连线（点击两个节点）');
-      updateGraph();
-      return;
-    }
-  }
-
   if (event.shiftKey) {
     // toggle
     if (selectedNodeIds.has(d.id)) selectedNodeIds.delete(d.id);
@@ -194,6 +304,7 @@ function handleNodeClick(event, d) {
   }
   applySelectionStyles();
   updatePropertyPanel();
+  updateAllButtonStates();
 }
 
 function handleLinkClick(event, d) {
@@ -207,6 +318,7 @@ function handleLinkClick(event, d) {
   }
   applySelectionStyles();
   updatePropertyPanel();
+  updateAllButtonStates();
 }
 
 // 背景点击用于清除选择 / 矩形框选起点
@@ -242,6 +354,7 @@ svg.on('mouseup', (event) => {
   });
   applySelectionStyles();
   updatePropertyPanel();
+  updateAllButtonStates();
 });
 
 // 拖动
@@ -261,7 +374,11 @@ function dragended(event, d) {
 }
 
 // 工具按钮逻辑
+document.getElementById('btnUndo').addEventListener('click', undo);
+document.getElementById('btnRedo').addEventListener('click', redo);
+
 document.getElementById('btnAddNode').addEventListener('click', () => {
+  saveHistory();
   const id = uid('n');
   const node = { id, name: '设备 ' + id.slice(-3), radius: 14, type: 'device', x: WIDTH/2 + (Math.random()-0.5)*80, y: HEIGHT/2 + (Math.random()-0.5)*80 };
   nodes.push(node);
@@ -269,20 +386,54 @@ document.getElementById('btnAddNode').addEventListener('click', () => {
 });
 
 document.getElementById('btnAddLink').addEventListener('click', () => {
-  addLinkMode = !addLinkMode;
-  pendingLinkSource = null;
-  document.getElementById('btnAddLink').textContent = addLinkMode ? '正在添加连线：点击两个节点' : '添加连线（点击两个节点）';
+  if (selectedNodeIds.size < 2) {
+    alert('请先选择至少两个节点再连接');
+    return;
+  }
+  
+  saveHistory();
+  const selectedNodes = nodes.filter(n => selectedNodeIds.has(n.id));
+  
+  // 连接所有选中的节点（完全图连接）
+  for (let i = 0; i < selectedNodes.length; i++) {
+    for (let j = i + 1; j < selectedNodes.length; j++) {
+      const source = selectedNodes[i];
+      const target = selectedNodes[j];
+      
+      // 检查是否已存在连接
+      const existingLink = links.find(l =>
+        (l.source.id === source.id && l.target.id === target.id) ||
+        (l.source.id === target.id && l.target.id === source.id)
+      );
+      
+      if (!existingLink) {
+        const newLink = {
+          id: uid('link'),
+          source: source.id,
+          target: target.id,
+          name: '线缆',
+          targetLength: DEFAULT_LINK_LENGTH
+        };
+        links.push(newLink);
+      }
+    }
+  }
+  
+  updateGraph();
 });
 
 document.getElementById('btnGroup').addEventListener('click', () => {
+  saveHistory();
   groupSelectedNodes();
 });
 
 document.getElementById('btnZip').addEventListener('click', () => {
+  saveHistory();
   zipTieSelectedLinks();
 });
 
 document.getElementById('btnDelete').addEventListener('click', () => {
+  saveHistory();
   deleteSelected();
 });
 
@@ -301,8 +452,12 @@ document.getElementById('loadFile').addEventListener('change', (evt) => {
     try {
       const data = JSON.parse(e.target.result);
       loadFromJson(data);
+      // 重置文件输入，允许再次选择同一文件
+      evt.target.value = '';
     } catch(err) {
       alert('读取失败：' + err);
+      // 出错时也重置文件输入
+      evt.target.value = '';
     }
   };
   reader.readAsText(f);
@@ -405,9 +560,13 @@ function saveToJson() {
 
 function loadFromJson(data) {
   if (!data.nodes || !data.links) { alert('格式错误：需要 nodes 和 links'); return; }
+  saveHistory();
   nodes = data.nodes.map(n => Object.assign({}, n));
   links = data.links.map(l => Object.assign({}, l));
-  // ensure link source/target are ids for force.link to resolve
+  // 清除选择状态
+  selectedNodeIds.clear();
+  selectedLinkIds.clear();
+  // 确保连线引用正确并更新图形
   updateGraph();
 }
 
@@ -503,6 +662,7 @@ function updatePropertyPanel() {
     area.append('div').attr('class','info').text('类型：' + (node.type || 'device'));
     const btnApply = area.append('button').attr('class','small').text('应用').node();
     btnApply.onclick = () => {
+      saveHistory();
       node.name = nameIn.value || node.name;
       node.radius = Math.max(4, Number(rIn.value) || node.radius);
       updateGraph();
@@ -510,6 +670,7 @@ function updatePropertyPanel() {
     const btnUnGroup = area.append('button').attr('class','small').style('margin-left','6px').text('取消分组（若为群组）').node();
     btnUnGroup.onclick = () => {
       if (node.type !== 'group') { alert('仅群组节点可取消分组（手动删除或拆分）。'); return; }
+      saveHistory();
       // 删除与该群组的链接，保留成员节点
       links = links.filter(l => !( (l.source === node.id) || (l.target === node.id) ));
       nodes = nodes.filter(n => n.id !== node.id);
@@ -529,6 +690,7 @@ function updatePropertyPanel() {
     area.append('div').attr('class','info').text('源: ' + ((typeof link.source === 'object') ? link.source.id : link.source) + ' → 目标: ' + ((typeof link.target === 'object') ? link.target.id : link.target));
     const btnApply = area.append('button').attr('class','small').text('应用').node();
     btnApply.onclick = () => {
+      saveHistory();
       link.name = nameIn.value || link.name;
       link.targetLength = Math.max(10, Number(lenIn.value) || link.targetLength);
       updateGraph();
@@ -553,11 +715,25 @@ function handleResize() {
   simulation.alpha(0.3).restart();
 }
 
+// 键盘事件监听器
+document.addEventListener('keydown', (event) => {
+  if (event.ctrlKey || event.metaKey) {
+    if (event.key === 'z') {
+      event.preventDefault();
+      undo();
+    } else if (event.key === 'y') {
+      event.preventDefault();
+      redo();
+    }
+  }
+});
+
 // 添加窗口大小变化监听
 window.addEventListener('resize', handleResize);
 
-// 初始渲染
+// 初始渲染并保存初始状态
 updateGraph();
+saveHistory();
 
 </script>
 </body>
