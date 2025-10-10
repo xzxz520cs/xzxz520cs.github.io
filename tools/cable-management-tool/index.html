@@ -656,18 +656,24 @@ function updatePropertyPanel() {
     area.append('label').text('节点名称');
     const nameIn = area.append('input').attr('type','text').node();
     nameIn.value = node.name || '';
+    nameIn.addEventListener('input', () => {
+      saveHistory();
+      node.name = nameIn.value || node.name;
+      updateGraph();
+    });
+    
     area.append('label').text('节点半径 (像素)');
     const rIn = area.append('input').attr('type','number').node();
     rIn.value = node.radius || 12;
-    area.append('div').attr('class','info').text('类型：' + (node.type || 'device'));
-    const btnApply = area.append('button').attr('class','small').text('应用').node();
-    btnApply.onclick = () => {
+    rIn.addEventListener('input', () => {
       saveHistory();
-      node.name = nameIn.value || node.name;
       node.radius = Math.max(4, Number(rIn.value) || node.radius);
       updateGraph();
-    };
-    const btnUnGroup = area.append('button').attr('class','small').style('margin-left','6px').text('取消分组（若为群组）').node();
+    });
+    
+    area.append('div').attr('class','info').text('类型：' + (node.type || 'device'));
+    
+    const btnUnGroup = area.append('button').attr('class','small').style('margin-top','8px').text('取消分组（若为群组）').node();
     btnUnGroup.onclick = () => {
       if (node.type !== 'group') { alert('仅群组节点可取消分组（手动删除或拆分）。'); return; }
       saveHistory();
@@ -684,17 +690,22 @@ function updatePropertyPanel() {
     area.append('label').text('线名称');
     const nameIn = area.append('input').attr('type','text').node();
     nameIn.value = link.name || '';
+    nameIn.addEventListener('input', () => {
+      saveHistory();
+      link.name = nameIn.value || link.name;
+      updateGraph();
+    });
+    
     area.append('label').text('目标长度 (像素)');
     const lenIn = area.append('input').attr('type','number').node();
     lenIn.value = link.targetLength || DEFAULT_LINK_LENGTH;
-    area.append('div').attr('class','info').text('源: ' + ((typeof link.source === 'object') ? link.source.id : link.source) + ' → 目标: ' + ((typeof link.target === 'object') ? link.target.id : link.target));
-    const btnApply = area.append('button').attr('class','small').text('应用').node();
-    btnApply.onclick = () => {
+    lenIn.addEventListener('input', () => {
       saveHistory();
-      link.name = nameIn.value || link.name;
       link.targetLength = Math.max(10, Number(lenIn.value) || link.targetLength);
       updateGraph();
-    };
+    });
+    
+    area.append('div').attr('class','info').text('源: ' + ((typeof link.source === 'object') ? link.source.id : link.source) + ' → 目标: ' + ((typeof link.target === 'object') ? link.target.id : link.target));
   } else if (selectedNodeIds.size === 0 && selectedLinkIds.size === 0) {
     area.append('div').attr('class','info').text('未选中任何元素。');
   } else {
