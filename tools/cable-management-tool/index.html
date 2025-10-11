@@ -102,7 +102,7 @@ const gNodes = svg.append('g');
 // 模拟器
 const simulation = d3.forceSimulation()
   .force('charge', d3.forceManyBody().strength(-300))
-  .force('center', d3.forceCenter(WIDTH/2, HEIGHT/2))
+  .force('center', d3.forceCenter(WIDTH/2, HEIGHT/2).strength(0.0001)) // 极小中心力
   .force('collide', d3.forceCollide().radius(d => d.radius + 6))
   .on('tick', ticked);
 
@@ -804,8 +804,8 @@ function handleResize() {
   WIDTH = window.innerWidth - 320;
   HEIGHT = window.innerHeight;
   
-  // 更新中心力
-  simulation.force('center', d3.forceCenter(WIDTH/2, HEIGHT/2));
+  // 更新中心力（保持极小强度）
+  simulation.force('center', d3.forceCenter(WIDTH/2, HEIGHT/2).strength(0.0001));
   
   // 强制更新图形，确保节点在新的边界内
   simulation.alpha(0.3).restart();
