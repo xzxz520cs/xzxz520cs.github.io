@@ -18,9 +18,12 @@
     .node text { font-size: 12px; pointer-events: none; user-select: none; }
     .rect-select { fill: rgba(0,0,255,0.06); stroke: rgba(0,0,255,0.5); stroke-dasharray:4 2; }
     label { display:block; margin-top:8px; font-weight:600; }
-    input[type="text"], input[type="number"] { width:100%; box-sizing:border-box; padding:6px; margin-top:4px; }
+    input[type="text"], input[type="number"], select { width:100%; box-sizing:border-box; padding:6px; margin-top:4px; }
     .info { font-size:12px; color:#666; margin-top:6px; }
     .small { font-size:12px; padding:4px 8px; }
+    .name-container { display: flex; gap: 4px; margin-top: 4px; }
+    .name-container select { flex: 1; }
+    .name-container input { flex: 2; }
   </style>
 </head>
 <body>
@@ -65,6 +68,18 @@ const BASE_LINK_WIDTH = 4;
 const NEUTRAL_COLOR = '#999';
 const STRETCH_COLOR = '#ff3b3b'; // 红色
 const COMPRESS_COLOR = '#2b8cff'; // 蓝色
+
+// 预设列表
+const NODE_NAME_PRESETS = [
+  '电源', '排插', '主机', '电脑', '显示器', '音响', 'switch', 'xbox', 'ps5',
+  '切换器', '键盘', '鼠标', '光猫', '路由器', '打印机', '扫描仪', '投影仪',
+  '摄像头', '麦克风', '集线器', '交换机', '服务器', 'NAS', 'UPS'
+];
+
+const LINK_NAME_PRESETS = [
+  '电线', '网线', '音频线', '鼠标线', '键盘线', '视频线', 'HDMI线', 'DP线',
+  'USB线', '电源线', '数据线', '光纤', '同轴线', '电话线', 'VGA线', 'DVI线'
+];
 
 // 数据
 let nodes = [
@@ -663,11 +678,32 @@ function updatePropertyPanel() {
     const node = nodes.find(n => n.id === id);
     if (!node) return;
     area.append('label').text('节点名称');
-    const nameIn = area.append('input').attr('type','text').node();
+    
+    // 创建节点名称选择容器
+    const nameContainer = area.append('div').attr('class', 'name-container');
+    
+    // 创建下拉选择框
+    const selectIn = nameContainer.append('select').node();
+    selectIn.innerHTML = '<option value="">选择预设...</option>' +
+      NODE_NAME_PRESETS.map(name => `<option value="${name}">${name}</option>`).join('');
+    
+    // 创建文本输入框
+    const nameIn = nameContainer.append('input').attr('type','text').node();
     nameIn.value = node.name || '';
+    
+    // 当下拉选择改变时，更新输入框
+    selectIn.addEventListener('change', () => {
+      if (selectIn.value) {
+        nameIn.value = selectIn.value;
+        node.name = nameIn.value;
+        updateGraphWithoutPropertyPanel();
+        saveHistory();
+      }
+    });
+    
+    // 当输入框内容改变时，更新节点名称
     nameIn.addEventListener('input', () => {
       node.name = nameIn.value || node.name;
-      // 只更新图形，不重新创建属性面板
       updateGraphWithoutPropertyPanel();
       saveHistory();
     });
@@ -718,11 +754,32 @@ function updatePropertyPanel() {
     const link = links.find(l => l.id === id);
     if (!link) return;
     area.append('label').text('线名称');
-    const nameIn = area.append('input').attr('type','text').node();
+    
+    // 创建线名称选择容器
+    const nameContainer = area.append('div').attr('class', 'name-container');
+    
+    // 创建下拉选择框
+    const selectIn = nameContainer.append('select').node();
+    selectIn.innerHTML = '<option value="">选择预设...</option>' +
+      LINK_NAME_PRESETS.map(name => `<option value="${name}">${name}</option>`).join('');
+    
+    // 创建文本输入框
+    const nameIn = nameContainer.append('input').attr('type','text').node();
     nameIn.value = link.name || '';
+    
+    // 当下拉选择改变时，更新输入框
+    selectIn.addEventListener('change', () => {
+      if (selectIn.value) {
+        nameIn.value = selectIn.value;
+        link.name = nameIn.value;
+        updateGraphWithoutPropertyPanel();
+        saveHistory();
+      }
+    });
+    
+    // 当输入框内容改变时，更新连线名称
     nameIn.addEventListener('input', () => {
       link.name = nameIn.value || link.name;
-      // 只更新图形，不重新创建属性面板
       updateGraphWithoutPropertyPanel();
       saveHistory();
     });
