@@ -31,15 +31,15 @@
   <div id="right">
     <h3>属性面板</h3>
     <div class="toolbar" style="margin-bottom: 16px;">
-      <button id="btnUndo" title="Ctrl+Z" disabled>撤销</button>
-      <button id="btnRedo" title="Ctrl+Y" disabled>恢复</button>
-      <button id="btnAddNode">添加节点</button>
-      <button id="btnAddLink">连接选中节点</button>
-      <button id="btnZip">扎带选中连线</button>
-      <button id="btnDelete">删除选中</button>
-      <button id="btnSave">保存 JSON</button>
+      <button id="btnUndo" title="Ctrl+Z" disabled>撤销 (Ctrl+Z)</button>
+      <button id="btnRedo" title="Ctrl+Y" disabled>恢复 (Ctrl+Y)</button>
+      <button id="btnAddNode" title="N">添加节点 (N)</button>
+      <button id="btnAddLink" title="L">连接选中节点 (L)</button>
+      <button id="btnZip" title="B">扎带选中连线 (B)</button>
+      <button id="btnDelete" title="Delete">删除选中 (Del)</button>
+      <button id="btnSave" title="S">保存 JSON (S)</button>
       <input id="loadFile" type="file" style="display:none" />
-      <button id="btnLoad">加载 JSON</button>
+      <button id="btnLoad" title="O">加载 JSON (O)</button>
     </div>
     <div id="propArea">
       <div class="info">请选择一个节点或连线来编辑属性，或框选/Shift+点击多选。</div>
@@ -50,6 +50,8 @@
         <li>拖动节点可改变位置。</li>
         <li>空白处按下并拖动可矩形选区。</li>
         <li>添加连线时，先选择多个节点再点击"连接选中节点"按钮。</li>
+        <li>按住Shift键点击可多选节点或连线。</li>
+        <li>使用快捷键快速操作：N(添加节点), L(连接), B(扎带), Del(删除), S(保存), O(加载)</li>
       </ul>
     </div>
   </div>
@@ -66,9 +68,9 @@ const COMPRESS_COLOR = '#2b8cff'; // 蓝色
 
 // 数据
 let nodes = [
-  { id: 'pc', name: '电脑', radius: 10, type: 'device', x: 200, y: 200 },
-  { id: 'monitor', name: '显示器', radius: 10, type: 'device', x: 360, y: 220 },
-  { id: 'speaker', name: '音响', radius: 10, type: 'device', x: 220, y: 380 }
+  { id: 'pc', name: '电脑', radius: 10, type: 'device', x: 200, y: 200, locked: false },
+  { id: 'monitor', name: '显示器', radius: 10, type: 'device', x: 360, y: 220, locked: false },
+  { id: 'speaker', name: '音响', radius: 10, type: 'device', x: 220, y: 380, locked: false }
 ];
 let links = [
   { id: 'l1', source: 'pc', target: 'monitor', name: '视频线', targetLength: 100 },
@@ -129,7 +131,7 @@ function saveHistory() {
   }
   
   // 像保存JSON一样保存完整状态
-  const nodesOut = nodes.map(n => ({ id:n.id, name:n.name, radius:n.radius, type:n.type, x:n.x, y:n.y }));
+  const nodesOut = nodes.map(n => ({ id:n.id, name:n.name, radius:n.radius, type:n.type, x:n.x, y:n.y, locked:n.locked }));
   const linksOut = links.map(l => ({
     id: l.id,
     source: (typeof l.source === 'object') ? l.source.id : l.source,
@@ -159,7 +161,15 @@ function saveHistory() {
 
 // 从历史记录加载状态
 function loadFromHistory(state) {
-  nodes = state.nodes.map(n => Object.assign({}, n));
+  nodes = state.nodes.map(n => {
+    const node = Object.assign({}, n);
+    // 如果节点被锁定，设置固定位置
+    if (node.locked) {
+      node.fx = node.x;
+      node.fy = node.y;
+    }
+    return node;
+  });
   links = state.links.map(l => Object.assign({}, l));
   selectedNodeIds = new Set(state.selectedNodeIds);
   selectedLinkIds = new Set(state.selectedLinkIds);
@@ -357,17 +367,28 @@ svg.on('mouseup', (event) => {
 // 拖动
 function dragstarted(event, d) {
   if (!event.active) simulation.alphaTarget(0.3).restart();
-  d.fx = d.x;
-  d.fy = d.y;
+  // 如果节点已锁定，保持固定位置；否则设置固定位置
+  if (d.locked) {
+    // 锁定节点：保持当前固定位置不变
+    // 不需要设置 fx/fy，因为它们已经固定
+  } else {
+    d.fx = d.x;
+    d.fy = d.y;
+  }
 }
 function dragged(event, d) {
+  // 无论节点是否锁定，都可以拖动
   d.fx = event.x;
   d.fy = event.y;
 }
 function dragended(event, d) {
   if (!event.active) simulation.alphaTarget(0);
-  d.fx = null;
-  d.fy = null;
+  // 如果节点未锁定，清除固定位置；如果锁定，保持固定位置
+  if (!d.locked) {
+    d.fx = null;
+    d.fy = null;
+  }
+  // 对于锁定节点，fx/fy 保持不变
 }
 
 // 工具按钮逻辑
@@ -376,7 +397,7 @@ document.getElementById('btnRedo').addEventListener('click', redo);
 
 document.getElementById('btnAddNode').addEventListener('click', () => {
   const id = uid('n');
-  const node = { id, name: '设备 ' + id.slice(-3), radius: 10, type: 'device', x: WIDTH/2 + (Math.random()-0.5)*80, y: HEIGHT/2 + (Math.random()-0.5)*80 };
+  const node = { id, name: '设备 ' + id.slice(-3), radius: 10, type: 'device', x: WIDTH/2 + (Math.random()-0.5)*80, y: HEIGHT/2 + (Math.random()-0.5)*80, locked: false };
   nodes.push(node);
   updateGraph();
   saveHistory();
@@ -516,7 +537,7 @@ function deleteSelected() {
 // ==== 保存加载 ====
 function saveToJson() {
   // 如果连线源/目标是对象，则转换为id
-  const nodesOut = nodes.map(n => ({ id:n.id, name:n.name, radius:n.radius, type:n.type, x:n.x, y:n.y }));
+  const nodesOut = nodes.map(n => ({ id:n.id, name:n.name, radius:n.radius, type:n.type, x:n.x, y:n.y, locked:n.locked }));
   const linksOut = links.map(l => ({
     id: l.id,
     source: (typeof l.source === 'object') ? l.source.id : l.source,
@@ -536,7 +557,19 @@ function saveToJson() {
 
 function loadFromJson(data) {
   if (!data.nodes || !data.links) { alert('格式错误：需要 nodes 和 links'); return; }
-  nodes = data.nodes.map(n => Object.assign({}, n));
+  nodes = data.nodes.map(n => {
+    // 确保锁定状态存在，默认为false
+    const node = Object.assign({}, n);
+    if (node.locked === undefined) {
+      node.locked = false;
+    }
+    // 如果节点被锁定，设置固定位置
+    if (node.locked) {
+      node.fx = node.x;
+      node.fy = node.y;
+    }
+    return node;
+  });
   links = data.links.map(l => Object.assign({}, l));
   // 清除选择状态
   selectedNodeIds.clear();
@@ -659,7 +692,26 @@ function updatePropertyPanel() {
       saveHistory();
     });
     
+    // 添加锁定/解锁按钮
+    const lockBtn = area.append('button').attr('class', 'small').node();
+    lockBtn.textContent = node.locked ? '解锁位置' : '锁定位置';
+    lockBtn.addEventListener('click', () => {
+      node.locked = !node.locked;
+      if (node.locked) {
+        // 锁定节点：固定当前位置
+        node.fx = node.x;
+        node.fy = node.y;
+      } else {
+        // 解锁节点：清除固定位置
+        node.fx = null;
+        node.fy = null;
+      }
+      updatePropertyPanel(); // 重新创建属性面板以更新按钮文本
+      saveHistory();
+    });
+    
     area.append('div').attr('class','info').text('类型：' + (node.type || 'device'));
+    area.append('div').attr('class','info').text('状态：' + (node.locked ? '已锁定' : '未锁定'));
     
   } else if (selectedLinkIds.size === 1 && selectedNodeIds.size === 0) {
     const id = Array.from(selectedLinkIds)[0];
@@ -761,6 +813,12 @@ function handleResize() {
 
 // 键盘事件监听器
 document.addEventListener('keydown', (event) => {
+  // 检查是否在输入框中，如果是则不处理快捷键
+  const activeElement = document.activeElement;
+  if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+    return;
+  }
+
   if (event.ctrlKey || event.metaKey) {
     if (event.key === 'z') {
       event.preventDefault();
@@ -768,6 +826,26 @@ document.addEventListener('keydown', (event) => {
     } else if (event.key === 'y') {
       event.preventDefault();
       redo();
+    }
+  } else if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+    if (event.key === 'n' || event.key === 'N') {
+      event.preventDefault();
+      document.getElementById('btnAddNode').click();
+    } else if (event.key === 'l' || event.key === 'L') {
+      event.preventDefault();
+      document.getElementById('btnAddLink').click();
+    } else if (event.key === 'b' || event.key === 'B') {
+      event.preventDefault();
+      document.getElementById('btnZip').click();
+    } else if (event.key === 's' || event.key === 'S') {
+      event.preventDefault();
+      document.getElementById('btnSave').click();
+    } else if (event.key === 'o' || event.key === 'O') {
+      event.preventDefault();
+      document.getElementById('btnLoad').click();
+    } else if (event.key === 'Delete' || event.key === 'Backspace') {
+      event.preventDefault();
+      document.getElementById('btnDelete').click();
     }
   }
 });
