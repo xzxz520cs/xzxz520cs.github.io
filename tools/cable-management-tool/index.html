@@ -659,7 +659,8 @@ function updatePropertyPanel() {
     nameIn.addEventListener('input', () => {
       saveHistory();
       node.name = nameIn.value || node.name;
-      updateGraph();
+      // 只更新图形，不重新创建属性面板
+      updateGraphWithoutPropertyPanel();
     });
     
     area.append('label').text('节点半径 (像素)');
@@ -668,7 +669,18 @@ function updatePropertyPanel() {
     rIn.addEventListener('input', () => {
       saveHistory();
       node.radius = Math.max(4, Number(rIn.value) || node.radius);
-      updateGraph();
+      // 只更新图形，不重新创建属性面板
+      updateGraphWithoutPropertyPanel();
+    });
+    // 添加滚轮调整功能
+    rIn.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      const delta = Math.sign(event.deltaY) * -10; // 反转方向，向上滚增加，向下滚减少
+      const newValue = Math.max(4, Number(rIn.value) + delta);
+      rIn.value = newValue;
+      saveHistory();
+      node.radius = newValue;
+      updateGraphWithoutPropertyPanel();
     });
     
     area.append('div').attr('class','info').text('类型：' + (node.type || 'device'));
@@ -693,7 +705,8 @@ function updatePropertyPanel() {
     nameIn.addEventListener('input', () => {
       saveHistory();
       link.name = nameIn.value || link.name;
-      updateGraph();
+      // 只更新图形，不重新创建属性面板
+      updateGraphWithoutPropertyPanel();
     });
     
     area.append('label').text('目标长度 (像素)');
@@ -702,7 +715,18 @@ function updatePropertyPanel() {
     lenIn.addEventListener('input', () => {
       saveHistory();
       link.targetLength = Math.max(10, Number(lenIn.value) || link.targetLength);
-      updateGraph();
+      // 只更新图形，不重新创建属性面板
+      updateGraphWithoutPropertyPanel();
+    });
+    // 添加滚轮调整功能
+    lenIn.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      const delta = Math.sign(event.deltaY) * -10; // 反转方向，向上滚增加，向下滚减少
+      const newValue = Math.max(10, Number(lenIn.value) + delta);
+      lenIn.value = newValue;
+      saveHistory();
+      link.targetLength = newValue;
+      updateGraphWithoutPropertyPanel();
     });
     
     area.append('div').attr('class','info').text('源: ' + ((typeof link.source === 'object') ? link.source.id : link.source) + ' → 目标: ' + ((typeof link.target === 'object') ? link.target.id : link.target));
@@ -712,6 +736,49 @@ function updatePropertyPanel() {
     area.append('div').attr('class','info').text(`多选：${selectedNodeIds.size} 个节点，${selectedLinkIds.size} 条连线。`);
     // 可以扩展批量编辑
   }
+}
+
+// 更新图形但不更新属性面板（用于属性输入时的实时更新）
+function updateGraphWithoutPropertyPanel() {
+  // 确保连线引用正确
+  fixLinkReferences();
+  
+  // bind links
+  const linkSel = gLinks.selectAll('line.link').data(links, d=>d.id);
+  linkSel.exit().remove();
+  const linkEnter = linkSel.enter().append('line')
+    .attr('class', 'link')
+    .on('click', (event,d) => { event.stopPropagation(); handleLinkClick(event, d); });
+  linkEnter.append('title');
+  // merge
+  const linkAll = linkEnter.merge(linkSel);
+  linkAll.select('title').text(d => d.name || '');
+  
+  // bind nodes
+  const nodeSel = gNodes.selectAll('g.node').data(nodes, d=>d.id);
+  nodeSel.exit().remove();
+  const nodeEnter = nodeSel.enter().append('g').attr('class','node')
+    .call(d3.drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended))
+    .on('click', (event,d) => { event.stopPropagation(); handleNodeClick(event,d); });
+
+  nodeEnter.append('circle').attr('r', d => d.radius);
+  nodeEnter.append('text').attr('dy', '0.35em').attr('x', d => d.radius + 6).text(d => d.name);
+
+  const nodeAll = nodeEnter.merge(nodeSel);
+  nodeAll.select('circle').attr('r', d => d.radius);
+  nodeAll.select('text').text(d => d.name);
+
+  // 重新设置力导向图
+  simulation.nodes(nodes);
+  simulation.force('link').links(links);
+  simulation.alpha(0.6).restart();
+
+  applySelectionStyles();
+  // 注意：这里不调用 updatePropertyPanel()，避免重新创建输入框
+  updateAllButtonStates();
 }
 
 // 窗口大小变化处理
