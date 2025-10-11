@@ -58,7 +58,7 @@
 // ==== 基本配置 ====
 let WIDTH = window.innerWidth - 320; // left area approx
 let HEIGHT = window.innerHeight;
-const DEFAULT_LINK_LENGTH = 160;
+const DEFAULT_LINK_LENGTH = 100;
 const BASE_LINK_WIDTH = 4;
 const NEUTRAL_COLOR = '#999';
 const STRETCH_COLOR = '#ff3b3b'; // red
@@ -66,13 +66,13 @@ const COMPRESS_COLOR = '#2b8cff'; // blue
 
 // 数据
 let nodes = [
-  { id: 'pc', name: '电脑', radius: 20, type: 'device', x: 200, y: 200 },
-  { id: 'monitor', name: '显示器', radius: 16, type: 'device', x: 360, y: 220 },
-  { id: 'speaker', name: '音响', radius: 12, type: 'device', x: 220, y: 380 }
+  { id: 'pc', name: '电脑', radius: 10, type: 'device', x: 200, y: 200 },
+  { id: 'monitor', name: '显示器', radius: 10, type: 'device', x: 360, y: 220 },
+  { id: 'speaker', name: '音响', radius: 10, type: 'device', x: 220, y: 380 }
 ];
 let links = [
-  { id: 'l1', source: 'pc', target: 'monitor', name: '视频线', targetLength: 160 },
-  { id: 'l2', source: 'pc', target: 'speaker', name: '音频线', targetLength: 130 }
+  { id: 'l1', source: 'pc', target: 'monitor', name: '视频线', targetLength: 100 },
+  { id: 'l2', source: 'pc', target: 'speaker', name: '音频线', targetLength: 100 }
 ];
 
 // 选中集合（id）
@@ -376,7 +376,7 @@ document.getElementById('btnRedo').addEventListener('click', redo);
 
 document.getElementById('btnAddNode').addEventListener('click', () => {
   const id = uid('n');
-  const node = { id, name: '设备 ' + id.slice(-3), radius: 14, type: 'device', x: WIDTH/2 + (Math.random()-0.5)*80, y: HEIGHT/2 + (Math.random()-0.5)*80 };
+  const node = { id, name: '设备 ' + id.slice(-3), radius: 10, type: 'device', x: WIDTH/2 + (Math.random()-0.5)*80, y: HEIGHT/2 + (Math.random()-0.5)*80 };
   nodes.push(node);
   updateGraph();
   saveHistory();
