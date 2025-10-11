@@ -30,7 +30,6 @@
       <button id="btnRedo" title="Ctrl+Y" disabled>恢复</button>
       <button id="btnAddNode">添加节点</button>
       <button id="btnAddLink">连接选中节点</button>
-      <button id="btnGroup">分组选中节点</button>
       <button id="btnZip">扎带选中连线</button>
       <button id="btnDelete">删除选中</button>
       <button id="btnSave">保存 JSON</button>
@@ -232,8 +231,6 @@ function updateAllButtonStates() {
   // 连接按钮：至少选中2个节点
   btnAddLink.disabled = selectedNodeIds.size < 2;
   
-  // 分组按钮：至少选中2个节点
-  btnGroup.disabled = selectedNodeIds.size < 2;
   
   // 扎带按钮：至少选中1条连线
   btnZip.disabled = selectedLinkIds.size < 1;
@@ -422,10 +419,6 @@ document.getElementById('btnAddLink').addEventListener('click', () => {
   updateGraph();
 });
 
-document.getElementById('btnGroup').addEventListener('click', () => {
-  saveHistory();
-  groupSelectedNodes();
-});
 
 document.getElementById('btnZip').addEventListener('click', () => {
   saveHistory();
@@ -464,23 +457,6 @@ document.getElementById('loadFile').addEventListener('change', (evt) => {
 });
 
 // ==== 复杂操作：分组 & 扎带 & 删除 ====
-function groupSelectedNodes() {
-  if (selectedNodeIds.size < 2) { alert('请先选中至少两个节点再分组。'); return; }
-  const sel = nodes.filter(n => selectedNodeIds.has(n.id));
-  const centroid = { x: d3.mean(sel, d=>d.x), y: d3.mean(sel, d=>d.y) };
-  const gid = uid('group');
-  const groupNode = { id: gid, name: 'Group', radius: Math.max(24, sel.length*6), type: 'group', x: centroid.x, y: centroid.y };
-  nodes.push(groupNode);
-  // connect each selected node to group node with short strong links
-  sel.forEach(n => {
-    links.push({ id: uid('link'), source: n.id, target: gid, name: '属组', targetLength: 60 });
-  });
-  // clear selection and select only the new group
-  selectedNodeIds.clear();
-  selectedLinkIds.clear();
-  selectedNodeIds.add(gid);
-  updateGraph();
-}
 
 function zipTieSelectedLinks() {
   if (selectedLinkIds.size < 1) { alert('请先选中至少一条连线再扎带。'); return; }
@@ -685,16 +661,6 @@ function updatePropertyPanel() {
     
     area.append('div').attr('class','info').text('类型：' + (node.type || 'device'));
     
-    const btnUnGroup = area.append('button').attr('class','small').style('margin-top','8px').text('取消分组（若为群组）').node();
-    btnUnGroup.onclick = () => {
-      if (node.type !== 'group') { alert('仅群组节点可取消分组（手动删除或拆分）。'); return; }
-      saveHistory();
-      // 删除与该群组的链接，保留成员节点
-      links = links.filter(l => !( (l.source === node.id) || (l.target === node.id) ));
-      nodes = nodes.filter(n => n.id !== node.id);
-      selectedNodeIds.clear();
-      updateGraph();
-    };
   } else if (selectedLinkIds.size === 1 && selectedNodeIds.size === 0) {
     const id = Array.from(selectedLinkIds)[0];
     const link = links.find(l => l.id === id);
