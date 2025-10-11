@@ -56,13 +56,13 @@
 
 <script>
 // ==== 基本配置 ====
-let WIDTH = window.innerWidth - 320; // left area approx
+let WIDTH = window.innerWidth - 320; // 左侧区域大约宽度
 let HEIGHT = window.innerHeight;
 const DEFAULT_LINK_LENGTH = 100;
 const BASE_LINK_WIDTH = 4;
 const NEUTRAL_COLOR = '#999';
-const STRETCH_COLOR = '#ff3b3b'; // red
-const COMPRESS_COLOR = '#2b8cff'; // blue
+const STRETCH_COLOR = '#ff3b3b'; // 红色
+const COMPRESS_COLOR = '#2b8cff'; // 蓝色
 
 // 数据
 let nodes = [
@@ -97,23 +97,23 @@ const svg = d3.select('#svgCanvas')
 const gLinks = svg.append('g');
 const gNodes = svg.append('g');
 
-// simulation
+// 模拟器
 const simulation = d3.forceSimulation()
   .force('charge', d3.forceManyBody().strength(-300))
   .force('center', d3.forceCenter(WIDTH/2, HEIGHT/2))
   .force('collide', d3.forceCollide().radius(d => d.radius + 6))
   .on('tick', ticked);
 
-// link force will be created in initForce()
+// 连线力将在initForce()中创建
 let linkForce = d3.forceLink()
   .id(d => d.id)
   .distance(d => d.targetLength || DEFAULT_LINK_LENGTH)
   .strength(linkStrengthFn);
 
-// apply link force
+// 应用连线力
 simulation.force('link', linkForce);
 
-// utility
+// 工具函数
 function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
 
 // 深拷贝对象
@@ -244,18 +244,18 @@ function updateGraph() {
   // 确保连线引用正确
   fixLinkReferences();
   
-  // bind links
+  // 绑定连线
   const linkSel = gLinks.selectAll('line.link').data(links, d=>d.id);
   linkSel.exit().remove();
   const linkEnter = linkSel.enter().append('line')
     .attr('class', 'link')
     .on('click', (event,d) => { event.stopPropagation(); handleLinkClick(event, d); });
   linkEnter.append('title');
-  // merge
+  // 合并
   const linkAll = linkEnter.merge(linkSel);
   linkAll.select('title').text(d => d.name || '');
   
-  // bind nodes
+  // 绑定节点
   const nodeSel = gNodes.selectAll('g.node').data(nodes, d=>d.id);
   nodeSel.exit().remove();
   const nodeEnter = nodeSel.enter().append('g').attr('class','node')
@@ -291,7 +291,7 @@ function applySelectionStyles() {
 // ==== 交互处理 ====
 function handleNodeClick(event, d) {
   if (event.shiftKey) {
-    // toggle
+    // 切换选择
     if (selectedNodeIds.has(d.id)) selectedNodeIds.delete(d.id);
     else selectedNodeIds.add(d.id);
   } else {
@@ -321,7 +321,7 @@ function handleLinkClick(event, d) {
 // 背景点击用于清除选择 / 矩形框选起点
 svg.on('mousedown', (event) => {
   if (event.target === svg.node()) {
-    if (event.shiftKey) return; // allow shift for other uses
+    if (event.shiftKey) return; // 允许Shift键用于其他用途
     rectStart = d3.pointer(event, svg.node());
     isRectSelecting = true;
     if (rectEl) rectEl.remove();
@@ -341,7 +341,7 @@ svg.on('mouseup', (event) => {
   const rect = rectEl.node().getBBox();
   rectEl.remove();
   rectEl = null;
-  // select nodes whose center inside rect
+  // 选择中心点在矩形区域内的节点
   selectedNodeIds.clear();
   selectedLinkIds.clear();
   nodes.forEach(n => {
@@ -461,7 +461,7 @@ document.getElementById('loadFile').addEventListener('change', (evt) => {
 function zipTieSelectedLinks() {
   if (selectedLinkIds.size < 1) { alert('请先选中至少一条连线再扎带。'); return; }
   const selLinks = links.filter(l => selectedLinkIds.has(l.id));
-  // compute average midpoint
+  // 计算平均中点
   const midpoints = selLinks.map(l => {
     const s = (typeof l.source === 'object') ? l.source : nodes.find(n=>n.id===l.source);
     const t = (typeof l.target === 'object') ? l.target : nodes.find(n=>n.id===l.target);
@@ -472,14 +472,14 @@ function zipTieSelectedLinks() {
   const bundleNode = { id: bid, name: '扎带', radius: 10, type: 'bundle', x: bundlePos.x, y: bundlePos.y };
   nodes.push(bundleNode);
 
-  // For each selected link: remove it and replace with two links via bundleNode
+  // 对于每条选中的连线：移除它并通过扎带节点替换为两条连线
   const newLinks = [];
   const remainingLinks = [];
   links.forEach(l => {
     if (selectedLinkIds.has(l.id)) {
-      // decompose
+      // 分解
       const originalLength = l.targetLength || DEFAULT_LINK_LENGTH;
-      // ensure we refer to source/target ids
+      // 确保我们引用源/目标id
       const srcId = (typeof l.source === 'object') ? l.source.id : l.source;
       const tgtId = (typeof l.target === 'object') ? l.target.id : l.target;
       newLinks.push({ id: uid('link'), source: srcId, target: bid, name: l.name + ' (1/2)', targetLength: Math.max(30, originalLength * 0.5) });
@@ -489,7 +489,7 @@ function zipTieSelectedLinks() {
     }
   });
   links = remainingLinks.concat(newLinks);
-  // update selection to the new bundle
+  // 更新选择到新的扎带
   selectedNodeIds.clear();
   selectedLinkIds.clear();
   selectedNodeIds.add(bid);
@@ -498,9 +498,9 @@ function zipTieSelectedLinks() {
 
 function deleteSelected() {
   if (selectedNodeIds.size === 0 && selectedLinkIds.size === 0) return;
-  // remove nodes
+  // 移除节点
   nodes = nodes.filter(n => !selectedNodeIds.has(n.id));
-  // remove links that involve deleted nodes or are selected
+  // 移除涉及已删除节点或被选中的连线
   links = links.filter(l => {
     const s = (typeof l.source === 'object') ? l.source.id : l.source;
     const t = (typeof l.target === 'object') ? l.target.id : l.target;
@@ -515,7 +515,7 @@ function deleteSelected() {
 
 // ==== 保存加载 ====
 function saveToJson() {
-  // convert links source/target to ids if objects
+  // 如果连线源/目标是对象，则转换为id
   const nodesOut = nodes.map(n => ({ id:n.id, name:n.name, radius:n.radius, type:n.type, x:n.x, y:n.y }));
   const linksOut = links.map(l => ({
     id: l.id,
@@ -548,37 +548,37 @@ function loadFromJson(data) {
 
 // ==== 力学/视觉计算 ====
 function linkStrengthFn(l) {
-  // Called by d3.forceLink each tick; compute dynamic strength based on current deformation
+  // 由d3.forceLink每帧调用；根据当前变形计算动态强度
   const s = (typeof l.source === 'object') ? l.source : nodes.find(n => n.id === l.source);
   const t = (typeof l.target === 'object') ? l.target : nodes.find(n => n.id === l.target);
   if (!s || !t) return 0.2;
   const dx = s.x - t.x, dy = s.y - t.y;
   const cur = Math.hypot(dx, dy);
   const target = (l.targetLength || DEFAULT_LINK_LENGTH);
-  const ratio = (cur - target) / target; // >0 stretched, <0 compressed
+  const ratio = (cur - target) / target; // >0 拉伸，<0 压缩
   const base = 0.6;
   const stretchFactor = 0.6;
   const compressFactor = -0.3;
   let strength = base;
   if (ratio > 0) strength = base + Math.min(1, ratio) * stretchFactor;
   else strength = Math.max(0.05, base + Math.max(-1, ratio) * compressFactor);
-  // ensure in range 0.01..1
+  // 确保在0.01到1的范围内
   return Math.max(0.01, Math.min(1, strength));
 }
 
 function computeLinkStyle(cur, target) {
-  const ratio = (cur - target) / target; // -inf..inf
+  const ratio = (cur - target) / target; // 负无穷到正无穷
   const clipped = Math.max(-1, Math.min(1, ratio));
   let color = NEUTRAL_COLOR;
   let width = BASE_LINK_WIDTH;
   if (clipped > 0) {
-    // stretched -> towards red, thinner
-    const t = clipped; // 0..1
+    // 拉伸 -> 趋向红色，变细
+    const t = clipped; // 0到1
     color = d3.interpolateRgb(NEUTRAL_COLOR, STRETCH_COLOR)(t);
     width = BASE_LINK_WIDTH * (1 - t * 0.65);
   } else {
-    // compressed -> towards blue, thicker
-    const t = -clipped; // 0..1
+    // 压缩 -> 趋向蓝色，变粗
+    const t = -clipped; // 0到1
     color = d3.interpolateRgb(NEUTRAL_COLOR, COMPRESS_COLOR)(t);
     width = BASE_LINK_WIDTH * (1 + t * 1.1);
   }
@@ -603,7 +603,7 @@ function ticked() {
     }
   });
 
-  // update lines
+  // 更新连线
   gLinks.selectAll('line.link').each(function(d) {
     const s = (typeof d.source === 'object') ? d.source : nodes.find(n => n.id === d.source);
     const t = (typeof d.target === 'object') ? d.target : nodes.find(n => n.id === d.target);
@@ -617,7 +617,7 @@ function ticked() {
     d3.select(this).select('title').text(d.name || '');
   });
 
-  // update nodes (group transform)
+  // 更新节点（组变换）
   gNodes.selectAll('g.node').attr('transform', d => `translate(${d.x},${d.y})`);
 }
 
@@ -709,18 +709,18 @@ function updateGraphWithoutPropertyPanel() {
   // 确保连线引用正确
   fixLinkReferences();
   
-  // bind links
+  // 绑定连线
   const linkSel = gLinks.selectAll('line.link').data(links, d=>d.id);
   linkSel.exit().remove();
   const linkEnter = linkSel.enter().append('line')
     .attr('class', 'link')
     .on('click', (event,d) => { event.stopPropagation(); handleLinkClick(event, d); });
   linkEnter.append('title');
-  // merge
+  // 合并
   const linkAll = linkEnter.merge(linkSel);
   linkAll.select('title').text(d => d.name || '');
   
-  // bind nodes
+  // 绑定节点
   const nodeSel = gNodes.selectAll('g.node').data(nodes, d=>d.id);
   nodeSel.exit().remove();
   const nodeEnter = nodeSel.enter().append('g').attr('class','node')
