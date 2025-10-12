@@ -17,29 +17,153 @@
     gtag('config', 'G-HYJXFSRHF5');
   </script>
   <style>
-    .cable-management-container { display: flex; height: calc(100vh - 140px); margin-top: var(--space-md); }
-    #left { flex: 1; background: var(--color-bg-alt); border-radius: var(--radius-md); }
-    #right { width: 320px; padding: var(--space-md); box-sizing: border-box; background: var(--color-bg); overflow: auto; }
-    .toolbar { padding: var(--space-sm); display:flex; gap:var(--space-xs); flex-wrap:wrap; background: var(--color-bg-alt); border-radius: var(--radius-sm); border: 1px solid var(--color-border); }
-    button { padding:var(--space-xs) var(--space-sm); cursor:pointer; }
-    svg { width:100%; height:100%; display:block; border-radius: var(--radius-sm); }
-    .link { stroke-opacity: 0.9; }
+    .cable-management-container {
+      display: flex;
+      height: calc(100vh - 140px);
+      margin-top: var(--space-md);
+      flex-direction: row;
+    }
+    #left {
+      flex: 1;
+      background: var(--color-bg-alt);
+      border-radius: var(--radius-md);
+      min-height: 400px;
+    }
+    #right {
+      width: 320px;
+      padding: var(--space-md);
+      box-sizing: border-box;
+      background: var(--color-bg);
+      overflow: auto;
+      border-left: 1px solid var(--color-border);
+    }
+    .toolbar {
+      padding: var(--space-sm);
+      display:flex;
+      gap:var(--space-xs);
+      flex-wrap:wrap;
+      background: var(--color-bg-alt);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+    svg {
+      width:100%;
+      height:100%;
+      display:block;
+      border-radius: var(--radius-sm);
+      background: var(--color-bg-alt);
+    }
+    .link {
+      stroke-opacity: 0.9;
+      transition: all var(--transition-fast);
+    }
     .link.selected {
       stroke-opacity: 1;
       stroke: var(--color-warning) !important;
       stroke-width: 6px !important;
       z-index: 10;
     }
-    .link-hit-area { stroke: transparent; stroke-width: 12px; cursor: pointer; }
-    .node circle { fill: var(--color-light); stroke: var(--color-dark); stroke-width:1.5px; cursor: pointer; }
-    .node.selected circle { stroke: var(--color-warning); stroke-width:6px; }
-    .node text { font-size: 12px; pointer-events: none; user-select: none; }
-    .rect-select { fill: rgba(59, 130, 246, 0.06); stroke: rgba(59, 130, 246, 0.5); stroke-dasharray:4 2; }
-    .info { font-size:12px; color:var(--color-text-muted); margin-top:var(--space-sm); }
-    .small { font-size:12px; padding:var(--space-xxs) var(--space-sm); }
-    .name-container { display: flex; gap: var(--space-xs); margin-top: var(--space-xs); }
-    .name-container select { flex: 1; }
-    .name-container input { flex: 2; }
+    .link-hit-area {
+      stroke: transparent;
+      stroke-width: 12px;
+      cursor: pointer;
+    }
+    .node circle {
+      fill: var(--color-light);
+      stroke: var(--color-dark);
+      stroke-width:1.5px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .node.selected circle {
+      stroke: var(--color-warning);
+      stroke-width:6px;
+    }
+    .node text {
+      font-size: 12px;
+      pointer-events: none;
+      user-select: none;
+      fill: var(--color-text);
+    }
+    .rect-select {
+      fill: rgba(59, 130, 246, 0.06);
+      stroke: rgba(59, 130, 246, 0.5);
+      stroke-dasharray:4 2;
+    }
+    .info {
+      font-size:12px;
+      color:var(--color-text-muted);
+      margin-top:var(--space-sm);
+    }
+    .name-container {
+      display: flex;
+      gap: var(--space-xs);
+      margin-top: var(--space-xs);
+    }
+    .name-container select {
+      flex: 1;
+    }
+    .name-container input {
+      flex: 2;
+    }
+
+    /* 移动端适配 */
+    @media (max-width: 768px) {
+      .cable-management-container {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 140px);
+      }
+      #left {
+        flex: none;
+        height: 50vh;
+        min-height: 300px;
+      }
+      #right {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--color-border);
+        max-height: 40vh;
+      }
+      .toolbar {
+        justify-content: center;
+      }
+      .toolbar .btn--small {
+        flex: 1;
+        min-width: 120px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .cable-management-container {
+        margin-top: var(--space-sm);
+      }
+      .toolbar {
+        padding: var(--space-xs);
+        gap: var(--space-xxs);
+      }
+      .toolbar .btn--small {
+        min-width: 100px;
+      }
+      #right {
+        padding: var(--space-sm);
+      }
+    }
+
+    /* 深色模式特定调整 */
+    @media (prefers-color-scheme: dark) {
+      .node circle {
+        fill: var(--color-medium);
+        stroke: var(--color-light);
+      }
+      .link {
+        stroke: var(--color-medium);
+      }
+      .rect-select {
+        fill: rgba(96, 165, 250, 0.1);
+        stroke: rgba(96, 165, 250, 0.6);
+      }
+    }
   </style>
 </head>
 <body>
@@ -109,16 +233,16 @@
         <div id="right">
           <h3>属性面板</h3>
           <div class="toolbar" style="margin-bottom: var(--space-lg);">
-            <button id="btnUndo" class="btn btn--secondary small" title="Ctrl+Z" disabled>撤销 (Ctrl+Z)</button>
-            <button id="btnRedo" class="btn btn--secondary small" title="Ctrl+Y" disabled>恢复 (Ctrl+Y)</button>
-            <button id="btnAddNode" class="btn btn--primary small" title="N">添加节点 (N)</button>
-            <button id="btnAddLink" class="btn btn--primary small" title="L">连接选中节点 (L)</button>
-            <button id="btnZip" class="btn btn--primary small" title="B">扎带选中连线 (B)</button>
-            <button id="btnDelete" class="btn btn--danger small" title="Delete">删除选中 (Del)</button>
-            <button id="btnLock" class="btn btn--warning small" title="K">锁定/解锁选中 (K)</button>
-            <button id="btnSave" class="btn btn--success small" title="S">保存 JSON (S)</button>
+            <button id="btnUndo" class="btn btn--secondary btn--small" title="Ctrl+Z" disabled>撤销 (Ctrl+Z)</button>
+            <button id="btnRedo" class="btn btn--secondary btn--small" title="Ctrl+Y" disabled>恢复 (Ctrl+Y)</button>
+            <button id="btnAddNode" class="btn btn--primary btn--small" title="N">添加节点 (N)</button>
+            <button id="btnAddLink" class="btn btn--primary btn--small" title="L">连接选中节点 (L)</button>
+            <button id="btnZip" class="btn btn--primary btn--small" title="B">扎带选中连线 (B)</button>
+            <button id="btnDelete" class="btn btn--danger btn--small" title="Delete">删除选中 (Del)</button>
+            <button id="btnLock" class="btn btn--warning btn--small" title="K">锁定/解锁选中 (K)</button>
+            <button id="btnSave" class="btn btn--success btn--small" title="S">保存 JSON (S)</button>
             <input id="loadFile" type="file" style="display:none" />
-            <button id="btnLoad" class="btn btn--success small" title="O">加载 JSON (O)</button>
+            <button id="btnLoad" class="btn btn--success btn--small" title="O">加载 JSON (O)</button>
           </div>
           <div id="propArea">
             <div class="info">请选择一个节点或连线来编辑属性，或框选/Shift+点击多选。</div>
@@ -163,9 +287,11 @@ let WIDTH = window.innerWidth - 320; // 左侧区域大约宽度
 let HEIGHT = window.innerHeight;
 const DEFAULT_LINK_LENGTH = 100;
 const BASE_LINK_WIDTH = 4;
-const NEUTRAL_COLOR = '#999';
-const STRETCH_COLOR = '#ff3b3b'; // 红色
-const COMPRESS_COLOR = '#2b8cff'; // 蓝色
+// 获取CSS变量值用于动态颜色
+const styles = getComputedStyle(document.documentElement);
+const NEUTRAL_COLOR = styles.getPropertyValue('--color-text-muted').trim();
+const STRETCH_COLOR = styles.getPropertyValue('--color-danger').trim();
+const COMPRESS_COLOR = styles.getPropertyValue('--color-info').trim();
 
 // 预设列表
 const NODE_NAME_PRESETS = [
