@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>力导向图理线工具 - 天天发蛋糕的工具箱</title>
   <meta name="description" content="力导向图理线工具 - 天天发蛋糕的工具箱，支持节点和连线的可视化编辑，适用于桌面理线、接线等场景。">
   <meta name="keywords" content="力导向图, 理线工具, 节点连线, 可视化编辑, 工具箱">
@@ -34,25 +35,11 @@
     .node.selected circle { stroke: var(--color-warning); stroke-width:6px; }
     .node text { font-size: 12px; pointer-events: none; user-select: none; }
     .rect-select { fill: rgba(59, 130, 246, 0.06); stroke: rgba(59, 130, 246, 0.5); stroke-dasharray:4 2; }
-    label { display:block; margin-top:var(--space-sm); font-weight:600; color: var(--color-text); }
-    input[type="text"], input[type="number"], select { width:100%; box-sizing:border-box; padding:var(--space-sm) var(--space-xs); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.8em; transition: border-color var(--transition-fast); background-color: var(--color-white); color: var(--color-text); margin-top:var(--space-xs); }
     .info { font-size:12px; color:var(--color-text-muted); margin-top:var(--space-sm); }
     .small { font-size:12px; padding:var(--space-xxs) var(--space-sm); }
     .name-container { display: flex; gap: var(--space-xs); margin-top: var(--space-xs); }
     .name-container select { flex: 1; }
     .name-container input { flex: 2; }
-    
-    @media (prefers-color-scheme: dark) {
-      input[type="text"], input[type="number"], select {
-        background-color: var(--color-bg-alt);
-      }
-    }
-    
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--color-secondary);
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-    }
   </style>
 </head>
 <body>
