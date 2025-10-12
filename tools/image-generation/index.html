@@ -39,6 +39,7 @@
               <li><a href="/tools/card-translate/" class="dropdown-item">游戏王卡牌日中对照文本生成器</a></li>
               <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
               <li><a href="/tools/image-generation/" class="dropdown-item">gpt-image-1图像生成API调用工具</a></li>
+              <li><a href="/tools/cable-management-tool/" class="dropdown-item">力导向图理线工具</a></li>
               <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
                   class="dropdown-item">恢复关闭的标签页</a></li>
             </ul>
@@ -114,8 +115,8 @@
         <button id="drawMaskBtn" class="btn btn--secondary disabled" type="button">绘制遮罩</button>
         <button id="downloadMaskBtn" class="btn btn--secondary hidden" type="button">下载遮罩</button>
         <p class="text-muted mt-3"><strong>提示：用该工具绘制时遮罩区域(红色半透明区域)表示需要AI修改的部分，非遮罩区域将尽量保留不被修改。<br>
-        上传遮罩文件时，透明区域表示需要AI修改的部分，不透明区域将尽量保留不被修改。<br>
-        </strong></p>
+            上传遮罩文件时，透明区域表示需要AI修改的部分，不透明区域将尽量保留不被修改。<br>
+          </strong></p>
         <div id="maskToolbox" class="hidden mt-3 flex">
           <div class="tool-buttons flex gap-1">
             <button id="brushModeBtn" class="btn btn--toggle active" type="button" title="画笔">
@@ -580,7 +581,7 @@
       const size = document.getElementById("size").value || "1024x1024";
       const quality = document.getElementById("quality").value || "auto";
       const maskInput = document.getElementById("maskImage");
-      
+
       // 统一使用全局状态变量
       const isDrawingMask = !!window.isDrawingMask;
       console.log('编辑模式状态检查:', {
@@ -668,19 +669,19 @@
           exportCanvas.width = maskBaseImage.width;
           exportCanvas.height = maskBaseImage.height;
           const exportCtx = exportCanvas.getContext('2d');
-          
+
           // 创建临时画布处理遮罩数据
           const tempCanvas = document.createElement('canvas');
           tempCanvas.width = window.maskImageData.width;
           tempCanvas.height = window.maskImageData.height;
           const tempCtx = tempCanvas.getContext('2d');
-          
+
           // 直接拷贝maskImageData，保留原始alpha值
           tempCtx.putImageData(window.maskImageData, 0, 0);
-          
+
           // 将临时画布拉伸到原图尺寸
           exportCtx.drawImage(tempCanvas, 0, 0, maskBaseImage.width, maskBaseImage.height);
-          
+
           // 仅处理alpha通道，不修改RGB值
           const exportImgData = exportCtx.getImageData(0, 0, exportCanvas.width, exportCanvas.height);
           for (let i = 0; i < exportImgData.data.length; i += 4) {
@@ -691,7 +692,7 @@
             // alpha通道保持不变（0表示可编辑区域）
           }
           exportCtx.putImageData(exportImgData, 0, 0);
-          
+
           // 导出为PNG
           await new Promise((resolve, reject) => {
             exportCanvas.toBlob(blob => {
@@ -743,7 +744,7 @@
           console.log(`FormData key: ${key}, size: ${value.size || value.length || 'N/A'}`);
           if (key === 'mask') hasMask = true;
         }
-        
+
         if (!hasMask && (isDrawingMask || maskInput.files.length > 0)) {
           console.error('错误：FormData缺少遮罩数据');
           throw new Error('遮罩数据未正确添加');
@@ -882,7 +883,7 @@
         drawMaskBtn.textContent = '放弃绘制';
         maskUploadGroup.classList.add("hidden");
         maskCanvasContainer.classList.remove("hidden");
-        
+
         // 异步状态验证
         await new Promise(resolve => setTimeout(resolve, 0));
         console.log('异步状态验证:', {
@@ -908,12 +909,12 @@
         maskCanvasContainer.innerHTML = '';
         maskCanvas = document.createElement('canvas');
         if (!maskCanvas) throw new Error('画布创建失败');
-        
+
         maskCanvas.style.border = '1px solid #ccc';
         maskCanvas.style.display = 'block';
         maskCanvas.style.position = 'relative';
         maskCanvasContainer.appendChild(maskCanvas);
-        
+
         // 获取画布上下文
         maskCtx = maskCanvas.getContext('2d');
         if (!maskCtx) throw new Error('无法获取画布上下文');
