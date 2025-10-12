@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>力导向图理线工具 - 天天发蛋糕的工具箱</title>
-  <meta name="description" content="力导向图理线工具 - 天天发蛋糕的工具箱，支持节点和连线的可视化编辑，适用于电路图、网络拓扑等场景。">
+  <meta name="description" content="力导向图理线工具 - 天天发蛋糕的工具箱，支持节点和连线的可视化编辑，适用于桌面理线、接线等场景。">
   <meta name="keywords" content="力导向图, 理线工具, 节点连线, 可视化编辑, 工具箱">
   <link rel="stylesheet" href="../../assets/css/styles.css">
   <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -18,7 +18,7 @@
   <style>
     .cable-management-container { display: flex; height: calc(100vh - 140px); margin-top: var(--space-md); }
     #left { flex: 1; background: var(--color-bg-alt); border-radius: var(--radius-md); }
-    #right { width: 320px; border-left: 1px solid var(--color-border); padding: var(--space-md); box-sizing: border-box; background: var(--color-bg); overflow: auto; }
+    #right { width: 320px; padding: var(--space-md); box-sizing: border-box; background: var(--color-bg); overflow: auto; }
     .toolbar { padding: var(--space-sm); display:flex; gap:var(--space-xs); flex-wrap:wrap; background: var(--color-bg-alt); border-radius: var(--radius-sm); border: 1px solid var(--color-border); }
     button { padding:var(--space-xs) var(--space-sm); cursor:pointer; }
     svg { width:100%; height:100%; display:block; border-radius: var(--radius-sm); }
@@ -1062,7 +1062,6 @@ function updatePropertyPanel() {
       saveHistory();
     });
     
-    area.append('div').attr('class','info').text('源: ' + ((typeof link.source === 'object') ? link.source.id : link.source) + ' → 目标: ' + ((typeof link.target === 'object') ? link.target.id : link.target));
   } else if (selectedNodeIds.size === 0 && selectedLinkIds.size === 0) {
     area.append('div').attr('class','info').text('未选中任何元素。');
   } else {
