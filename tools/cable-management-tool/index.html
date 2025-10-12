@@ -797,18 +797,23 @@ function computeLinkStyle(cur, target) {
 
 function ticked() {
   // 边界约束 - 防止节点出界
+  // 获取SVG画布的实际边界
+  const svgRect = svg.node().getBoundingClientRect();
+  const svgWidth = svgRect.width;
+  const svgHeight = svgRect.height;
+  
   nodes.forEach(node => {
     // 考虑节点半径，确保整个节点都在可视区域内
     const padding = node.radius + 2; // 额外2像素边距
-    node.x = Math.max(padding, Math.min(WIDTH - padding, node.x));
-    node.y = Math.max(padding, Math.min(HEIGHT - padding, node.y));
+    node.x = Math.max(padding, Math.min(svgWidth - padding, node.x));
+    node.y = Math.max(padding, Math.min(svgHeight - padding, node.y));
     
     // 如果节点被固定位置，也要约束固定位置
     if (node.fx !== null && node.fx !== undefined) {
-      node.fx = Math.max(padding, Math.min(WIDTH - padding, node.fx));
+      node.fx = Math.max(padding, Math.min(svgWidth - padding, node.fx));
     }
     if (node.fy !== null && node.fy !== undefined) {
-      node.fy = Math.max(padding, Math.min(HEIGHT - padding, node.fy));
+      node.fy = Math.max(padding, Math.min(svgHeight - padding, node.fy));
     }
   });
 
