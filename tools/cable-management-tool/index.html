@@ -2,64 +2,168 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <title>接线理线 — 力导向原型</title>
+  <title>接线理线 — 力导向原型 - 天天发蛋糕的工具箱</title>
+  <meta name="description" content="接线理线力导向原型工具 - 天天发蛋糕的工具箱，支持节点和连线的可视化编辑，适用于电路图、网络拓扑等场景。">
+  <meta name="keywords" content="接线理线, 力导向图, 节点连线, 可视化编辑, 工具箱">
+  <link rel="stylesheet" href="../../assets/css/styles.css">
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYJXFSRHF5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-HYJXFSRHF5');
+  </script>
   <style>
-    body { font-family: Arial, Helvetica, sans-serif; margin: 0; display: flex; height: 100vh; }
-    #left { flex: 1; background: #fafafa; }
-    #right { width: 320px; border-left: 1px solid #ddd; padding: 10px; box-sizing: border-box; background: #fff; overflow: auto; }
-    .toolbar { padding: 8px; display:flex; gap:6px; flex-wrap:wrap; background: #f5f5f5; border-radius: 4px; border: 1px solid #e0e0e0; }
-    button { padding:6px 10px; cursor:pointer; }
-    svg { width:100%; height:100%; display:block; }
-    .link { stroke: #999; stroke-opacity: 0.9; }
-    .link.selected { stroke: orange; stroke-opacity:1; }
+    .cable-management-container { display: flex; height: calc(100vh - 140px); margin-top: var(--space-md); }
+    #left { flex: 1; background: var(--color-bg-alt); border-radius: var(--radius-md); }
+    #right { width: 320px; border-left: 1px solid var(--color-border); padding: var(--space-md); box-sizing: border-box; background: var(--color-bg); overflow: auto; }
+    .toolbar { padding: var(--space-sm); display:flex; gap:var(--space-xs); flex-wrap:wrap; background: var(--color-bg-alt); border-radius: var(--radius-sm); border: 1px solid var(--color-border); }
+    button { padding:var(--space-xs) var(--space-sm); cursor:pointer; }
+    svg { width:100%; height:100%; display:block; border-radius: var(--radius-sm); }
+    .link { stroke: var(--color-medium); stroke-opacity: 0.9; }
+    .link.selected { stroke: var(--color-warning); stroke-opacity:1; }
     .link-hit-area { stroke: transparent; stroke-width: 12px; cursor: pointer; }
-    .node circle { fill: #eee; stroke: #666; stroke-width:1.5px; cursor: pointer; }
-    .node.selected circle { stroke: orange; stroke-width:3px; }
+    .node circle { fill: var(--color-light); stroke: var(--color-dark); stroke-width:1.5px; cursor: pointer; }
+    .node.selected circle { stroke: var(--color-warning); stroke-width:3px; }
     .node text { font-size: 12px; pointer-events: none; user-select: none; }
-    .rect-select { fill: rgba(0,0,255,0.06); stroke: rgba(0,0,255,0.5); stroke-dasharray:4 2; }
-    label { display:block; margin-top:8px; font-weight:600; }
-    input[type="text"], input[type="number"], select { width:100%; box-sizing:border-box; padding:6px; margin-top:4px; }
-    .info { font-size:12px; color:#666; margin-top:6px; }
-    .small { font-size:12px; padding:4px 8px; }
-    .name-container { display: flex; gap: 4px; margin-top: 4px; }
+    .rect-select { fill: rgba(59, 130, 246, 0.06); stroke: rgba(59, 130, 246, 0.5); stroke-dasharray:4 2; }
+    label { display:block; margin-top:var(--space-sm); font-weight:600; color: var(--color-text); }
+    input[type="text"], input[type="number"], select { width:100%; box-sizing:border-box; padding:var(--space-sm) var(--space-xs); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.8em; transition: border-color var(--transition-fast); background-color: var(--color-white); color: var(--color-text); margin-top:var(--space-xs); }
+    .info { font-size:12px; color:var(--color-text-muted); margin-top:var(--space-sm); }
+    .small { font-size:12px; padding:var(--space-xxs) var(--space-sm); }
+    .name-container { display: flex; gap: var(--space-xs); margin-top: var(--space-xs); }
     .name-container select { flex: 1; }
     .name-container input { flex: 2; }
+    
+    @media (prefers-color-scheme: dark) {
+      input[type="text"], input[type="number"], select {
+        background-color: var(--color-bg-alt);
+      }
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--color-secondary);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
   </style>
 </head>
 <body>
-  <div id="left">
-    <svg id="svgCanvas"></svg>
-  </div>
+  <!-- 模板页头 -->
+  <header class="site-header">
+    <div class="container">
+      <div class="site-title">
+        <a href="/" class="site-title-link">
+          <span class="site-title">天天发蛋糕的工具箱</span>
+        </a>
+      </div>
+      <label for="menu-toggle-checkbox" class="menu-toggle" aria-label="打开菜单">☰</label>
+      <nav class="nav-menu">
+        <ul class="nav-list">
+          <li class="nav-item dropdown">
+            <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
+            <ul class="dropdown-menu">
+              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a>
+              </li>
+              <li><a href="/tools/card-translate/" class="dropdown-item">游戏王卡牌日中对照文本生成器</a></li>
+              <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
+              <li><a href="/tools/image-generation/" class="dropdown-item">gpt-image-1图像生成API调用工具</a></li>
+              <li><a href="/tools/cable-management-tool/" class="dropdown-item">接线理线力导向原型</a></li>
+              <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                      class="dropdown-item">恢复关闭的标签页</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <input type="checkbox" id="menu-toggle-checkbox" hidden>
+    <div class="drawer">
+      <div class="container">
+        <label for="menu-toggle-checkbox" class="menu-toggle close-menu" aria-label="关闭菜单">×</label>
+      </div>
+      <nav class="drawer-menu">
+        <ul class="drawer-list">
+          <li class="drawer-item">
+            <a href="#" class="drawer-link">工具</a>
+            <ul class="drawer-submenu">
+              <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a>
+              </li>
+              <li><a href="/tools/card-translate/" class="drawer-subitem">游戏王卡牌日中对照文本生成器</a></li>
+              <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
+              <li><a href="/tools/image-generation/" class="drawer-subitem">gpt-image-1图像生成API调用工具</a></li>
+              <li><a href="/tools/cable-management-tool/" class="drawer-subitem">接线理线力导向原型</a></li>
+              <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
+                      class="drawer-subitem">恢复关闭的标签页</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <label for="menu-toggle-checkbox" class="drawer-overlay"></label>
+  </header>
 
-  <div id="right">
-    <h3>属性面板</h3>
-    <div class="toolbar" style="margin-bottom: 16px;">
-      <button id="btnUndo" title="Ctrl+Z" disabled>撤销 (Ctrl+Z)</button>
-      <button id="btnRedo" title="Ctrl+Y" disabled>恢复 (Ctrl+Y)</button>
-      <button id="btnAddNode" title="N">添加节点 (N)</button>
-      <button id="btnAddLink" title="L">连接选中节点 (L)</button>
-      <button id="btnZip" title="B">扎带选中连线 (B)</button>
-      <button id="btnDelete" title="Delete">删除选中 (Del)</button>
-      <button id="btnLock" title="K">锁定/解锁选中 (K)</button>
-      <button id="btnSave" title="S">保存 JSON (S)</button>
-      <input id="loadFile" type="file" style="display:none" />
-      <button id="btnLoad" title="O">加载 JSON (O)</button>
+  <!-- 主内容 -->
+  <main class="container">
+    <h1 class="mt-0 mb-3">接线理线力导向原型</h1>
+    
+    <div class="card card--elevated">
+      <div class="cable-management-container">
+        <div id="left">
+          <svg id="svgCanvas"></svg>
+        </div>
+
+        <div id="right">
+          <h3>属性面板</h3>
+          <div class="toolbar" style="margin-bottom: var(--space-lg);">
+            <button id="btnUndo" class="btn btn--secondary small" title="Ctrl+Z" disabled>撤销 (Ctrl+Z)</button>
+            <button id="btnRedo" class="btn btn--secondary small" title="Ctrl+Y" disabled>恢复 (Ctrl+Y)</button>
+            <button id="btnAddNode" class="btn btn--primary small" title="N">添加节点 (N)</button>
+            <button id="btnAddLink" class="btn btn--primary small" title="L">连接选中节点 (L)</button>
+            <button id="btnZip" class="btn btn--primary small" title="B">扎带选中连线 (B)</button>
+            <button id="btnDelete" class="btn btn--danger small" title="Delete">删除选中 (Del)</button>
+            <button id="btnLock" class="btn btn--warning small" title="K">锁定/解锁选中 (K)</button>
+            <button id="btnSave" class="btn btn--success small" title="S">保存 JSON (S)</button>
+            <input id="loadFile" type="file" style="display:none" />
+            <button id="btnLoad" class="btn btn--success small" title="O">加载 JSON (O)</button>
+          </div>
+          <div id="propArea">
+            <div class="info">请选择一个节点或连线来编辑属性，或框选/Shift+点击多选。</div>
+          </div>
+          <div style="margin-top:var(--space-md);">
+            <div class="info">提示：</div>
+            <ul style="padding-left:18px; margin-top:var(--space-sm);">
+              <li>拖动节点可改变位置。</li>
+              <li>空白处按下并拖动可矩形选区。</li>
+              <li>添加连线时，先选择多个节点再点击"连接选中节点"按钮。</li>
+              <li>按住Shift键点击可多选节点或连线。</li>
+              <li>使用快捷键快速操作：N(添加节点), L(连接), B(扎带), Del(删除), K(锁定/解锁), S(保存), O(加载)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
-    <div id="propArea">
-      <div class="info">请选择一个节点或连线来编辑属性，或框选/Shift+点击多选。</div>
+  </main>
+
+  <!-- 模板页脚 -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-title">关于作者</h3>
+          <ul class="footer-links">
+            <li><a href="mailto:ttfdg520cs@gmail.com">ttfdg520cs@gmail.com</a></li>
+            <li><a href="https://space.bilibili.com/1446349" target="_blank">Bilibili主页</a></li>
+            <li><a href="https://github.com/xzxz520cs" target="_blank">GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="text-muted">© 2025 天天发蛋糕的工具箱</p>
+      </div>
     </div>
-    <div style="margin-top:12px;">
-      <div class="info">提示：</div>
-      <ul style="padding-left:18px; margin-top:6px;">
-        <li>拖动节点可改变位置。</li>
-        <li>空白处按下并拖动可矩形选区。</li>
-        <li>添加连线时，先选择多个节点再点击"连接选中节点"按钮。</li>
-        <li>按住Shift键点击可多选节点或连线。</li>
-        <li>使用快捷键快速操作：N(添加节点), L(连接), B(扎带), Del(删除), K(锁定/解锁), S(保存), O(加载)</li>
-      </ul>
-    </div>
-  </div>
+  </footer>
 
 <script>
 // ==== 基本配置 ====
