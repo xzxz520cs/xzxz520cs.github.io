@@ -40,6 +40,7 @@
       <button id="btnAddLink" title="L">连接选中节点 (L)</button>
       <button id="btnZip" title="B">扎带选中连线 (B)</button>
       <button id="btnDelete" title="Delete">删除选中 (Del)</button>
+      <button id="btnLock" title="K">锁定/解锁选中 (K)</button>
       <button id="btnSave" title="S">保存 JSON (S)</button>
       <input id="loadFile" type="file" style="display:none" />
       <button id="btnLoad" title="O">加载 JSON (O)</button>
@@ -54,7 +55,7 @@
         <li>空白处按下并拖动可矩形选区。</li>
         <li>添加连线时，先选择多个节点再点击"连接选中节点"按钮。</li>
         <li>按住Shift键点击可多选节点或连线。</li>
-        <li>使用快捷键快速操作：N(添加节点), L(连接), B(扎带), Del(删除), S(保存), O(加载)</li>
+        <li>使用快捷键快速操作：N(添加节点), L(连接), B(扎带), Del(删除), K(锁定/解锁), S(保存), O(加载)</li>
       </ul>
     </div>
   </div>
@@ -252,6 +253,7 @@ function updateAllButtonStates() {
   const btnGroup = document.getElementById('btnGroup');
   const btnZip = document.getElementById('btnZip');
   const btnDelete = document.getElementById('btnDelete');
+  const btnLock = document.getElementById('btnLock');
   
   // 连接按钮：至少选中2个节点
   btnAddLink.disabled = selectedNodeIds.size < 2;
@@ -262,6 +264,9 @@ function updateAllButtonStates() {
   
   // 删除按钮：至少选中1个节点或1条连线
   btnDelete.disabled = selectedNodeIds.size === 0 && selectedLinkIds.size === 0;
+  
+  // 锁定按钮：至少选中1个节点
+  btnLock.disabled = selectedNodeIds.size === 0;
 }
 
 // ==== 更新图形绑定 ====
@@ -466,6 +471,10 @@ document.getElementById('btnDelete').addEventListener('click', () => {
   saveHistory();
 });
 
+document.getElementById('btnLock').addEventListener('click', () => {
+  toggleLockSelectedNodes();
+});
+
 document.getElementById('btnSave').addEventListener('click', () => {
   saveToJson();
 });
@@ -547,6 +556,35 @@ function deleteSelected() {
   selectedNodeIds.clear();
   selectedLinkIds.clear();
   updateGraph();
+}
+
+// 切换选中节点的锁定状态
+function toggleLockSelectedNodes() {
+  if (selectedNodeIds.size === 0) {
+    alert('请先选择至少一个节点来锁定/解锁');
+    return;
+  }
+  
+  // 检查是否所有选中节点都已锁定
+  const selectedNodes = nodes.filter(n => selectedNodeIds.has(n.id));
+  const allLocked = selectedNodes.every(n => n.locked);
+  
+  // 切换锁定状态
+  selectedNodes.forEach(node => {
+    node.locked = !allLocked;
+    if (node.locked) {
+      // 锁定节点：固定当前位置
+      node.fx = node.x;
+      node.fy = node.y;
+    } else {
+      // 解锁节点：清除固定位置
+      node.fx = null;
+      node.fy = null;
+    }
+  });
+  
+  updateGraph();
+  saveHistory();
 }
 
 // ==== 保存加载 ====
@@ -728,23 +766,6 @@ function updatePropertyPanel() {
       saveHistory();
     });
     
-    // 添加锁定/解锁按钮
-    const lockBtn = area.append('button').attr('class', 'small').node();
-    lockBtn.textContent = node.locked ? '解锁位置' : '锁定位置';
-    lockBtn.addEventListener('click', () => {
-      node.locked = !node.locked;
-      if (node.locked) {
-        // 锁定节点：固定当前位置
-        node.fx = node.x;
-        node.fy = node.y;
-      } else {
-        // 解锁节点：清除固定位置
-        node.fx = null;
-        node.fy = null;
-      }
-      updatePropertyPanel(); // 重新创建属性面板以更新按钮文本
-      saveHistory();
-    });
     
     area.append('div').attr('class','info').text('类型：' + (node.type || 'device'));
     area.append('div').attr('class','info').text('状态：' + (node.locked ? '已锁定' : '未锁定'));
@@ -903,6 +924,9 @@ document.addEventListener('keydown', (event) => {
     } else if (event.key === 'Delete' || event.key === 'Backspace') {
       event.preventDefault();
       document.getElementById('btnDelete').click();
+    } else if (event.key === 'k' || event.key === 'K') {
+      event.preventDefault();
+      toggleLockSelectedNodes();
     }
   }
 });
