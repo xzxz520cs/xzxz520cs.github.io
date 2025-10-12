@@ -559,6 +559,30 @@ img {
   width: 100%;
 }
 
+/* 小按钮样式 - 用于工具栏、紧凑布局等场景 */
+.btn--small {
+  padding: var(--space-xxs) var(--space-sm);
+  font-size: 12px;
+  font-weight: 500;
+  min-height: auto;
+}
+
+/* 小按钮在移动端的响应式调整 */
+@media (max-width: 768px) {
+  .btn--small {
+    min-width: 100px;
+    font-size: 11px;
+    padding: var(--space-xxs) var(--space-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .btn--small {
+    min-width: 80px;
+    font-size: 10px;
+  }
+}
+
 /* 表单组件样式：容器、标签与输入框 */
 .form-group {
   margin-bottom: 0;
