@@ -494,18 +494,95 @@ svg.on('mouseup', (event) => {
   const rect = rectEl.node().getBBox();
   rectEl.remove();
   rectEl = null;
+  
   // 选择中心点在矩形区域内的节点
   selectedNodeIds.clear();
   selectedLinkIds.clear();
+  
+  // 首先尝试选择节点
   nodes.forEach(n => {
     if (n.x >= rect.x && n.x <= rect.x + rect.width && n.y >= rect.y && n.y <= rect.y + rect.height) {
       selectedNodeIds.add(n.id);
     }
   });
+  
+  // 如果没有选中任何节点，则尝试选择连线（基于连线是否与矩形相交）
+  if (selectedNodeIds.size === 0) {
+    links.forEach(l => {
+      const s = (typeof l.source === 'object') ? l.source : nodes.find(n => n.id === l.source);
+      const t = (typeof l.target === 'object') ? l.target : nodes.find(n => n.id === l.target);
+      if (!s || !t) return;
+      
+      // 检查连线是否与矩形相交
+      if (lineIntersectsRect(s.x, s.y, t.x, t.y, rect.x, rect.y, rect.width, rect.height)) {
+        selectedLinkIds.add(l.id);
+      }
+    });
+  }
+  
   applySelectionStyles();
   updatePropertyPanel();
   updateAllButtonStates();
 });
+
+// 检查线段是否与矩形相交的辅助函数
+function lineIntersectsRect(x1, y1, x2, y2, rx, ry, rw, rh) {
+  // 快速检查：如果线段两个端点都在矩形同一侧，则不相交
+  if ((x1 < rx && x2 < rx) || (x1 > rx + rw && x2 > rx + rw) ||
+      (y1 < ry && y2 < ry) || (y1 > ry + rh && y2 > ry + rh)) {
+    return false;
+  }
+  
+  // 检查线段是否与矩形的四条边相交
+  const edges = [
+    { x1: rx, y1: ry, x2: rx + rw, y2: ry }, // 上边
+    { x1: rx + rw, y1: ry, x2: rx + rw, y2: ry + rh }, // 右边
+    { x1: rx, y1: ry + rh, x2: rx + rw, y2: ry + rh }, // 下边
+    { x1: rx, y1: ry, x2: rx, y2: ry + rh } // 左边
+  ];
+  
+  for (const edge of edges) {
+    if (linesIntersect(x1, y1, x2, y2, edge.x1, edge.y1, edge.x2, edge.y2)) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+// 检查两条线段是否相交的辅助函数
+function linesIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
+  // 计算方向
+  const d1 = direction(x3, y3, x4, y4, x1, y1);
+  const d2 = direction(x3, y3, x4, y4, x2, y2);
+  const d3 = direction(x1, y1, x2, y2, x3, y3);
+  const d4 = direction(x1, y1, x2, y2, x4, y4);
+  
+  // 检查一般情况
+  if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
+      ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) {
+    return true;
+  }
+  
+  // 检查特殊情况（共线）
+  if (d1 === 0 && onSegment(x3, y3, x4, y4, x1, y1)) return true;
+  if (d2 === 0 && onSegment(x3, y3, x4, y4, x2, y2)) return true;
+  if (d3 === 0 && onSegment(x1, y1, x2, y2, x3, y3)) return true;
+  if (d4 === 0 && onSegment(x1, y1, x2, y2, x4, y4)) return true;
+  
+  return false;
+}
+
+// 计算三点方向的辅助函数
+function direction(px, py, qx, qy, rx, ry) {
+  return (qx - px) * (ry - py) - (qy - py) * (rx - px);
+}
+
+// 检查点是否在线段上的辅助函数
+function onSegment(px, py, qx, qy, rx, ry) {
+  return Math.min(px, qx) <= rx && rx <= Math.max(px, qx) &&
+         Math.min(py, qy) <= ry && ry <= Math.max(py, qy);
+}
 
 // 拖动
 function dragstarted(event, d) {
