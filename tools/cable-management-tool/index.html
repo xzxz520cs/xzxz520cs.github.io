@@ -194,13 +194,40 @@ const LINK_NAME_PRESETS = [
 
 // 数据
 let nodes = [
-  { id: 'pc', name: '电脑', radius: 10, type: 'device', x: 200, y: 200, locked: false },
-  { id: 'monitor', name: '显示器', radius: 10, type: 'device', x: 360, y: 220, locked: false },
-  { id: 'speaker', name: '音响', radius: 10, type: 'device', x: 220, y: 380, locked: false }
+  { id: 'n_ehr4r6o', name: '主机', radius: 10, type: 'device', x: 652, y: 342, locked: false },
+  { id: 'n_ahnrpao', name: '显示器', radius: 10, type: 'device', x: 758, y: 369, locked: false },
+  { id: 'n_xj27o90', name: '电源', radius: 10, type: 'device', x: 745, y: 556, locked: false },
+  { id: 'n_mz4vwj5', name: '排插', radius: 10, type: 'device', x: 678, y: 460, locked: false },
+  { id: 'n_tcy3iyp', name: 'switch', radius: 10, type: 'device', x: 798, y: 466, locked: false },
+  { id: 'n_7matmu8', name: '音响右', radius: 10, type: 'device', x: 580, y: 407, locked: false },
+  { id: 'n_i10nrjg', name: '音响左', radius: 10, type: 'device', x: 463, y: 395, locked: false },
+  { id: 'n_1zh4y16', name: '键盘', radius: 10, type: 'device', x: 599, y: 239, locked: false },
+  { id: 'n_fcr3nf1', name: '鼠标', radius: 10, type: 'device', x: 693, y: 234, locked: false },
+  { id: 'n_6p6i6d2', name: '切换器', radius: 10, type: 'device', x: 698, y: 423, locked: false },
+  { id: 'n_mnz1u9m', name: '路由器', radius: 10, type: 'device', x: 578, y: 456, locked: false },
+  { id: 'n_w6wk1vz', name: '光猫', radius: 10, type: 'device', x: 616, y: 568, locked: false },
+  { id: 'n_cnmty9g', name: '光纤', radius: 10, type: 'device', x: 593, y: 690, locked: false }
 ];
 let links = [
-  { id: 'l1', source: 'pc', target: 'monitor', name: '视频线', targetLength: 100 },
-  { id: 'l2', source: 'pc', target: 'speaker', name: '音频线', targetLength: 100 }
+  { id: 'link_ok0lugf', source: 'n_ehr4r6o', target: 'n_ahnrpao', name: '线缆', targetLength: 100 },
+  { id: 'link_uko8pjl', source: 'n_xj27o90', target: 'n_mz4vwj5', name: '线缆', targetLength: 100 },
+  { id: 'link_7xjoe0n', source: 'n_ehr4r6o', target: 'n_mz4vwj5', name: '线缆', targetLength: 100 },
+  { id: 'link_4qlf43w', source: 'n_ahnrpao', target: 'n_mz4vwj5', name: '线缆', targetLength: 100 },
+  { id: 'link_p0qtktg', source: 'n_7matmu8', target: 'n_i10nrjg', name: '线缆', targetLength: 100 },
+  { id: 'link_121eg1o', source: 'n_ehr4r6o', target: 'n_7matmu8', name: '线缆', targetLength: 100 },
+  { id: 'link_7b25gon', source: 'n_mz4vwj5', target: 'n_7matmu8', name: '线缆', targetLength: 100 },
+  { id: 'link_ephc13t', source: 'n_mz4vwj5', target: 'n_tcy3iyp', name: '线缆', targetLength: 100 },
+  { id: 'link_l73fkf6', source: 'n_ehr4r6o', target: 'n_1zh4y16', name: '线缆', targetLength: 100 },
+  { id: 'link_7svbaa8', source: 'n_ehr4r6o', target: 'n_fcr3nf1', name: '线缆', targetLength: 100 },
+  { id: 'link_7q451oi', source: 'n_ahnrpao', target: 'n_tcy3iyp', name: '线缆', targetLength: 100 },
+  { id: 'link_uim0gxv', source: 'n_tcy3iyp', target: 'n_6p6i6d2', name: '线缆', targetLength: 100 },
+  { id: 'link_y7lf757', source: 'n_7matmu8', target: 'n_6p6i6d2', name: '线缆', targetLength: 100 },
+  { id: 'link_99pcll2', source: 'n_mnz1u9m', target: 'n_w6wk1vz', name: '线缆', targetLength: 100 },
+  { id: 'link_kxszyjh', source: 'n_w6wk1vz', target: 'n_cnmty9g', name: '线缆', targetLength: 100 },
+  { id: 'link_jhspgfj', source: 'n_mz4vwj5', target: 'n_mnz1u9m', name: '线缆', targetLength: 100 },
+  { id: 'link_ei0sy6s', source: 'n_mz4vwj5', target: 'n_w6wk1vz', name: '线缆', targetLength: 100 },
+  { id: 'link_eewseyf', source: 'n_ehr4r6o', target: 'n_mnz1u9m', name: '线缆', targetLength: 100 },
+  { id: 'link_kxoz5e4', source: 'n_ehr4r6o', target: 'n_6p6i6d2', name: '线缆', targetLength: 100 }
 ];
 
 // 选中集合（id）
