@@ -116,11 +116,40 @@ async function downloadZip() {
         folder.file(file.name, file.blob);
     });
 
-    const content = await zip.generateAsync({ type: 'blob' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(content);
-    link.download = `converted_images_${Date.now()}.zip`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // 更新状态为打包中
+    updateStatus('正在打包压缩文件...');
+    document.querySelector('.progress').style.width = '0%';
+    
+    try {
+        const content = await zip.generateAsync({
+            type: 'blob',
+            onUpdate: (metadata) => {
+                // 更新打包进度
+                const progress = (metadata.percent / 100) * 100;
+                document.querySelector('.progress').style.width = `${progress}%`;
+                updateStatus(`正在打包压缩文件... ${Math.round(metadata.percent)}%`);
+            }
+        });
+        
+        // 打包完成
+        updateStatus('打包完成，正在下载...');
+        document.querySelector('.progress').style.width = '100%';
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = `converted_images_${Date.now()}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // 短暂显示完成状态
+        setTimeout(() => {
+            updateStatus('下载完成！');
+        }, 1000);
+        
+    } catch (error) {
+        console.error('打包失败:', error);
+        updateStatus('打包失败，请重试');
+        document.querySelector('.progress').style.width = '0%';
+    }
 }
