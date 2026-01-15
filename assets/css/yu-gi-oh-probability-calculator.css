@@ -1,7 +1,7 @@
 /* =====================================================
-    游戏王概率计算器专用样式定义
-    本文件包含计算器各组件的布局及设计标准。
-   ===================================================== */
+     游戏王概率计算器专用样式定义
+     本文件包含计算器各组件的布局及设计标准。
+    ===================================================== */
 
 /* 卡组管理面板样式 */
 .deck-management {
@@ -39,8 +39,12 @@
 /* 卡牌输入网格布局样式 */
 .card-input-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(4em, 1fr));
     gap: var(--space-xxs);
+}
+
+.card-input-grid label {
+    text-align: center;
 }
 
 /* 右侧信息显示区整体布局 */
@@ -219,7 +223,7 @@
 
     .chart-section {
         height: 80%;
-    }    
+    }
 
     .main-content {
         grid-template-columns: 1fr;
@@ -309,4 +313,38 @@
 
 #manualConditionInput textarea {
     height: 100%;
+}
+
+/* 概率网格布局 */
+.probability-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+}
+
+.probability {
+    padding: var(--space-xs);
+    text-align: center;
+    border-radius: var(--radius-sm);
+}
+
+.probability-header {
+    font-weight: 600;
+    background-color: var(--color-primary);
+    color: var(--color-text-light);
+}
+
+.probability-cell {
+    background: transparent;
+    border: 2px solid currentColor;
+    color: var(--color-secondary);
+    padding: calc(var(--space-xs) - 2px);
+}
+
+#incrementValue {
+    width: 1.2em;
+    height: 1.5em;
+}
+#autoIncrementDraws {
+    margin-left: 4px;
 }
