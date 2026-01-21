@@ -4,12 +4,11 @@
 
 ## 工具列表
 
-1. [游戏王概率计算器](/tools/yu-gi-oh-probability-calculator/) - 精准计算卡组启动概率上手率等概率
-2. [游戏王卡牌日中对照文本生成器](/tools/card-translate/) - 生成日文与中文官方名称对照
-3. [AVIF/WebP转JPG/PNG工具](/tools/webp-avif-2-jpg-png/) - 图片格式转换工具
-4. [gpt-image-1图像生成API调用工具](/tools/image-generation/) - 调用图像生成API
-5. [文本转语音工具](/tools/text-to-speech/) - 将文本转换为语音
-6. [恢复关闭的标签页](https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed) - Chrome扩展
+1. [游戏王概率计算器](https://ttfdg.cn/tools/yu-gi-oh-probability-calculator/) - 精准计算卡组启动概率上手率等概率
+2. [游戏王卡牌日中对照文本生成器](https://ttfdg.cn/tools/card-translate/) - 生成日文与中文官方名称对照
+3. [AVIF/WebP转JPG/PNG工具](https://ttfdg.cn/tools/webp-avif-2-jpg-png/) - 图片格式转换工具
+4. [文本转语音工具](https://ttfdg.cn/tools/text-to-speech/) - 将文本转换为语音
+5. [恢复关闭的标签页](https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed) - Chrome扩展
 
 ## 使用说明
 
