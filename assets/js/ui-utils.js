@@ -186,21 +186,51 @@
 
     /**
      * 隐藏一个AA-AZ卡牌
+     * 从最后一个AA-AZ卡类开始，隐藏连续的无内容卡类
+     * 当遇到有内容的卡类时停止
+     * 不隐藏有内容卡类之前的无内容卡类
      * @returns {boolean} 是否还有更多卡牌可隐藏
      */
     function hideOneCard() {
         const allVisibleCards = Array.from(document.querySelectorAll('#cardInputs .form-group:not(.hidden)'));
-        const aaAzCards = allVisibleCards.filter(el => {
-            const input = el.querySelector('input[type="number"]');
-            if (!input || !input.id) return false;
-            const num = parseInt(input.id.replace('card',''));
-            return num >= 26 && num <= 51;
-        });
+        
+        // 获取所有可见的AA-AZ卡类，并按索引降序排序（从最后一个开始）
+        const aaAzCards = allVisibleCards
+            .filter(el => {
+                const input = el.querySelector('input[type="number"]');
+                if (!input || !input.id) return false;
+                const num = parseInt(input.id.replace('card',''));
+                return num >= 26 && num <= 51;
+            })
+            .sort((a, b) => {
+                const numA = parseInt(a.querySelector('input[type="number"]').id.replace('card',''));
+                const numB = parseInt(b.querySelector('input[type="number"]').id.replace('card',''));
+                return numB - numA; // 降序排序，从索引大的开始
+            });
 
         if (aaAzCards.length === 0) return false;
         
-        aaAzCards[aaAzCards.length - 1].classList.add('hidden');
-        return aaAzCards.length > 1;
+        // 从最后一个AA-AZ卡类开始（索引最大的）
+        for (const cardElement of aaAzCards) {
+            const countInput = cardElement.querySelector('input[type="number"]');
+            const nameInput = cardElement.querySelector('input[type="text"]');
+            
+            // 检查卡类是否有内容：数量不为0或卡名不为空
+            const hasCount = countInput && (parseInt(countInput.value) || 0) > 0;
+            const hasName = nameInput && nameInput.value.trim() !== '';
+            
+            if (!hasCount && !hasName) {
+                // 这个卡类没有内容，可以隐藏
+                cardElement.classList.add('hidden');
+                return true; // 成功隐藏了一个卡类
+            } else {
+                // 遇到有内容的卡类，停止隐藏
+                break;
+            }
+        }
+        
+        // 没有找到可以隐藏的无内容卡类
+        return false;
     }
 
     /**
@@ -243,15 +273,43 @@
         const hasHiddenCards = document.querySelectorAll('#cardInputs .form-group.hidden').length > 0;
         showMoreBtn.disabled = !hasHiddenCards;
 
-        // 检查AA-AZ卡类中是否有显示的
+        // 检查AA-AZ卡类中是否有可以隐藏的卡类（根据新的hideOneCard逻辑）
         const allVisibleCards = Array.from(document.querySelectorAll('#cardInputs .form-group:not(.hidden)'));
-        const hasVisibleAaAzCards = allVisibleCards.some(el => {
-            const input = el.querySelector('input[type="number"]');
-            if (!input || !input.id) return false;
-            const num = parseInt(input.id.replace('card',''));
-            return num >= 26 && num <= 51;
-        });
-        showLessBtn.disabled = !hasVisibleAaAzCards;
+        
+        // 获取所有可见的AA-AZ卡类，并按索引降序排序
+        const aaAzCards = allVisibleCards
+            .filter(el => {
+                const input = el.querySelector('input[type="number"]');
+                if (!input || !input.id) return false;
+                const num = parseInt(input.id.replace('card',''));
+                return num >= 26 && num <= 51;
+            })
+            .sort((a, b) => {
+                const numA = parseInt(a.querySelector('input[type="number"]').id.replace('card',''));
+                const numB = parseInt(b.querySelector('input[type="number"]').id.replace('card',''));
+                return numB - numA; // 降序排序，从索引大的开始
+            });
+
+        // 检查从最后一个AA-AZ卡类开始，是否有连续的无内容卡类
+        let hasHideableAaAzCards = false;
+        for (const cardElement of aaAzCards) {
+            const countInput = cardElement.querySelector('input[type="number"]');
+            const nameInput = cardElement.querySelector('input[type="text"]');
+            
+            const hasCount = countInput && (parseInt(countInput.value) || 0) > 0;
+            const hasName = nameInput && nameInput.value.trim() !== '';
+            
+            if (!hasCount && !hasName) {
+                // 找到无内容卡类，可以隐藏
+                hasHideableAaAzCards = true;
+                break;
+            } else {
+                // 遇到有内容卡类，停止检查
+                break;
+            }
+        }
+        
+        showLessBtn.disabled = !hasHideableAaAzCards;
     }
 
     // 对外暴露的工具方法集合
