@@ -131,6 +131,24 @@
             ydkContent = ydkText;
         }
 
+        // 提示用户导入操作会清空现有的卡牌输入
+        const hasExistingData = Array.from(document.querySelectorAll('#cardInputs input')).some(input => {
+            if (input.type === 'number') {
+                return parseInt(input.value) > 0;
+            } else if (input.type === 'text') {
+                return input.value.trim() !== '';
+            }
+            return false;
+        });
+
+        if (hasExistingData) {
+            const confirmMessage = '导入操作将会清空所有现有的卡牌输入。是否继续？';
+            if (!confirm(confirmMessage)) {
+                updateStatus('导入已取消');
+                return;
+            }
+        }
+
         updateStatus('正在解析.ydk文件...');
 
         try {
@@ -312,7 +330,8 @@
         // 首先尝试从缓存中查找
         if (cardDataCache && cardDataCache[cardId]) {
             const card = cardDataCache[cardId];
-            return card.cn_name || card.sc_name || card.md_name || card.jp_name || card.en_name || `未知-${unknownCardCounter++}`;
+            // 按照用户指定的优先级顺序：sc_name → md_name → cn_name → jp_name → en_name
+            return card.sc_name || card.md_name || card.cn_name || card.jp_name || card.en_name || `未知-${unknownCardCounter++}`;
         }
 
         // 如果缓存中没有，尝试使用API查询
@@ -360,6 +379,29 @@
         }
 
         updateStatus(`已填充 ${Math.min(cardInfo.length, 52)} 种卡片到输入框`);
+
+        // 如果填充的卡片种类超过26个（默认显示的数量），则自动显示更多卡片输入框
+        if (cardInfo.length > 26) {
+            // 计算需要显示的额外卡片数量
+            const extraCardsNeeded = Math.min(cardInfo.length - 26, 26); // 最多再显示26个
+            let cardsShown = 0;
+            
+            // 显示隐藏的卡片输入框，直到满足需求或没有更多可显示
+            while (cardsShown < extraCardsNeeded) {
+                const hasMore = window.UIUtils && window.UIUtils.showOneCard ? window.UIUtils.showOneCard() : false;
+                if (!hasMore) break;
+                cardsShown++;
+            }
+            
+            if (cardsShown > 0) {
+                updateStatus(`自动显示了 ${cardsShown} 个额外的卡片输入框`);
+                
+                // 更新按钮状态
+                if (window.UIUtils && window.UIUtils.updateCardVisibilityButtons) {
+                    window.UIUtils.updateCardVisibilityButtons();
+                }
+            }
+        }
     }
 
     /**
