@@ -98,7 +98,10 @@
             <div class="main-content">
                 <!-- 卡牌输入 -->
                 <div class="card-input-section">
-                    <h2 class="mt-1 mb-2">卡牌输入</h2>
+                    <div class="flex align-center justify-space-between mb-2">
+                        <h2 class="mt-1 mb-0">卡牌输入</h2>
+                        <button id="importDeckBtn" type="button" class="btn btn--small btn--outline">导入卡组</button>
+                    </div>
                     <div id="cardInputs" class="card-input-grid">
                         <!-- 静态卡牌输入项，自动生成A-AZ共52项 -->
                         <script>
@@ -406,6 +409,63 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
         </div>
     </footer>
 
+    <!-- 导入卡组模态窗口 -->
+    <div id="importDeckModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">导入卡组</h3>
+                <button type="button" class="modal-close" id="closeImportModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>导入方式</label>
+                    <div class="condition-mode">
+                        <label>
+                            <input type="radio" name="importMethod" value="file" checked>
+                            选择.ydk文件
+                        </label>
+                        <label>
+                            <input type="radio" name="importMethod" value="text">
+                            输入ydk文本
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="fileImportSection" class="import-section">
+                    <div class="form-group">
+                        <label for="ydkFile">选择.ydk文件</label>
+                        <input type="file" id="ydkFile" accept=".ydk" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="filePreview">文件预览</label>
+                        <textarea id="filePreview" class="form-control" rows="5" readonly placeholder="选择文件后显示内容..."></textarea>
+                    </div>
+                </div>
+                
+                <div id="textImportSection" class="import-section hidden">
+                    <div class="form-group">
+                        <label for="ydkText">输入.ydk格式文本</label>
+                        <textarea id="ydkText" class="form-control" rows="10" placeholder="粘贴.ydk文件内容，例如：
+#main
+28306253
+65681983
+45171524
+..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="importStatus">导入状态</label>
+                    <textarea id="importStatus" class="form-control" rows="3" readonly placeholder="等待导入..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn--secondary" id="cancelImportBtn">取消</button>
+                <button type="button" class="btn btn--primary" id="importBtn">导入</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 游戏王概率计算器子模块 -->
     <script async src="../../assets/js/chart.umd.min.js"></script>
     <script src="../../assets/js/ui-utils.js"></script>
@@ -413,6 +473,8 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
     <script src="../../assets/js/condition-builder.js"></script>
     <script src="../../assets/js/calculation-engine.js"></script>
     <script src="../../assets/js/probability-adversary-calculator.js"></script>
+    <!-- 卡组导入模块 -->
+    <script src="../../assets/js/deck-importer.js"></script>
     <!-- 游戏王概率计算器主模块 -->
     <script src="../../assets/js/yu-gi-oh-probability-calculator.js"></script>
 

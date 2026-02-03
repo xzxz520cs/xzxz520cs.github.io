@@ -99,6 +99,11 @@ window.onload = function () {
         document.getElementById('showHistoryBtn').classList.remove('hidden');
         document.getElementById('hideHistoryBtn').classList.add('hidden');
     });
+
+    // 初始化卡组导入功能
+    if (window.DeckImporter && window.DeckImporter.init) {
+        window.DeckImporter.init();
+    }
 };
 
 // 组合生成代理函数
