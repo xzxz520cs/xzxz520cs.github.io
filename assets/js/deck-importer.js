@@ -90,9 +90,9 @@
         if (typeof JSZip !== 'undefined') {
             return JSZip;
         }
-        
+
         updateStatus('正在加载JSZip库...');
-        
+
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
@@ -132,25 +132,25 @@
         }
 
         updateStatus('正在解析.ydk文件...');
-        
+
         try {
             const deckData = parseYdkContent(ydkContent);
             updateStatus(`解析完成：主卡组 ${deckData.main.length} 张卡`);
-            
+
             // 加载卡片数据
             updateStatus('正在加载卡片数据...');
             await loadCardData();
-            
+
             // 处理卡片信息
             updateStatus('正在查询卡片信息...');
             const cardInfo = await processCardIds(deckData.main);
-            
+
             // 填充到卡牌输入框
             updateStatus('正在填充卡牌输入...');
             fillCardInputs(cardInfo);
-            
+
             updateStatus('导入完成！');
-            
+
             // 3秒后自动关闭模态窗口
             setTimeout(() => {
                 closeModal();
@@ -162,7 +162,7 @@
                     window.UIUtils.updatePieChart();
                 }
             }, 3000);
-            
+
         } catch (error) {
             updateStatus(`导入失败：${error.message}`);
             console.error('导入失败:', error);
@@ -181,12 +181,12 @@
             extra: [],
             side: []
         };
-        
+
         let currentSection = null;
-        
+
         for (const line of lines) {
             const trimmedLine = line.trim();
-            
+
             if (trimmedLine.startsWith('#')) {
                 if (trimmedLine === '#main') {
                     currentSection = 'main';
@@ -199,12 +199,12 @@
                 }
                 continue;
             }
-            
+
             // 忽略空行和注释
             if (!trimmedLine || trimmedLine.startsWith('//') || trimmedLine.startsWith('#')) {
                 continue;
             }
-            
+
             // 只处理数字行（卡片ID）
             if (/^\d+$/.test(trimmedLine)) {
                 if (currentSection && result[currentSection]) {
@@ -212,7 +212,7 @@
                 }
             }
         }
-        
+
         return result;
     }
 
@@ -223,16 +223,16 @@
         if (cardDataCache) {
             return cardDataCache;
         }
-        
+
         if (cardDataLoading) {
             // 等待其他加载完成
             await new Promise(resolve => setTimeout(resolve, 100));
             return loadCardData();
         }
-        
+
         cardDataLoading = true;
         updateStatus('正在下载卡片数据...');
-        
+
         try {
             // 尝试加载JSZip库
             let JSZipInstance;
@@ -242,29 +242,29 @@
                 updateStatus('JSZip库加载失败，将直接使用API查询');
                 throw new Error('JSZip加载失败');
             }
-            
+
             // 尝试从本地zip文件加载
             updateStatus('正在下载ygocdb.com.cards.zip...');
             const response = await fetch('../../assets/card_data/ygocdb.com.cards.zip');
             if (!response.ok) {
                 throw new Error(`无法加载本地卡片数据: HTTP ${response.status}`);
             }
-            
+
             updateStatus('正在解压卡片数据...');
             const zipData = await response.arrayBuffer();
             const zip = new JSZipInstance();
             const zipContents = await zip.loadAsync(zipData);
-            
+
             const cardsJsonFile = zipContents.file('cards.json');
             if (!cardsJsonFile) {
                 throw new Error('cards.json 不在zip文件中');
             }
-            
+
             updateStatus('正在解析卡片数据...');
             const cardsJsonText = await cardsJsonFile.async('text');
             cardDataCache = JSON.parse(cardsJsonText);
             updateStatus(`卡片数据加载完成，共 ${Object.keys(cardDataCache).length} 张卡片`);
-            
+
         } catch (error) {
             console.warn('无法从本地加载卡片数据，将使用API查询:', error);
             updateStatus(`本地数据加载失败: ${error.message}，将使用在线API查询`);
@@ -272,7 +272,7 @@
         } finally {
             cardDataLoading = false;
         }
-        
+
         return cardDataCache;
     }
 
@@ -283,14 +283,14 @@
      */
     async function processCardIds(cardIds) {
         const cardCounts = {};
-        
+
         // 统计每种卡的数量
         for (const cardId of cardIds) {
             cardCounts[cardId] = (cardCounts[cardId] || 0) + 1;
         }
-        
+
         const result = [];
-        
+
         for (const [cardId, count] of Object.entries(cardCounts)) {
             let cardName = await getCardNameById(cardId);
             result.push({
@@ -299,7 +299,7 @@
                 count: count
             });
         }
-        
+
         return result;
     }
 
@@ -314,7 +314,7 @@
             const card = cardDataCache[cardId];
             return card.cn_name || card.sc_name || card.md_name || card.jp_name || card.en_name || `未知-${unknownCardCounter++}`;
         }
-        
+
         // 如果缓存中没有，尝试使用API查询
         try {
             updateStatus(`正在查询卡片 ${cardId}...`);
@@ -322,7 +322,7 @@
             if (!response.ok) {
                 throw new Error(`API返回错误: ${response.status}`);
             }
-            
+
             const cardData = await response.json();
             if (cardData && cardData.text && cardData.text.name) {
                 return cardData.text.name;
@@ -330,7 +330,7 @@
         } catch (error) {
             console.warn(`无法查询卡片 ${cardId}:`, error);
         }
-        
+
         // 如果API也失败，返回未知卡片名称
         return `未知-${unknownCardCounter++}`;
     }
@@ -345,7 +345,7 @@
             document.getElementById(`card${i}`).value = '';
             document.getElementById(`cardName${i}`).value = '';
         }
-        
+
         // 填充新的卡片信息
         let cardIndex = 0;
         for (const card of cardInfo) {
@@ -353,12 +353,12 @@
                 updateStatus(`警告：卡组超过52种卡，只显示前52种`);
                 break;
             }
-            
+
             document.getElementById(`card${cardIndex}`).value = card.count;
             document.getElementById(`cardName${cardIndex}`).value = card.name;
             cardIndex++;
         }
-        
+
         updateStatus(`已填充 ${Math.min(cardInfo.length, 52)} 种卡片到输入框`);
     }
 
