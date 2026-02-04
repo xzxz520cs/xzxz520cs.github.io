@@ -1,6 +1,7 @@
 /**
  * 卡组导入模块
  * 功能：处理.ydk文件导入，解析卡组，查询卡片信息并填充到卡牌输入框
+ * 感谢百鸽(ygocdb.com)提供的卡片数据API
  */
 
 (function (global) {
@@ -168,6 +169,7 @@
             fillCardInputs(cardInfo);
 
             updateStatus('导入完成！');
+            updateStatus('感谢百鸽(ygocdb.com)提供的卡片数据API');
 
             // 3秒后自动关闭模态窗口
             setTimeout(() => {
