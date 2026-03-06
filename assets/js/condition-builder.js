@@ -43,7 +43,7 @@
             const name = document.getElementById(`cardName${i}`)?.value.trim();
             if (name && !varNames.includes(name) && !customNames.includes(name)) customNames.push(name);
         }
-        const allNames = [...varNames, ...customNames];
+        const allNames = [...customNames, ...varNames];
         return allNames.length > 0 ? allNames : ['请先输入数量或卡名'];
     }
 
