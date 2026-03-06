@@ -140,6 +140,10 @@
         }
 
         if (window.UIUtils && window.UIUtils.updateTotalDeck) window.UIUtils.updateTotalDeck();
+        // 更新条件构建器的下拉框（如果条件构建器已加载）
+        if (window.builderRender) {
+            window.builderRender();
+        }
         alert("卡组加载成功！");
     }
 
