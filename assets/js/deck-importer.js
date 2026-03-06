@@ -181,6 +181,10 @@
                 if (window.UIUtils && window.UIUtils.updatePieChart) {
                     window.UIUtils.updatePieChart();
                 }
+                // 如果当前是条件构建器模式，刷新构建器下拉框
+                if (window.builderRender) {
+                    window.builderRender();
+                }
             }, 3000);
 
         } catch (error) {
@@ -403,6 +407,11 @@
                     window.UIUtils.updateCardVisibilityButtons();
                 }
             }
+        }
+
+        // 更新条件构建器的下拉框（如果条件构建器已加载）
+        if (window.builderRender) {
+            window.builderRender();
         }
     }
 
