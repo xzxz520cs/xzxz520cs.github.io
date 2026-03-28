@@ -98,6 +98,7 @@
 - 只有整行仅为数字的内容会被识别为卡牌编号密码。
 - 粘贴YGOPro/文本卡组导出内容时，只有纯数字行会被提取。
 - 可混合输入，自动提取所有有效编号密码行，忽略无效行。
+- 系统会自动去除重复的编号密码，每个编号只查询一次。
 
 输出说明：
 - 自动查询卡牌信息，支持批量输入。
@@ -280,8 +281,9 @@
 
         /**
          * 加载卡片数据（从本地zip或API）
+         * @param {Function} progressCallback - 进度回调函数，接收进度百分比和消息
          */
-        async function loadCardData() {
+        async function loadCardData(progressCallback) {
             if (cardDataCache) {
                 return cardDataCache;
             }
@@ -289,7 +291,7 @@
             if (cardDataLoading) {
                 // 等待其他加载完成
                 await new Promise(resolve => setTimeout(resolve, 100));
-                return loadCardData();
+                return loadCardData(progressCallback);
             }
 
             cardDataLoading = true;
@@ -298,19 +300,51 @@
                 // 尝试加载JSZip库
                 let JSZipInstance;
                 try {
+                    if (progressCallback) progressCallback(0, '正在加载JSZip库...');
                     JSZipInstance = await loadJSZip();
+                    if (progressCallback) progressCallback(10, 'JSZip库加载完成');
                 } catch (error) {
                     console.warn('JSZip库加载失败，将直接使用API查询');
                     throw new Error('JSZip加载失败');
                 }
 
                 // 尝试从本地zip文件加载
+                if (progressCallback) progressCallback(20, '正在下载卡片数据库...');
                 const response = await fetch('../../assets/card_data/ygocdb.com.cards.zip');
                 if (!response.ok) {
                     throw new Error(`无法加载本地卡片数据: HTTP ${response.status}`);
                 }
 
-                const zipData = await response.arrayBuffer();
+                // 获取内容长度用于进度计算
+                const contentLength = response.headers.get('content-length');
+                let loaded = 0;
+                let total = contentLength ? parseInt(contentLength) : 0;
+
+                // 使用ReadableStream来跟踪下载进度
+                const reader = response.body.getReader();
+                const chunks = [];
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    chunks.push(value);
+                    loaded += value.length;
+                    
+                    // 更新下载进度
+                    if (total > 0 && progressCallback) {
+                        const downloadPercent = 20 + Math.round((loaded / total) * 50); // 20%到70%
+                        progressCallback(downloadPercent, `正在下载卡片数据库... ${Math.round((loaded / total) * 100)}%`);
+                    }
+                }
+
+                // 合并chunks
+                const zipData = new Uint8Array(loaded);
+                let position = 0;
+                for (const chunk of chunks) {
+                    zipData.set(chunk, position);
+                    position += chunk.length;
+                }
+
+                if (progressCallback) progressCallback(70, '正在解压卡片数据...');
                 const zip = new JSZipInstance();
                 const zipContents = await zip.loadAsync(zipData);
 
@@ -319,12 +353,16 @@
                     throw new Error('cards.json 不在zip文件中');
                 }
 
+                if (progressCallback) progressCallback(80, '正在解析卡片数据...');
                 const cardsJsonText = await cardsJsonFile.async('text');
                 cardDataCache = JSON.parse(cardsJsonText);
+                
+                if (progressCallback) progressCallback(100, `卡片数据加载完成，共 ${Object.keys(cardDataCache).length} 张卡片`);
                 console.log(`卡片数据加载完成，共 ${Object.keys(cardDataCache).length} 张卡片`);
 
             } catch (error) {
                 console.warn('无法从本地加载卡片数据，将使用API查询:', error);
+                if (progressCallback) progressCallback(100, '本地数据加载失败，将使用在线API查询');
                 cardDataCache = {}; // 使用空缓存，后续通过API查询
             } finally {
                 cardDataLoading = false;
@@ -374,14 +412,16 @@
         /**
          * 根据卡片ID获取卡片信息（支持批量查询）
          * @param {Array} cardIds - 卡片ID数组
+         * @param {Function} progressCallback - 进度回调函数
          * @returns {Promise<Array>} 卡片信息数组
          */
-        async function getCardInfoBatch(cardIds) {
-            // 先加载卡片数据
-            await loadCardData();
+        async function getCardInfoBatch(cardIds, progressCallback) {
+            // 先加载卡片数据，传递进度回调
+            await loadCardData(progressCallback);
             
             const results = [];
-            for (const cardId of cardIds) {
+            for (let i = 0; i < cardIds.length; i++) {
+                const cardId = cardIds[i];
                 // 首先尝试从缓存中查找
                 if (cardDataCache && cardDataCache[cardId]) {
                     const card = cardDataCache[cardId];
@@ -396,6 +436,12 @@
                     } else {
                         results.push({ _inputNum: cardId, notFound: true });
                     }
+                }
+                
+                // 更新查询进度
+                if (progressCallback) {
+                    const queryPercent = Math.round(((i + 1) / cardIds.length) * 100);
+                    progressCallback(queryPercent, `正在查询卡片... ${i + 1}/${cardIds.length}`);
                 }
             }
             return results;
@@ -414,62 +460,85 @@
                 copyBtn.classList.add('hidden');
                 return;
             }
-            // 创建进度条
+            // 创建进度条和状态显示
             output.innerHTML = `
                 <div class="progress-bar-container mb-2">
                     <div class="progress-bar" id="progress-bar"></div>
                 </div>
+                <div id="progress-status" class="text-muted mb-1">准备中...</div>
                 <span id="progress-text" class="text-muted">0/${numbers.length}</span>
                 <div id="result-area" class="mt-2"></div>
             `;
             copyBtn.classList.add('hidden');
             const progressBar = document.getElementById('progress-bar');
+            const progressStatus = document.getElementById('progress-status');
             const progressText = document.getElementById('progress-text');
             const resultArea = document.getElementById('result-area');
             
-            // 批量获取卡片信息
-            const cardList = await getCardInfoBatch(numbers);
+            // 创建进度回调函数
+            const progressCallback = (percent, message) => {
+                progressBar.style.width = percent + '%';
+                if (message) {
+                    progressStatus.textContent = message;
+                }
+                // 如果是在查询卡片阶段，更新卡片计数
+                if (message && message.includes('查询卡片')) {
+                    const match = message.match(/(\d+)\/(\d+)/);
+                    if (match) {
+                        progressText.textContent = match[0];
+                    }
+                }
+            };
             
-            // 更新进度条
-            progressBar.style.width = '100%';
-            progressText.textContent = numbers.length + '/' + numbers.length;
-            
-            // 保持原始输入顺序
-            let results = [];
-            for (const card of cardList) {
-                if (card.notFound) {
-                    results.push(`${card._inputNum}->未找到卡片`);
-                } else {
-                    // 检查自定义模板
-                    const template = document.getElementById('customTemplate').value.trim();
-                    if (template) {
-                        // 用正则替换所有 {字段名}
-                        let line = template.replace(/\{(\w+)\}/g, (m, key) => {
-                            if (key === 'jp_and_ruby_or_en') return getJpBest(card);
-                            if (key === 'cn_official') return getCnBest(card);
-                            return card[key] !== undefined ? card[key] : '';
-                        });
-                        results.push(line);
+            try {
+                // 批量获取卡片信息，传递进度回调
+                const cardList = await getCardInfoBatch(numbers, progressCallback);
+                
+                // 更新进度条
+                progressBar.style.width = '100%';
+                progressStatus.textContent = '查询完成';
+                progressText.textContent = numbers.length + '/' + numbers.length;
+                
+                // 保持原始输入顺序
+                let results = [];
+                for (const card of cardList) {
+                    if (card.notFound) {
+                        results.push(`${card._inputNum}->未找到卡片`);
                     } else {
-                        // 默认输出逻辑
-                        const cn_name = getCnBest(card);
-                        let jp_best = getJpBest(card);
-                        if (!jp_best) {
-                            results.push(`${cn_name}`);
-                        } else if (jp_best.indexOf('->') === -1) {
-                            results.push(`${jp_best}->${cn_name}`);
+                        // 检查自定义模板
+                        const template = document.getElementById('customTemplate').value.trim();
+                        if (template) {
+                            // 用正则替换所有 {字段名}
+                            let line = template.replace(/\{(\w+)\}/g, (m, key) => {
+                                if (key === 'jp_and_ruby_or_en') return getJpBest(card);
+                                if (key === 'cn_official') return getCnBest(card);
+                                return card[key] !== undefined ? card[key] : '';
+                            });
+                            results.push(line);
                         } else {
-                            results.push(`${jp_best}->${cn_name}`);
+                            // 默认输出逻辑
+                            const cn_name = getCnBest(card);
+                            let jp_best = getJpBest(card);
+                            if (!jp_best) {
+                                results.push(`${cn_name}`);
+                            } else if (jp_best.indexOf('->') === -1) {
+                                results.push(`${jp_best}->${cn_name}`);
+                            } else {
+                                results.push(`${jp_best}->${cn_name}`);
+                            }
                         }
                     }
                 }
-            }
-            resultArea.innerText = results.join('\n');
-            // 有输出时显示复制按钮，无输出时隐藏
-            if (results.length > 0 && results.some(r => r && r.trim() !== '')) {
-                copyBtn.classList.remove('hidden');
-            } else {
-                copyBtn.classList.add('hidden');
+                resultArea.innerText = results.join('\n');
+                // 有输出时显示复制按钮，无输出时隐藏
+                if (results.length > 0 && results.some(r => r && r.trim() !== '')) {
+                    copyBtn.classList.remove('hidden');
+                } else {
+                    copyBtn.classList.add('hidden');
+                }
+            } catch (error) {
+                progressStatus.textContent = '发生错误: ' + error.message;
+                console.error('查询失败:', error);
             }
         });
 
