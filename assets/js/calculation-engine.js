@@ -17,6 +17,23 @@
         return Math.floor((Date.now() - calculationStartTime) / 1000);
     }
 
+    // 用 BigInt 十进制整数运算精确格式化百分比（避免 Number 超出 2^53 导致精度丢失）
+    // 返回形如 "12.345678901234567%" 的字符串，`decimals` 位小数（默认15位，半进位四舍五入）
+    function formatProbabilityPercent(valid, total, decimals = 15) {
+        if (total <= 0n) return '0%';
+        const scale = 10n ** BigInt(decimals);
+        // 百分数整体放大 scale 倍：valid * 100 * scale / total
+        const scaled = (valid * 100n * scale) / total;
+        // 半进位四舍五入到 `decimals` 位
+        let rounded = scaled;
+        const remainder = scaled % 10n;
+        if (remainder * 2n >= 10n) rounded += 1n;
+        const whole = rounded / scale;
+        const frac = rounded % scale;
+        let fracStr = frac.toString().padStart(decimals, '0');
+        return `${whole.toString()}.${fracStr}%`;
+    }
+
     // 精确组合概率计算主入口，负责参数校验、进度显示、worker启动
     function calculate() {
         if (isCalculating) {
@@ -157,13 +174,12 @@
                             let multiplier = probMappings.reduce((acc, {denom}) => acc * BigInt(denom), 1n);
                             return { valid: validCount, multiplier };
                         }
-                        function recurse(index, counts, remaining) {
+                        // 优化：共享 counts 数组（回溯复用，避免每层数组复制）+
+                        // 增量组合数（prob 沿路径累积，叶子 O(1)，避免全量累乘所有卡类）
+                        const counts = new Array(cardCounts.length).fill(0);
+                        function recurse(index, remaining, prob) {
                             if (index === cardCounts.length) {
                                 if (remaining !== 0) return;
-                                let prob = 1n;
-                                for (let i = 0; i < counts.length; i++) {
-                                    prob *= combination(cardCounts[i], counts[i]);
-                                }
                                 const evalRes = evaluateCondition(counts);
                                 total += prob * evalRes.multiplier;
                                 valid += prob * evalRes.valid;
@@ -174,10 +190,10 @@
                             const max = Math.min(cardCounts[index], remaining);
                             for (let k = 0; k <= max; k++) {
                                 counts[index] = k;
-                                recurse(index + 1, [...counts], remaining - k);
+                                recurse(index + 1, remaining - k, prob * combination(cardCounts[index], k));
                             }
                         }
-                        recurse(0, [], draws);
+                        recurse(0, draws, 1n);
                         return { valid, total };
                     }
                     try {
@@ -223,9 +239,9 @@
         progressUpdateInterval = null;
         cleanupCalculation();
         // 使用BigInt进行精确百分比计算
-        const probability = Number(BigInt(result.valid) * (10n ** 22n) / BigInt(result.total)) / (10 ** 20);
+        const probability = formatProbabilityPercent(BigInt(result.valid), BigInt(result.total));
         const elapsedSeconds = getElapsedSeconds();
-        document.getElementById('probability').value = `${probability.toFixed(15)}%`;
+        document.getElementById('probability').value = probability;
         document.getElementById('validCombinations').value = result.valid.toString();
         document.getElementById('totalCombinations').value = result.total.toString();
         document.getElementById('calculationProgress').value = 100;
@@ -429,9 +445,9 @@
                     progressUpdateInterval = null;
                     cleanupCalculation();
                     // 使用BigInt进行精确百分比计算
-                    const probability = Number(BigInt(e.data.valid) * (10n ** 22n) / BigInt(e.data.total)) / (10 ** 20);
+                    const probability = formatProbabilityPercent(BigInt(e.data.valid), BigInt(e.data.total));
                     const elapsedSeconds = getElapsedSeconds();
-                    document.getElementById('probability').value = `${probability.toFixed(15)}%`;
+                    document.getElementById('probability').value = probability;
                     document.getElementById('validCombinations').value = e.data.valid.toString();
                     document.getElementById('totalCombinations').value = e.data.total.toString();
                     

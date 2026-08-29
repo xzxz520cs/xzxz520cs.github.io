@@ -82,12 +82,14 @@
             // 创建Web Worker执行组合生成
             generatorWorker = new Worker(URL.createObjectURL(new Blob([`
                 // Worker内部：组合生成与条件验证
-                let combinations = [];
                 let deck = [];
-                let cardNames = [];
                 let conditionFunc;
                 let combinationType;
                 let maxCombinations;
+                let draws;
+                // 已发现（并已发送给主线程）的组合去重集合；续算时保留并跳过，避免重复输出
+                let sentKeys = new Set();
+                let sentCount = 0;
                 let shouldStop = false;
 
                 function varToIndex(varName) {
@@ -104,97 +106,107 @@
                     throw new Error("无效的卡名称: " + varName);
                 }
 
-                function initialize(cardCounts, cardNames, condition, type, count) {
+                function initialize(cardCountsArr, condition, type, count, drawCount) {
                     // 构建牌组数组
                     deck = [];
-                    for (let i = 0; i < cardCounts.length; i++) {
-                        for (let j = 0; j < cardCounts[i]; j++) {
+                    for (let i = 0; i < cardCountsArr.length; i++) {
+                        for (let j = 0; j < cardCountsArr[i]; j++) {
                             deck.push(i);
                         }
                     }
-                    // 构建卡名数组
-                    this.cardNames = cardNames;
+                    draws = drawCount;
                     // 处理PROB函数
-                    const probMatches = condition.match(/PROB\\((\\d+(?:\\.\\d+)?)\\)/g) || [];
-                    const probValues = probMatches.map(m => parseFloat(m.match(/PROB\\((\\d+(?:\\.\\d+)?)\\)/)[1]));
+                    const probMatches = condition.match(/PROB\((\\d+(?:\.\d+)?)\)/g) || [];
+                    const probValues = probMatches.map(m => parseFloat(m.match(/PROB\((\\d+(?:\.\d+)?)\)/)[1]));
                     
-                    // 构建基础条件函数
+                    // 构建基础条件表达式
                     const baseCondition = condition
-                        .replace(/PROB\\((\\d+(?:\\.\\d+)?)\\)/g, "__PROB__")
+                        .replace(/PROB\((\\d+(?:\.\d+)?)\)/g, "__PROB__")
                         .replace(/\\b([a-z]{1,2})\\b/g, function(m) {
                             return (m === 'true' || m === 'false') ? m : "counts[" + varToIndex(m) + "]";
                         });
 
-                    // 创建条件验证函数
-                    conditionFunc = function(counts) {
-                        // 递归处理所有PROB组合
-                        function evaluate(index, currentCondition) {
-                            if (index >= probValues.length) {
-                                return eval(currentCondition);
-                            }
-                            // 计算PROB(0)和PROB(100)两种情况
-                            const prob0 = currentCondition.replace('__PROB__', 'false');
-                            const prob100 = currentCondition.replace('__PROB__', 'true');
-                            return evaluate(index + 1, prob0) || evaluate(index + 1, prob100);
-                        }
-                        return evaluate(0, baseCondition);
-                    };
-                    
+                    // 优化：把 eval 改为一次编译的 new Function
+                    // 每个 __PROB__ 占位符展开为真/假两种分支的表达式（存在任一分支满足即视为满足）
+                    function expandProbs(expr, index) {
+                        if (index >= probValues.length) return expr;
+                        const branchFalse = expandProbs(expr.replace('__PROB__', 'false'), index + 1);
+                        const branchTrue = expandProbs(expr.replace('__PROB__', 'true'), index + 1);
+                        return '(' + branchFalse + ') || (' + branchTrue + ')';
+                    }
+                    const expanded = expandProbs(baseCondition, 0);
+                    conditionFunc = new Function("counts", "return " + expanded);
+
                     combinationType = type;
                     maxCombinations = count;
                 }
 
-                function generateUniqueCombinations(draws) {
-                    const seen = new Set();
+                // 递归组合枚举：从 deck 中选 draws 个位置（索引严格递增），计数去重，按条件过滤
+                // 续算（reset=false）时保留 sentKeys，重扫时跳过已发送组合，不重复输出
+                function generateUniqueCombinations() {
                     const result = [];
-                    const counts = Array(52).fill(0);
+                    const currentCounts = Array(52).fill(0);
 
-                    function backtrack(start, remaining, currentCounts) {
+                    function backtrack(start, remaining) {
                         if (shouldStop) return;
                         if (remaining === 0) {
                             const key = currentCounts.join(',');
-                            if (!seen.has(key)) {
-                                seen.add(key);
+                            if (!sentKeys.has(key)) {
+                                sentKeys.add(key);
                                 const isValid = conditionFunc(currentCounts);
-                                if ((combinationType === 'valid' && isValid) || 
+                                if ((combinationType === 'valid' && isValid) ||
                                     (combinationType === 'invalid' && !isValid)) {
-                                    result.push([...currentCounts]);
-                                    postMessage({ 
-                                        type: 'combination', 
-                                        counts: [...currentCounts],
-                                        totalFound: result.length
+                                    result.push(currentCounts.slice());
+                                    sentCount++;
+                                    postMessage({
+                                        type: 'combination',
+                                        counts: currentCounts.slice(),
+                                        totalFound: sentCount
                                     });
                                 }
                             }
                             return;
                         }
                         for (let i = start; i < deck.length; i++) {
-                            const cardIndex = deck[i];
-                            currentCounts[cardIndex]++;
-                            backtrack(i + 1, remaining - 1, currentCounts);
-                            currentCounts[cardIndex]--;
-                            if (result.length >= maxCombinations) {
-                                shouldStop = true;
-                                return;
-                            }
+                            currentCounts[deck[i]]++;
+                            backtrack(i + 1, remaining - 1);
+                            currentCounts[deck[i]]--;
+                            if (sentCount >= maxCombinations) { shouldStop = true; return; }
+                            if (shouldStop) return;
                         }
                     }
 
-                    backtrack(0, draws, counts);
+                    backtrack(0, draws);
                     return result;
                 }
 
                 onmessage = function(e) {
                     if (e.data.type === 'start') {
-                        initialize(
-                            e.data.cardCounts,
-                            e.data.cardNames,
-                            e.data.condition,
-                            e.data.combinationType,
-                            e.data.combinationCount
-                        );
-                        generateUniqueCombinations(e.data.draws);
-                        postMessage({ type: 'complete', totalFound: combinations.length });
+                        if (e.data.reset) {
+                            // 全新开始：清空已发送记录
+                            sentKeys = new Set();
+                            sentCount = 0;
+                            shouldStop = false;
+                            initialize(
+                                e.data.cardCounts,
+                                e.data.condition,
+                                e.data.combinationType,
+                                e.data.combinationCount,
+                                e.data.draws
+                            );
+                        } else {
+                            // 续算：保留 sentKeys/sentCount，重置停止标志，重扫跳过已发送组合
+                            shouldStop = false;
+                        }
+                        // 若已达到目标数量，无需继续枚举，直接完成
+                        if (sentCount >= maxCombinations) {
+                            postMessage({ type: 'complete', totalFound: sentCount });
+                            return;
+                        }
+                        const result = generateUniqueCombinations();
+                        if (!shouldStop) {
+                            postMessage({ type: 'complete', totalFound: sentCount });
+                        }
                     } else if (e.data.type === 'stop') {
                         shouldStop = true;
                     }
@@ -220,6 +232,7 @@
             // 启动生成器
             generatorWorker.postMessage({
                 type: 'start',
+                reset: true,   // 全新开始：清空 Worker 内已发送组合记录
                 cardCounts,
                 cardNames,
                 draws,
@@ -275,8 +288,9 @@
         );
 
         if (shouldContinue) {
+            // 续算：保留 Worker 内已发送组合记录，跳过已生成组合，继续枚举
             progressUpdateInterval = setInterval(updateGenerationProgress, 1000);
-            generatorWorker.postMessage({ type: 'start' });
+            generatorWorker.postMessage({ type: 'start', reset: false });
         } else {
             finalizeGeneration();
         }

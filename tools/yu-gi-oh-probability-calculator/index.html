@@ -21,60 +21,8 @@
 </head>
 
 <body>
-    <!-- 模板页头 -->
-    <header class="site-header">
-        <div class="container">
-            <div class="site-title">
-                <a href="/" class="site-title-link">
-                    <span class="site-title">天天发蛋糕的工具箱</span>
-                </a>
-            </div>
-            <label for="menu-toggle-checkbox" class="menu-toggle" aria-label="打开菜单">☰</label>
-            <nav class="nav-menu">
-                <ul class="nav-list">
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">工具</a>
-                        <ul class="dropdown-menu">
-                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="dropdown-item">游戏王概率计算器</a>
-                            </li>
-                            <li><a href="/tools/card-translate/" class="dropdown-item">游戏王卡牌日中对照文本生成器</a></li>
-                            <li><a href="/tools/webp-avif-2-jpg-png/" class="dropdown-item">AVIF/WebP转JPG/PNG</a></li>
-                            <li><a href="/tools/cable-management-tool/" class="dropdown-item">力导向图理线工具</a></li>
-                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
-                                    class="dropdown-item">恢复关闭的标签页</a></li>
-                            <li><a href="https://greasyfork.org/zh-CN/scripts/593417-%E6%B8%B8%E6%88%8F%E7%8E%8B%E5%8D%A1%E7%BB%84%E5%AF%BC%E5%87%BAydk"
-                                    class="dropdown-item">官方数据库导出YDK</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-        <input type="checkbox" id="menu-toggle-checkbox" hidden>
-        <div class="drawer">
-            <div class="container">
-                <label for="menu-toggle-checkbox" class="menu-toggle close-menu" aria-label="关闭菜单">×</label>
-            </div>
-            <nav class="drawer-menu">
-                <ul class="drawer-list">
-                    <li class="drawer-item">
-                        <a href="#" class="drawer-link">工具</a>
-                        <ul class="drawer-submenu">
-                            <li><a href="/tools/yu-gi-oh-probability-calculator/" class="drawer-subitem">游戏王概率计算器</a>
-                            </li>
-                            <li><a href="/tools/card-translate/" class="drawer-subitem">游戏王卡牌日中对照文本生成器</a></li>
-                            <li><a href="/tools/webp-avif-2-jpg-png/" class="drawer-subitem">AVIF/WebP转JPG/PNG</a></li>
-                            <li><a href="/tools/cable-management-tool/" class="drawer-subitem">力导向图理线工具</a></li>
-                            <li><a href="https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed"
-                                    class="drawer-subitem">恢复关闭的标签页</a></li>
-                            <li><a href="https://greasyfork.org/zh-CN/scripts/593417-%E6%B8%B8%E6%88%8F%E7%8E%8B%E5%8D%A1%E7%BB%84%E5%AF%BC%E5%87%BAydk"
-                                    class="drawer-subitem">官方数据库导出YDK</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-        <label for="menu-toggle-checkbox" class="drawer-overlay"></label>
-    </header>
+    <!-- 页头由 assets/js/site-chrome.js 统一注入 -->
+    <site-header></site-header>
 
     <main class="container">
         <h1>游戏王概率计算器</h1>
@@ -166,7 +114,6 @@
                                     <input id="incrementValue" class="form-control" value="1" min="0">
                                 </div>
                                 <input type="number" id="draws" class="form-control" value="5" min="1">
-                                </label>
                             </div>
                         </div>
                     </div>
@@ -395,26 +342,11 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
                     </div>
                 </div>
             </div>
+            </div>
     </main>
 
-    <!-- 新增：模板页脚 -->
-    <footer class="site-footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div>
-                    <h3 class="footer-title">关于作者</h3>
-                    <ul class="footer-links">
-                        <li><a href="mailto:ttfdg520cs@gmail.com">ttfdg520cs@gmail.com</a></li>
-                        <li><a href="https://space.bilibili.com/1446349" target="_blank">Bilibili主页</a></li>
-                        <li><a href="https://github.com/xzxz520cs" target="_blank">GitHub</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p class="text-muted">© 2025 天天发蛋糕的工具箱</p>
-            </div>
-        </div>
-    </footer>
+    <!-- 页脚由 assets/js/site-chrome.js 统一注入 -->
+    <site-footer></site-footer>
 
     <!-- 导入卡组模态窗口 -->
     <div id="importDeckModal" class="modal hidden">
@@ -475,7 +407,8 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
     </div>
 
     <!-- 游戏王概率计算器子模块 -->
-    <script async src="../../assets/js/chart.umd.min.js"></script>
+    <!-- Chart.js 改为同步加载（位于业务脚本之前），避免 async 竞态导致 Chart is not defined -->
+    <script src="../../assets/js/chart.umd.min.js"></script>
     <script src="../../assets/js/ui-utils.js"></script>
     <script src="../../assets/js/data-manager.js"></script>
     <script src="../../assets/js/condition-builder.js"></script>
@@ -488,6 +421,9 @@ a + b >= 3 && PROB(64.59)  // A和B类卡合计至少3张，与64.59%概率满�
 
     <!-- 实际组合生成器 -->
     <script src="../../assets/js/combination-generator.js"></script>
+
+    <!-- 站点共享页头/页脚注入 -->
+    <script src="../../assets/js/site-chrome.js"></script>
 
 </body>
 

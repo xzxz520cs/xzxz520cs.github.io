@@ -117,8 +117,19 @@
             backgroundColors.push(getColor(0));
         }
 
+        // 安全保护：Chart.js 尚未加载完成（async 加载）时跳过渲染，避免竞态报错
+        if (typeof Chart === 'undefined') {
+            return;
+        }
         const ctx = document.getElementById('deckPieChart').getContext('2d');
-        if (chart) chart.destroy();
+        // 优化：复用 chart 实例做增量更新，避免每次 destroy/new 重建
+        if (chart) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.data.datasets[0].backgroundColor = backgroundColors;
+            chart.update();
+            return;
+        }
 
         chart = new Chart(ctx, {
             type: 'doughnut',
@@ -340,6 +351,20 @@
             window.historyChart.destroy();
         }
 
+        // 优化：预计算一次 CSS 变量，避免每个 tooltip 回调重复 getComputedStyle
+        const cssVar = (name, fallback) => {
+            const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+            return v || fallback;
+        };
+        const tooltipColors = {
+            backgroundColor: cssVar('--color-bg-alt', '#f3f5f7'),
+            borderColor: cssVar('--color-border', '#94a3b8'),
+            titleColor: cssVar('--color-text', '#1e293b'),
+            boxShadow: cssVar('--shadow-md', '0 4px 6px rgba(15, 23, 42, 0.1)')
+        };
+        const borderRadius = parseInt(cssVar('--radius-md', '8px').replace('px', '')) || 8;
+        const padding = parseInt(cssVar('--space-sm', '0.75rem').replace('rem', '')) * 16 || 12;
+
         window.historyChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -372,14 +397,14 @@
                 plugins: {
                     tooltip: {
                         enabled: true,
-                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--color-bg-alt').trim() || '#f3f5f7',
-                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-border').trim() || '#94a3b8',
+                        backgroundColor: tooltipColors.backgroundColor,
+                        borderColor: tooltipColors.borderColor,
                         borderWidth: 1,
-                        borderRadius: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--radius-md').trim().replace('px', '')) || 8,
-                        titleColor: getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#1e293b',
-                        bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#1e293b',
-                        padding: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--space-sm').trim().replace('rem', '')) * 16 || 12,
-                        boxShadow: getComputedStyle(document.documentElement).getPropertyValue('--shadow-md').trim() || '0 4px 6px rgba(15, 23, 42, 0.1)',
+                        borderRadius: borderRadius,
+                        titleColor: tooltipColors.titleColor,
+                        bodyColor: tooltipColors.titleColor,
+                        padding: padding,
+                        boxShadow: tooltipColors.boxShadow,
                         callbacks: {
                             label: function (context) {
                                 const reversedIndex = records.length - 1 - context.dataIndex;
