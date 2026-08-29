@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         游戏王卡组导出YDK
 // @namespace    https://github.com/xzxz520cs
-// @version      1.0.0
+// @version      1.0.1
 // @description  在游戏王官方数据库(www.db.yugioh-card.com)卡组页面添加导出YDK按钮，自动将官方CID转换为非官方密码(passcode)
 // @author       xzxz520cs
 // @match        https://www.db.yugioh-card.com/yugiohdb/member_deck.action*
@@ -10,6 +10,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @connect      db.ygoprodeck.com
+// @connect      ygocdb.com
 // ==/UserScript==
 
 (function () {
@@ -17,7 +18,10 @@
 
     const CACHE_PREFIX = 'ygodeck_cid_';
     const API_BASE = 'https://db.ygoprodeck.com/api/v7/cardinfo.php';
+    const YGOCDB_API = 'https://ygocdb.com/api/v0/cardset';
     const BATCH_SIZE = 50;
+    const RETRY_TIMES = 2;              // ygoprodeck 失败后最多重试次数
+    const RETRY_DELAYS = [800, 1600];   // 指数退避延迟（毫秒），与 RETRY_TIMES 对应
 
     // --- DOM Helpers ---
 
@@ -183,6 +187,66 @@
         });
     }
 
+    /**
+     * ygoprodeck 批量查询（带重试，指数退避）
+     * 失败后最多重试 RETRY_TIMES 次，重试耗尽才 reject
+     */
+    function fetchPasscodeBatchWithRetry(cids, attempt = 0) {
+        return fetchPasscodeBatch(cids).catch(function (err) {
+            if (attempt < RETRY_TIMES) {
+                const delay = RETRY_DELAYS[attempt] || RETRY_DELAYS[RETRY_DELAYS.length - 1];
+                console.warn(`[YGO Deck Export] ygoprodeck batch failed (attempt ${attempt + 1}), retrying in ${delay}ms:`, err);
+                return new Promise(function (resolve) {
+                    setTimeout(function () {
+                        resolve(fetchPasscodeBatchWithRetry(cids, attempt + 1));
+                    }, delay);
+                });
+            }
+            throw err;
+        });
+    }
+
+    /**
+     * ygocdb 批量查询（兜底数据源）
+     * POST /api/v0/cardset，按 cid 数组批量查询，返回 { [cid]: passcode }
+     */
+    function fetchPasscodeFromYgocdb(cids) {
+        return new Promise((resolve, reject) => {
+            const body = JSON.stringify({ cids: cids.map(Number) });
+
+            GM_xmlhttpRequest({
+                method: 'POST',
+                url: YGOCDB_API,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                data: body,
+                timeout: 15000,
+                onload: function (resp) {
+                    try {
+                        const data = JSON.parse(resp.responseText);
+                        const mapping = {};
+                        // cardset 返回：以请求的 cid 为键、含 { cid, id } 的对象
+                        for (const [cid, card] of Object.entries(data || {})) {
+                            if (card && card.id) {
+                                mapping[String(cid)] = String(card.id);
+                            }
+                        }
+                        resolve(mapping);
+                    } catch (e) {
+                        reject(e);
+                    }
+                },
+                onerror: function (e) {
+                    reject(new Error('ygocdb Network error: ' + (e || 'unknown')));
+                },
+                ontimeout: function () {
+                    reject(new Error('ygocdb Request timeout'));
+                }
+            });
+        });
+    }
+
     async function resolvePasscodes(cidList) {
         const unique = [...new Set(cidList)];
         const mapping = {};
@@ -198,17 +262,39 @@
             }
         }
 
-        // 分批请求 API
+        // 记录已命中的 cid，用于后续计算"未命中"列表
+        const hitSet = new Set(Object.keys(mapping));
+
+        function applyResult(result) {
+            for (const [cid, passcode] of Object.entries(result)) {
+                mapping[cid] = passcode;
+                hitSet.add(cid);
+                setCached(cid, passcode);
+            }
+        }
+
+        // 第一级：ygoprodeck 分批查询（带重试）
         for (let i = 0; i < uncached.length; i += BATCH_SIZE) {
             const batch = uncached.slice(i, i + BATCH_SIZE);
             try {
-                const result = await fetchPasscodeBatch(batch);
-                for (const [konamiId, passcode] of Object.entries(result)) {
-                    mapping[konamiId] = passcode;
-                    setCached(konamiId, passcode);
-                }
+                const result = await fetchPasscodeBatchWithRetry(batch);
+                applyResult(result);
             } catch (e) {
-                console.warn('[YGO Deck Export] batch fetch failed:', e);
+                console.warn('[YGO Deck Export] ygoprodeck batch fetch failed after retries:', e);
+            }
+        }
+
+        // 第二级：ygocdb 兜底，补充 ygoprodeck 未命中的 CID
+        const missing = uncached.filter(cid => !hitSet.has(cid));
+        if (missing.length > 0) {
+            for (let i = 0; i < missing.length; i += BATCH_SIZE) {
+                const batch = missing.slice(i, i + BATCH_SIZE);
+                try {
+                    const result = await fetchPasscodeFromYgocdb(batch);
+                    applyResult(result);
+                } catch (e) {
+                    console.warn('[YGO Deck Export] ygocdb fallback batch fetch failed:', e);
+                }
             }
         }
 
