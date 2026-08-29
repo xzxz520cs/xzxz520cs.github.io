@@ -9,12 +9,14 @@
 3. [AVIF/WebP转JPG/PNG工具](https://ttfdg.cn/tools/webp-avif-2-jpg-png/) - 图片格式转换工具
 4. [文本转语音工具](https://ttfdg.cn/tools/text-to-speech/) - 将文本转换为语音
 5. [恢复关闭的标签页](https://chromewebstore.google.com/detail/kmnmkpgmneeokldcmfcgjppgpcfecoed) - Chrome扩展
+6. [官方数据库导出YDK](https://greasyfork.org/zh-CN/scripts/593417-%E6%B8%B8%E6%88%8F%E7%8E%8B%E5%8D%A1%E7%BB%84%E5%AF%BC%E5%87%BAydk) - 在游戏王官方数据库(www.db.yugioh-card.com)卡组页面一键导出YDK（用户脚本，也可[直接下载](https://ttfdg.cn/tools/yugioh-deck-export.user.js)）
 
 ## 使用说明
 
 1. 每个工具都有独立的页面，点击上方链接即可使用
 2. 部分工具需要API Key，请自备
 3. 所有工具都可以在浏览器中直接运行，无需额外安装
+4. "官方数据库导出YDK"为油猴(Tampermonkey)用户脚本，需先安装浏览器扩展后，再通过 Greasy Fork 安装
 
 ## 关于作者
 
